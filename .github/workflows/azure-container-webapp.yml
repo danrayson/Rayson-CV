@@ -23,15 +23,15 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: raysoncontainerregistry.azurecr.io
-          username: ${{ secrets.AzureAppService_ContainerUsername_72146ba38585434db30c411ea97ad54c }}
-          password: ${{ secrets.AzureAppService_ContainerPassword_8f4a6327602047e18d91a7b3e0b45683 }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_72146ba38585434db30c411ea97ad54c }}/dev.rayson:${{ github.sha }}
+          tags: ghcr.io/${{ secrets.ACR_USERNAME }}/dev.rayson:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -48,5 +48,5 @@ jobs:
         with:
           app-name: 'raysondev'
           slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_41c7af9c956248be8c5bd74e47e99912 }}
-          images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_72146ba38585434db30c411ea97ad54c }}/dev.rayson:${{ github.sha }}'
+          publish-profile: ${{ secrets.ACR_PUBLISHPROFILE }}
+          images: 'ghcr.io/${{ secrets.ACR_USERNAME }}/dev.rayson:${{ github.sha }}'
