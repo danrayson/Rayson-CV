@@ -32,7 +32,7 @@ jobs:
           context: ./Rayson.Dev/Rayson.Dev.Website/
           push: true
           tags: raysoncontainerregistry.azurecr.io/${{ secrets.ACR_USERNAME }}/dev.rayson:${{ github.sha }}
-          file: .Rayson.Dev/Rayson.Dev.Website/Dockerfile
+          file: ./Rayson.Dev/Rayson.Dev.Website/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
