@@ -27,9 +27,13 @@ const SignUp: React.FC<SignUpProps> = ({ handleLandingPageChange: handleLandingP
         setShowErrors(true);
       } else {
         console.error('There was a problem with the signup:', error);
+        setErrors({ "Server error": [error.message] });
+        setShowErrors(true);
       }
     } else {
       console.error('An unexpected error occurred:', error);
+      setErrors({ "Server error": ["There was a problem with the signup."] });
+      setShowErrors(true);
     }
   }
   function showSuccess() {
@@ -53,7 +57,6 @@ const SignUp: React.FC<SignUpProps> = ({ handleLandingPageChange: handleLandingP
     try {
       await httpClient.post(`auth/signup`, { displayName, email, password, });
       showSuccess();
-
     } catch (error) {
       handleError(error);
     }
@@ -67,7 +70,7 @@ const SignUp: React.FC<SignUpProps> = ({ handleLandingPageChange: handleLandingP
           <table className='w-full'>
             <tbody>
               <FormRow label="Display Name:" type="text" id="displayName" name="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-              <FormRow label="Email:" type="text" id="email" name="email" value={displayName} onChange={(e) => setEmail(e.target.value)} />
+              <FormRow label="Email:" type="text" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <FormRow label="Password:" type="password" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </tbody>
           </table>

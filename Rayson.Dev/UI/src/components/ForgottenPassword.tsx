@@ -33,7 +33,7 @@ const ForgottenPassword: React.FC<{ handleLandingPageChange: (path: string) => v
         setDisableSendEmailButton(false);
       } else {
         console.error('There was a problem with the password reset request:', error);
-        showErrors({ "Server Error": ["There was a problem sending reset request."] });
+        showErrors({ "Server Error": [error.message] });
         setDisableSendEmailButton(false);
       }
     }

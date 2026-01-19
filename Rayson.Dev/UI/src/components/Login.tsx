@@ -27,11 +27,13 @@ const Login: FC<LoginProps> = ({ handleLandingPageChangeDelegate: onLandingPageC
         setShowErrors(true);
       } else {
         console.error('There was a problem with the login:', error);
-        setErrors({ "Server error": ["There was a problem with the login."] });
+        setErrors({ "Server error": [error.message] });
+        setShowErrors(true);
       }
     }else{
-      console.error('Unknown error:', error);
+      console.error('An unexpected error occurred:', error);
       setErrors({ "Server error": ["There was a problem with the login."] });
+      setShowErrors(true);
     }
   }
 

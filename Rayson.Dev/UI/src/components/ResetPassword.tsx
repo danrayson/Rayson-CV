@@ -13,7 +13,7 @@ const ResetPassword: React.FC<{ token: string, handleLandingPageChange: (path: s
     const [passwordCheck, setPasswordCheck] = useState('');
     const [showMessage, setShowMessage] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
-    const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
+    const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
     const [loading, setLoading] = useState(false);
     const [shouldNavigateToLogin, setShouldNavigateToLogin] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -22,22 +22,22 @@ const ResetPassword: React.FC<{ token: string, handleLandingPageChange: (path: s
         setShowMessage(false);
         if (axios.isAxiosError(error)) {
             if (error.response && error.response.status === 400) {
-                const validationErrors = error.response.data.errors;
-                setValidationErrors(validationErrors);
+                const errors = error.response.data.errors;
+                setErrors(errors);
             } else if (error.response && error.response.status >= 500) {
-                setValidationErrors({ General: ['An internal server error occurred.'] });
+                setErrors({ 'Server Error': ['An internal server error occurred.'] });
             } else {
-                setValidationErrors({ General: ['An unknown error occurred.'] });
+                setErrors({ 'Server Error': [error.message] });
             }
         } else {
-            setValidationErrors({ General: ['An unknown error occurred.'] });
+            setErrors({ 'Server Error': ['An unknown error occurred.'] });
         }
         setShowErrors(true);
     }
     function showSuccess() {
         setShowMessage(true);
         setShowErrors(false);
-        setValidationErrors({});
+        setErrors({});
     }
     useEffect(() => {
         if (shouldNavigateToLogin) {
@@ -51,7 +51,7 @@ const ResetPassword: React.FC<{ token: string, handleLandingPageChange: (path: s
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setValidationErrors({});
+        setErrors({});
 
         try {
             const encodedToken = encodeURIComponent(token);
@@ -81,7 +81,7 @@ const ResetPassword: React.FC<{ token: string, handleLandingPageChange: (path: s
                         <LockOpenIcon className='w-4 h-4' />
                     </Button>
                     {showMessage && <p className="alert alert-success mt-2 text-sm">'Password reset successful.  Redirecting to Login page.  Please log in with your new password.'</p>}
-                    <ValidationMessages showErrors={showErrors} errors={validationErrors} />
+                    <ValidationMessages showErrors={showErrors} errors={errors} />
                 </div>
             </form>
         </div>
