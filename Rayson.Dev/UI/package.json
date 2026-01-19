@@ -1,0 +1,68 @@
+{
+  "name": "trade-pulse-web-gui",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Trade Pulse is a trading platform that allows you to trade stocks, cryptocurrencies, and more.",
+  "author": "daniel william frederick rayson (danrayson@hotmail.co.uk)",
+  "scripts": {
+    "dev": "vite",
+    "electron:dev": "tsc -b && vite build --mode development && electron .",
+    "electron:build": "tsc -b && vite build && electron-builder",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.1.5",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "axios": "^1.7.7",
+    "highcharts": "^11.4.8",
+    "highcharts-react-official": "^3.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@types/axios": "^0.14.4",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.14",
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8",
+    "eslint": "^9.11.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript-eslint": "^8.7.0"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.trade-pulse",
+    "productName": "Trade Pulse",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "icon": "src/assets/react.svg",
+      "target": "AppImage"
+    }
+  }
+}

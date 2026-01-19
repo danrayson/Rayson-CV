@@ -1,0 +1,90 @@
+/* src/global.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+#root {
+    height: 100%; /* Ensure the root container takes up full height */
+}
+
+.full-screen{
+    position: fixed; /* Fix the container to take up full height and width */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.topBit{
+    height: 100px;
+}
+.fillRemainder{
+    position: fixed; /* Fix the container to take up full height and width */
+    top: 100px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/*From here onwards it's all the highchart stuff that gets turned when 
+  const options: Highcharts.Options = {
+    chart: {
+      // styledMode: true
+    },*/
+.highcharts-data-table caption {
+    padding: 0.5em;
+}
+
+.highcharts-data-table thead tr,
+.highcharts-data-table tr:nth-child(even) {
+    background: #f8f8f8;
+}
+
+.highcharts-data-table tr:hover {
+    background: #f1f7ff;
+}
+
+.highcharts-yaxis .highcharts-axis-line {
+    stroke-width: 2px;
+}
+
+/* Link the series colors to axis colors */
+.highcharts-color-0 {
+    fill: #7cb5ec;
+    stroke: #7cb5ec;
+}
+.highcharts-point-up {
+    fill: #1fe22f;
+    stroke: #15581b;
+}
+.highcharts-point-down {
+    fill: #ec3717;
+    stroke: #52180e;
+}
+
+.highcharts-axis.highcharts-color-0 .highcharts-axis-line {
+    stroke: #7cb5ec;
+}
+
+.highcharts-axis.highcharts-color-0 text {
+    fill: #7cb5ec;
+}
+
+.highcharts-color-1 {
+    fill: #90ed7d;
+    stroke: #90ed7d;
+}
+
+.highcharts-axis.highcharts-color-1 .highcharts-axis-line {
+    stroke: #90ed7d;
+}
+
+.highcharts-axis.highcharts-color-1 text {
+    fill: #90ed7d;
+}
+
+.highcharts-description {
+    margin: 0.3rem 10px;
+}

@@ -1,0 +1,10 @@
+/* Custom button class */
+@layer base {
+    .alert.alert-outline{
+        @apply bg-transparent border-2 border-warning text-warning rounded-lg p-4 shadow-lg;
+    }
+
+    .form-label{
+        @apply text-sm/6 text-slate-500;
+    }
+}
