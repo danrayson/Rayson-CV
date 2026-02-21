@@ -1,7 +1,7 @@
 # ===========================================
-# Docker Compose - Database Only
+# Docker Compose - Development: Database Only
 # ===========================================
-# Usage: docker compose -f docker-compose.db.yml up -d
+# Usage: docker compose -f docker-compose.dev.db.yml up -d
 # Purpose: Run only PostgreSQL for local debugging of API and UI
 # ===========================================
 

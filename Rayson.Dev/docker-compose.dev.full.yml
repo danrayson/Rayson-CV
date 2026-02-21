@@ -1,9 +1,8 @@
 # ===========================================
-# Docker Compose - TradePulse Application
+# Docker Compose - Development: Full Stack
 # ===========================================
-# Usage:
-#   Development: docker-compose up --build
-#   Production:  docker-compose up -d --build
+# Usage: docker compose -f docker-compose.dev.full.yml up -d
+# Purpose: Run all services (PostgreSQL, API, UI) in Docker
 # ===========================================
 
 services:
@@ -46,7 +45,7 @@ services:
       AuthOptions__Audience: ${JWT_AUDIENCE}
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "13245:8080"
     depends_on:
@@ -56,7 +55,7 @@ services:
       - internal
     healthcheck:
       # Check if API is responding via Swagger endpoint
-      test: ["CMD", "curl", "-f", "http://localhost:13245/swagger/index.html"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger/index.html"]
       interval: 30s
       timeout: 10s
       retries: 3

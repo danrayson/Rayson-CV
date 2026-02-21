@@ -1,7 +1,7 @@
 # ===========================================
-# Docker Compose - Database + UI
+# Docker Compose - Development: Database + UI
 # ===========================================
-# Usage: docker compose -f docker-compose.db-ui.yml up -d
+# Usage: docker compose -f docker-compose.dev.db-ui.yml up -d
 # Purpose: Run PostgreSQL and UI in Docker, debug API locally
 # API runs on host at http://localhost:13245
 # ===========================================

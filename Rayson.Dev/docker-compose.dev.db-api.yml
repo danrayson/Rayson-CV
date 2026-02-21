@@ -1,7 +1,7 @@
 # ===========================================
-# Docker Compose - Database + API
+# Docker Compose - Development: Database + API
 # ===========================================
-# Usage: docker compose -f docker-compose.db-api.yml up -d
+# Usage: docker compose -f docker-compose.dev.db-api.yml up -d
 # Purpose: Run PostgreSQL and API in Docker, debug UI locally
 # UI connects to API at http://localhost:13245
 # ===========================================
@@ -38,7 +38,7 @@ services:
       AuthOptions__Audience: ${JWT_AUDIENCE}
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "13245:8080"
     depends_on:
@@ -47,7 +47,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:13245/swagger/index.html"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger/index.html"]
       interval: 30s
       timeout: 10s
       retries: 3
