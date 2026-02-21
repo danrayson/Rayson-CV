@@ -59,6 +59,7 @@ ENV AuthOptions__Issuer=danrayson
 ENV AuthOptions__Audience=TradePulseUsers
 ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_for_production
 ENV ConnectionStrings__DefaultConnection="Server=host.docker.internal;Port=5433;Database=tradepulse;User Id=tradepulse_user;Password=development_password;TrustServerCertificate=True"
+ENV Cors__AllowedOrigins__0=http://localhost:3000
 
 EXPOSE 8080
 

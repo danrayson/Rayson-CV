@@ -22,14 +22,18 @@ builder.Services.AddOptions<AuthOptions>().Bind(builder.Configuration.GetSection
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.AllowAnyOrigin()
+    options.AddDefaultPolicy(corsBuilder =>
+    {
+        var originsConfig = builder.Configuration["Cors:AllowedOrigins"];
+        var allowedOrigins = string.IsNullOrEmpty(originsConfig)
+            ? builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>()
+            : originsConfig.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        
+        corsBuilder.WithOrigins(allowedOrigins)
                    .AllowAnyHeader()
                    .AllowAnyMethod()
                    .WithExposedHeaders("X-Auth-Token");
-        });
+    });
 });
 
 builder.Services.AddEndpointsApiExplorer();

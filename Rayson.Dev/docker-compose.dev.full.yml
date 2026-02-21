@@ -46,6 +46,7 @@ services:
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
       ASPNETCORE_ENVIRONMENT: Development
+      Cors__AllowedOrigins__0: http://localhost:3000
     ports:
       - "13245:8080"
     depends_on:

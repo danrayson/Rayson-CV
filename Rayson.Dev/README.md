@@ -154,6 +154,29 @@ See `.env.example` for all required variables:
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 
+## CORS Configuration
+
+CORS origins are configuration-driven and whitelist only specified domains.
+
+### Local Development
+
+CORS is pre-configured in Docker Compose files and the Dockerfile:
+- `http://localhost:3000` (UI running locally or in Docker)
+
+### Azure Deployment
+
+Set the environment variable in Azure Container Apps:
+
+```
+Cors:AllowedOrigins=https://your-ui.azurecontainerapps.io,https://yourcustomdomain.com
+```
+
+For multiple origins, use comma-separated values or array syntax:
+```
+Cors:AllowedOrigins__0=https://your-ui.azurecontainerapps.io
+Cors:AllowedOrigins__1=https://yourcustomdomain.com
+```
+
 ## Database Migrations
 
 Migrations are applied automatically on API startup. To create a new migration:
