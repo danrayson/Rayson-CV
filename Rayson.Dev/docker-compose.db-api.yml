@@ -1,0 +1,61 @@
+# ===========================================
+# Docker Compose - Database + API
+# ===========================================
+# Usage: docker compose -f docker-compose.db-api.yml up -d
+# Purpose: Run PostgreSQL and API in Docker, debug UI locally
+# UI connects to API at http://localhost:13245
+# ===========================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tradepulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: ./Api
+      dockerfile: Dockerfile
+    container_name: tradepulse-api
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
+      AuthOptions__Issuer: ${JWT_ISSUER}
+      AuthOptions__Audience: ${JWT_AUDIENCE}
+      AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
+      DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "13245:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:13245/swagger/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres-data:

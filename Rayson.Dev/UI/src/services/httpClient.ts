@@ -5,7 +5,7 @@ class HttpClient {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL // Set the base URL for all requests made by this instance
+      baseURL: import.meta.env.VITE_API_BASE_URL // Set the base URL for all requests made by this instance
     });
 
     // Add interceptor to handle adding authorization tokens to requests
@@ -26,7 +26,7 @@ class HttpClient {
   }
 
   private async request<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, bodyData?: any, queryStringData?: any): Promise<AxiosResponse<T>> {
-    url = import.meta.env.VITE_API_URL + url;
+    url = import.meta.env.VITE_API_BASE_URL + url;
     if (queryStringData) {
       const queryString = Object.keys(queryStringData).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryStringData[key])}`).join('&');
       url += `?${queryString}`;

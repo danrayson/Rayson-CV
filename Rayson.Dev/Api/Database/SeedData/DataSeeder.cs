@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Reflection;
 using CsvHelper;
+using CsvHelper.Configuration;
 using Domain.Entities;
 using Domain.Repositories;
 
@@ -21,8 +23,8 @@ public class DataSeeder(DataSeedLocationSettings dataSeedLocationSettings, IRepo
         var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
         var csvPath = Path.Combine(assemblyPath, dataSeedLocationSettings.RelativeFilePath, "Exchanges.csv");
         using var reader = new StreamReader(csvPath);
-        using var csv = new CsvReader(reader);
-        csv.Configuration.WillThrowOnMissingField = false;
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<ExchangeMap>();
         var seedExchanges = csv.GetRecords<Exchange>().ToList();
 
         //Get the exchanges from the database where the name is in the seed list
@@ -35,5 +37,17 @@ public class DataSeeder(DataSeedLocationSettings dataSeedLocationSettings, IRepo
 
         //Save all the missing exchanges
         await exchangeRepo.AddManyAsync(newExchanges);
+    }
+
+    protected sealed class ExchangeMap : ClassMap<Exchange>
+    {
+        public ExchangeMap()
+        {
+            AutoMap(CultureInfo.InvariantCulture);
+            Map(m => m.DeletedAt).Ignore();
+            Map(m => m.DailyMarketDatas).Ignore();
+            Map(m => m.Id).Ignore();
+            Map(m => m.Symbols).Ignore();
+        }
     }
 }

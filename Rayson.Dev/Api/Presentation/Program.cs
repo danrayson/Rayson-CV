@@ -10,11 +10,6 @@ using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration and Settings
-builder.Configuration.AddJsonFile("appsettings.json");
-var envConfig = $"appsettings.{builder.Environment.EnvironmentName}.json";
-builder.Configuration.AddJsonFile(envConfig);
-
 var csvSettingsSectionName = "DataSeedLocation";
 var csvSettings = builder.Configuration.GetSection(csvSettingsSectionName).Get<DataSeedLocationSettings>()
     ?? throw new SettingsMissingException(csvSettingsSectionName);

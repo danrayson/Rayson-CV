@@ -1,0 +1,110 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: debug",
+            "dockerBuild": {
+                "tag": "tradepulse-api:dev",
+                "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
+                "context": "${workspaceFolder}/Rayson.Dev/Api",
+                "pull": true
+            },
+            "dependsOn": [
+                "build"
+            ],
+            "netCore": {
+                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+            }
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: release",
+            "dockerBuild": {
+                "tag": "tradepulse-api:latest",
+                "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
+                "context": "${workspaceFolder}/Rayson.Dev/Api",
+                "platform": {
+                    "os": "linux",
+                    "architecture": "amd64"
+                },
+                "pull": true
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build: debug"
+            ],
+            "dockerRun": {
+                "ports": [
+                    {
+                        "containerPort": 8080,
+                        "hostPort": 13245
+                    }
+                ],
+                "extraHosts": [
+                    {
+                        "hostname": "host.docker.internal",
+                        "ip": "host-gateway"
+                    }
+                ]
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj",
+                "enableDebugging": true
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build: release"
+            ],
+            "dockerRun": {},
+            "netCore": {
+                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+            }
+        }
+    ]
+}

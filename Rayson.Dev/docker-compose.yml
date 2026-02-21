@@ -1,0 +1,110 @@
+# ===========================================
+# Docker Compose - TradePulse Application
+# ===========================================
+# Usage:
+#   Development: docker-compose up --build
+#   Production:  docker-compose up -d --build
+# ===========================================
+
+services:
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: tradepulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # Named volume for persistent data storage
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      # Check if PostgreSQL is ready to accept connections
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ===========================================
+  # API (.NET 8.0)
+  # ===========================================
+  api:
+    build:
+      context: ./Api
+      dockerfile: Dockerfile
+    container_name: tradepulse-api
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
+      AuthOptions__Issuer: ${JWT_ISSUER}
+      AuthOptions__Audience: ${JWT_AUDIENCE}
+      AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
+      DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "13245:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      # Check if API is responding via Swagger endpoint
+      test: ["CMD", "curl", "-f", "http://localhost:13245/swagger/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ===========================================
+  # UI (React/Vite)
+  # ===========================================
+  ui:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+      args:
+        # Inject API URL at build time for Vite
+        # Value comes from .env file (VITE_API_BASE_URL variable)
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: tradepulse-ui
+    restart: unless-stopped
+    ports:
+      # Only expose UI to host machine
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      # Check if UI server is responding
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# ===========================================
+# Networks
+# ===========================================
+networks:
+  internal:
+    driver: bridge
+    # Internal network for service-to-service communication
+    # API and Postgres are NOT exposed to host
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres-data:
+    # Named volume managed by Docker
+    # Persists PostgreSQL data across container restarts
+    # To backup: docker run --rm -v raysondev_postgres-data:/data -v $(pwd):/backup alpine tar czf /backup/postgres-backup.tar.gz /data
