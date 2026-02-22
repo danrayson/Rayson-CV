@@ -6,13 +6,13 @@ namespace Infrastructure.Logging;
 
 public class LoggingService : ILoggingService
 {
-    public Task LogClientEventAsync(ClientLogEvent logEvent)
+    public Task LogClientEventAsync(ClientLogEvent logEvent, string? userId = null)
     {
         var logger = Log.ForContext("SourceContext", logEvent.Source ?? "Client");
 
-        if (logEvent.UserId is not null)
+        if (userId is not null)
         {
-            logger = logger.ForContext("UserId", logEvent.UserId);
+            logger = logger.ForContext("UserId", userId);
         }
         if (logEvent.BrowserInfo is not null)
         {

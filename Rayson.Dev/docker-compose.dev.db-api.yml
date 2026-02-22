@@ -59,6 +59,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
       SEQ_URL: http://seq:5341
+      LOG_LEVEL: Debug
     ports:
       - "13245:8080"
     depends_on:

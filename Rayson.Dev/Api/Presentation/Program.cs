@@ -8,6 +8,7 @@ using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
 using Infrastructure.Auth;
 using Infrastructure.Extensions;
+using Infrastructure.Logging;
 using Serilog;
 
 try
@@ -49,6 +50,8 @@ try
     builder.Services.AddInfrastructureServices();
 
     var app = builder.Build();
+
+    app.UseMiddleware<RequestLoggingMiddleware>();
 
     app.MapAuthEndpoints();
     app.MapHealthEndpoints();

@@ -8,8 +8,11 @@ public static class LoggingExtensions
 {
     public static void AddLoggingConfiguration(this WebApplicationBuilder builder)
     {
+        var logLevelStr = builder.Configuration["LOG_LEVEL"] ?? "Information";
+        var logLevel = Enum.Parse<LogEventLevel>(logLevelStr, ignoreCase: true);
+
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(logLevel)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithEnvironmentName()
@@ -27,6 +30,8 @@ public static class LoggingExtensions
                 .Enrich.WithMachineName()
                 .Enrich.WithThreadId()
                 .Enrich.WithCorrelationId()
+                .MinimumLevel.Is(logLevel)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
             var seqUrl = context.Configuration["SEQ_URL"];

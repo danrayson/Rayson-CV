@@ -38,22 +38,25 @@ RUN apk add --no-cache curl
 # Set working directory for the runtime
 WORKDIR /app
 
+# Ensure /app directory is owned by node user
+RUN chown node:node /app
+
 # Copy only the built static files from the build stage
 # This excludes node_modules and source code, keeping image small
-COPY --from=build /app/dist ./dist
+COPY --from=build --chown=node:node /app/dist ./dist
 
 # Copy health server
-COPY health-server.mjs ./
+COPY --chown=node:node health-server.mjs ./
 
 # Copy package.json for runtime dependencies
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
+
+# Switch to the built-in node user before npm install
+# Files created by npm will then be owned by node user
+USER node
 
 # Install only production dependencies (pino for logging)
 RUN npm install --omit=dev
-
-# Change ownership to the built-in node user
-# The node:20-alpine image already has a 'node' user with UID 1000
-RUN chown -R node:node /app
 
 # Document that the container listens on port 3000
 EXPOSE 3000
@@ -62,9 +65,6 @@ EXPOSE 3000
 # Uses /health/live endpoint (no API dependency check)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/health/live || exit 1
-
-# Switch to the built-in node user for security
-USER node
 
 # Start health server (serves static files + health endpoints)
 CMD ["node", "health-server.mjs"]
