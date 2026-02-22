@@ -1,11 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { API_BASE_URL } from '../config';
 
 class HttpClient {
   private instance: AxiosInstance;
 
   constructor() {
     this.instance = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL // Set the base URL for all requests made by this instance
+      baseURL: API_BASE_URL // Set the base URL for all requests made by this instance
     });
 
     // Add interceptor to handle adding authorization tokens to requests
@@ -26,7 +27,7 @@ class HttpClient {
   }
 
   private async request<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, bodyData?: any, queryStringData?: any): Promise<AxiosResponse<T>> {
-    url = import.meta.env.VITE_API_BASE_URL + url;
+    url = API_BASE_URL + url;// This seems superfluous considering we've set the base url during construction.
     if (queryStringData) {
       const queryString = Object.keys(queryStringData).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryStringData[key])}`).join('&');
       url += `?${queryString}`;
