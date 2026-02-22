@@ -4,6 +4,7 @@ using Database.SeedData;
 using Presentation.Exceptions;
 using Database.Extensions;
 using Presentation.Endpoints.Auth;
+using Presentation.Endpoints.Health;
 using Infrastructure.Auth;
 using Infrastructure.Extensions;
 
@@ -46,6 +47,7 @@ var app = builder.Build();
 
 //Map endpoints
 app.MapAuthEndpoints();
+app.MapHealthEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
