@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     public static void AddDatabaseServices(this IServiceCollection services, string connectionString)
     {
 
-        services.AddDbContext<TradePulseDbContext>((options) =>
+        services.AddDbContext<RaysonDevDbContext>((options) =>
         {
             options.UseNpgsql(connectionString);
         });

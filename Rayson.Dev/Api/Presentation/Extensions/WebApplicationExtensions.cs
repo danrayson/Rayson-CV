@@ -9,7 +9,7 @@ public static class WebApplicationExtensions
     public static void RunMigrations(this WebApplication webApplication)
     {
         var scope = webApplication.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TradePulseDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<RaysonDevDbContext>();
         context.Database.Migrate();
         var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
         seeder.SeedDatabase();

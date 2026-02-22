@@ -69,35 +69,6 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Exchanges",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Exchanges", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Symbols",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Symbols", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -203,64 +174,6 @@ namespace Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "DailyMarketDatas",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    DateUtc = table.Column<DateOnly>(type: "date", nullable: false),
-                    OpenPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    ClosePrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    HighPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    LowPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Volume = table.Column<long>(type: "bigint", nullable: true),
-                    AdjustedPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    SymbolId = table.Column<int>(type: "integer", nullable: false),
-                    ExchangeId = table.Column<int>(type: "integer", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DailyMarketDatas", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_DailyMarketDatas_Exchanges_ExchangeId",
-                        column: x => x.ExchangeId,
-                        principalTable: "Exchanges",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DailyMarketDatas_Symbols_SymbolId",
-                        column: x => x.SymbolId,
-                        principalTable: "Symbols",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SymbolExchange",
-                columns: table => new
-                {
-                    ExchangesId = table.Column<int>(type: "integer", nullable: false),
-                    SymbolsId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SymbolExchange", x => new { x.ExchangesId, x.SymbolsId });
-                    table.ForeignKey(
-                        name: "FK_SymbolExchange_Exchanges_ExchangesId",
-                        column: x => x.ExchangesId,
-                        principalTable: "Exchanges",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SymbolExchange_Symbols_SymbolsId",
-                        column: x => x.SymbolsId,
-                        principalTable: "Symbols",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -297,21 +210,6 @@ namespace Database.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DailyMarketDatas_ExchangeId",
-                table: "DailyMarketDatas",
-                column: "ExchangeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DailyMarketDatas_SymbolId",
-                table: "DailyMarketDatas",
-                column: "SymbolId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SymbolExchange_SymbolsId",
-                table: "SymbolExchange",
-                column: "SymbolsId");
         }
 
         /// <inheritdoc />
@@ -333,25 +231,13 @@ namespace Database.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "DailyMarketDatas");
-
-            migrationBuilder.DropTable(
                 name: "DataProtectionKeys");
-
-            migrationBuilder.DropTable(
-                name: "SymbolExchange");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Exchanges");
-
-            migrationBuilder.DropTable(
-                name: "Symbols");
         }
     }
 }

@@ -1,4 +1,4 @@
-# TradePulse
+# RaysonDev
 
 A financial market data dashboard application with .NET API backend and React frontend.
 
@@ -112,9 +112,9 @@ docker ps
 
 ### View Container Logs
 ```bash
-docker logs tradepulse-api
-docker logs tradepulse-ui
-docker logs tradepulse-postgres
+docker logs raysondev-api
+docker logs raysondev-ui
+docker logs raysondev-postgres
 ```
 
 ### Stop All Containers
@@ -150,7 +150,6 @@ See `.env.example` for all required variables:
 | `JWT_ISSUER` | JWT token issuer |
 | `JWT_AUDIENCE` | JWT token audience |
 | `JWT_SIGNING_KEY` | JWT signing key (min 16 chars) |
-| `DATA_SEED_PATH` | Path to seed data files |
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 

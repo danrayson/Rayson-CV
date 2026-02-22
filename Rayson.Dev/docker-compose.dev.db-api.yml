@@ -9,7 +9,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: tradepulse-postgres
+    container_name: raysondev-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -30,14 +30,13 @@ services:
     build:
       context: ./Api
       dockerfile: Dockerfile
-    container_name: tradepulse-api
+    container_name: raysondev-api
     restart: unless-stopped
     environment:
       ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
       AuthOptions__Issuer: ${JWT_ISSUER}
       AuthOptions__Audience: ${JWT_AUDIENCE}
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
-      DataSeedLocation__RelativeFilePath: ${DATA_SEED_PATH}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
     ports:

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Presentation.Endpoints.DailyMarketData;
 using Presentation.Extensions;
 using Database.SeedData;
 using Presentation.Exceptions;
@@ -9,11 +8,6 @@ using Infrastructure.Auth;
 using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var csvSettingsSectionName = "DataSeedLocation";
-var csvSettings = builder.Configuration.GetSection(csvSettingsSectionName).Get<DataSeedLocationSettings>()
-    ?? throw new SettingsMissingException(csvSettingsSectionName);
-builder.Services.AddSingleton(csvSettings);
 
 var authOptionsSectionName = "AuthOptions";
 builder.Services.AddOptions<AuthOptions>().Bind(builder.Configuration.GetSection(authOptionsSectionName));
@@ -39,7 +33,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "TradePulse Dashboard API", Version = "v1" });
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "RaysonDev Dashboard API", Version = "v1" });
 });
 
 builder.Services.AddPresentationServices();
@@ -51,7 +45,6 @@ builder.Services.AddInfrastructureServices();
 var app = builder.Build();
 
 //Map endpoints
-app.MapDailyMarketDataEndpoints();
 app.MapAuthEndpoints();
 
 // Configure the HTTP request pipeline.
@@ -62,7 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.EnableTryItOutByDefault();
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "TradePulse Dashboard API V1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "RaysonDev Dashboard API V1");
     });
 }
 
