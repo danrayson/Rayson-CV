@@ -28,14 +28,12 @@ RUN npm run build
 
 # ===========================================
 # Stage 2: Runtime
-# Minimal image with only the built static files and a server
+# Uses Node.js with health server
 # ===========================================
 FROM node:20-alpine AS runtime
 
-# Install serve globally to serve static files
-# curl is needed for health checks
-RUN apk add --no-cache curl && \
-    npm install -g serve
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Set working directory for the runtime
 WORKDIR /app
@@ -43,6 +41,9 @@ WORKDIR /app
 # Copy only the built static files from the build stage
 # This excludes node_modules and source code, keeping image small
 COPY --from=build /app/dist ./dist
+
+# Copy health server
+COPY health-server.mjs ./
 
 # Change ownership to the built-in node user
 # The node:20-alpine image already has a 'node' user with UID 1000
@@ -52,17 +53,12 @@ RUN chown -R node:node /app
 EXPOSE 3000
 
 # Define health check to verify the server is running
-# --interval=30s: Check every 30 seconds
-# --timeout=3s: Wait 3 seconds for response
-# --start-period=5s: Grace period on container start
-# --retries=3: Mark unhealthy after 3 consecutive failures
+# Uses /health/live endpoint (no API dependency check)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/ || exit 1
+    CMD curl -f http://localhost:3000/health/live || exit 1
 
 # Switch to the built-in node user for security
 USER node
 
-# Start the static file server
-# -s: Rewrite all requests to index.html (SPA routing)
-# -l 3000: Listen on port 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Start health server (serves static files + health endpoints)
+CMD ["node", "health-server.mjs"]

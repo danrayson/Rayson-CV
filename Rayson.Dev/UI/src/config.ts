@@ -1,6 +1,4 @@
-
-  
-  const getApiBaseUrl = () => {
+const getApiBaseUrl = () => {
   console.log("import.meta.env.VITE_API_BASE_URL is \"", import.meta.env.VITE_API_BASE_URL, "\"");
   if (import.meta.env.VITE_API_BASE_URL) {
     console.log("returning import.meta.env.VITE_API_BASE_URL");

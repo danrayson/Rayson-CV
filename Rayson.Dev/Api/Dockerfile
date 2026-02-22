@@ -68,7 +68,7 @@ EXPOSE 8080
 # --start-period=10s: Grace period on container start before checking
 # --retries=3: Mark unhealthy after 3 consecutive failures
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/swagger/index.html || exit 1
+    CMD curl -f http://localhost:8080/health/live || exit 1
 
 # Switch to the non-root user for security
 USER appuser

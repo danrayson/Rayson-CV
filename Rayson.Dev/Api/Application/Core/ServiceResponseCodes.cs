@@ -5,5 +5,6 @@ public enum ServiceResponseCodes
     Ok,
     UnexpectedError,
     ValidationProblem,
-    NoContent
+    NoContent,
+    ServiceUnavailable
 }

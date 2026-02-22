@@ -151,7 +151,86 @@ See `.env.example` for all required variables:
 | `JWT_AUDIENCE` | JWT token audience |
 | `JWT_SIGNING_KEY` | JWT signing key (min 16 chars) |
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
+| `API_HEALTH_URL` | API health URL for UI health checks |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
+
+## Health Check Endpoints
+
+Both API and UI expose health check endpoints for Azure Container Apps probes and monitoring.
+
+### API Endpoints
+
+| Endpoint | Purpose | Checks |
+|----------|---------|--------|
+| `GET /health` | Full health status | Self + PostgreSQL connectivity |
+| `GET /health/live` | Liveness probe | Self only (no dependency checks) |
+| `GET /health/ready` | Readiness probe | PostgreSQL connectivity |
+
+**Example Response (GET /health):**
+```json
+{
+  "status": "Healthy",
+  "checks": {
+    "postgresql": {
+      "status": "Healthy",
+      "description": null,
+      "duration": 42.5
+    }
+  },
+  "totalDuration": 45.2
+}
+```
+
+### UI Endpoints
+
+| Endpoint | Purpose | Checks |
+|----------|---------|--------|
+| `GET /health` | Full health status | Self + API connectivity |
+| `GET /health/live` | Liveness probe | Self only |
+| `GET /health/ready` | Readiness probe | API connectivity |
+
+**Example Response (GET /health):**
+```json
+{
+  "status": "Healthy",
+  "checks": {
+    "ui": {
+      "status": "Healthy",
+      "description": "UI server is running"
+    },
+    "api": {
+      "status": "Healthy",
+      "statusCode": 200
+    }
+  },
+  "totalDuration": 0
+}
+```
+
+### Azure Container Apps Configuration
+
+When deploying to Azure Container Apps, configure probes as follows:
+
+```yaml
+probes:
+  - type: Startup
+    httpGet:
+      path: /health/live
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+  - type: Liveness
+    httpGet:
+      path: /health/live
+      port: 8080
+    periodSeconds: 30
+  - type: Readiness
+    httpGet:
+      path: /health/ready
+      port: 8080
+    periodSeconds: 10
+```
 
 ## CORS Configuration
 

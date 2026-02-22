@@ -107,6 +107,15 @@ public class ServiceResponse
             };
         }
 
+        public static ServiceResponse<T> ServiceUnavailable(T result)
+        {
+            return new ServiceResponse<T>
+            {
+                ResultCode = ServiceResponseCodes.ServiceUnavailable,
+                Payload = result
+            };
+        }
+
         public static ServiceResponse<T> Invalid(IEnumerable<string> validationProblems)
         {
             return new ServiceResponse<T>
