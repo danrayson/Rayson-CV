@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from '../config';
+import { loggingService } from './loggingService';
 
 class HttpClient {
   private instance: AxiosInstance;
@@ -19,6 +20,23 @@ class HttpClient {
         return Promise.resolve(config as InternalAxiosRequestConfig); // Return the modified request configuration
       },
       (error) => Promise.reject(error) // Reject any errors that occur during the request
+    );
+
+    // Add response interceptor to log API errors
+    this.instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        loggingService.error(
+          `API Error: ${error.config?.url} - ${error.message}`,
+          'UI.HttpClient',
+          {
+            status: error.response?.status,
+            data: error.response?.data,
+            stack: error.stack
+          }
+        );
+        return Promise.reject(error);
+      }
     );
   }
 

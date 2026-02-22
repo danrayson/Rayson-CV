@@ -2,7 +2,7 @@
 # Docker Compose - Development: Full Stack
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.full.yml up -d
-# Purpose: Run all services (PostgreSQL, API, UI) in Docker
+# Purpose: Run all services (PostgreSQL, API, UI, Seq) in Docker
 # ===========================================
 
 services:
@@ -18,17 +18,37 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # Named volume for persistent data storage
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
-      # Check if PostgreSQL is ready to accept connections
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  # ===========================================
+  # Seq (Structured Logging)
+  # ===========================================
+  seq:
+    image: datalust/seq:latest
+    container_name: raysondev-seq
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - seq-data:/data
+    ports:
+      - "5341:80"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ===========================================
   # API (.NET 8.0)
@@ -46,15 +66,18 @@ services:
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
+      SEQ_URL: http://seq:5341
+      LOG_LEVEL: Debug
     ports:
       - "13245:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      seq:
+        condition: service_healthy
     networks:
       - internal
     healthcheck:
-      # Check if API is responding via health endpoint
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
       interval: 30s
       timeout: 10s
@@ -69,15 +92,13 @@ services:
       context: ./UI
       dockerfile: Dockerfile
       args:
-        # Inject API URL at build time for Vite
-        # Value comes from .env file (VITE_API_BASE_URL variable)
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     container_name: raysondev-ui
     restart: unless-stopped
     environment:
       API_HEALTH_URL: http://api:8080/health
+      LOG_LEVEL: info
     ports:
-      # Only expose UI to host machine
       - "3000:3000"
     depends_on:
       api:
@@ -85,7 +106,6 @@ services:
     networks:
       - internal
     healthcheck:
-      # Check if UI server is responding
       test: ["CMD", "curl", "-f", "http://localhost:3000/health/live"]
       interval: 30s
       timeout: 10s
@@ -98,14 +118,10 @@ services:
 networks:
   internal:
     driver: bridge
-    # Internal network for service-to-service communication
-    # API and Postgres are NOT exposed to host
 
 # ===========================================
 # Volumes
 # ===========================================
 volumes:
   postgres-data:
-    # Named volume managed by Docker
-    # Persists PostgreSQL data across container restarts
-    # To backup: docker run --rm -v raysondev_postgres-data:/data -v $(pwd):/backup alpine tar czf /backup/postgres-backup.tar.gz /data
+  seq-data:

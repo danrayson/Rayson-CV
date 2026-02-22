@@ -9,6 +9,7 @@ A financial market data dashboard application with .NET API backend and React fr
 | Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
+| Seq (Logging) | Datalust Seq | 5341 |
 
 ## Prerequisites
 
@@ -115,6 +116,7 @@ docker ps
 docker logs raysondev-api
 docker logs raysondev-ui
 docker logs raysondev-postgres
+docker logs raysondev-seq
 ```
 
 ### Stop All Containers
@@ -153,6 +155,9 @@ See `.env.example` for all required variables:
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `API_HEALTH_URL` | API health URL for UI health checks |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
+| `SEQ_URL` | Seq URL for structured logging (development) |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection (production) |
+| `LOG_LEVEL` | Log level for UI health server |
 
 ## Health Check Endpoints
 
@@ -254,6 +259,76 @@ For multiple origins, use comma-separated values or array syntax:
 Cors:AllowedOrigins__0=https://your-ui.azurecontainerapps.io
 Cors:AllowedOrigins__1=https://yourcustomdomain.com
 ```
+
+## Logging
+
+The application uses Serilog for structured logging with support for both development (Seq) and production (Application Insights).
+
+### Development (Seq)
+
+Seq is included in all Docker Compose configurations (except `docker-compose.dev.db.yml`) for structured log viewing.
+
+- **Seq UI**: http://localhost:5341
+- **Seq API**: Port 5341 (internal)
+
+Logs from the API and UI (client-side errors) are sent to Seq. The UI health server also logs to the console with structured JSON output (captured by Docker logs).
+
+**Log Enrichment:**
+- Environment name
+- Machine name
+- Thread ID
+- Correlation ID (for request tracing)
+
+### Production (Application Insights)
+
+For production deployments to Azure:
+
+1. Create an Application Insights resource in Azure Portal
+2. Copy the Connection String from Overview blade
+3. Set the environment variable in your Azure Container App:
+   ```
+   APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=...;IngestionEndpoint=...
+   ```
+4. Remove or leave empty the `SEQ_URL` environment variable
+
+### Log Sources
+
+| Source | Transport | Notes |
+|--------|-----------|-------|
+| API | Serilog → Seq/App Insights | Full structured logging |
+| UI Health Server | Pino → Console | Captured by Docker logs |
+| UI Client | HTTP POST → API `/logs` | Error boundary + manual logging |
+
+### API Log Endpoint
+
+The API exposes an endpoint for client-side logging:
+
+```
+POST /logs
+Content-Type: application/json
+
+{
+  "level": "Error",
+  "message": "Something went wrong",
+  "source": "UI.ErrorBoundary",
+  "browserInfo": "Mozilla/5.0...",
+  "stackTrace": "Error: ...",
+  "additionalData": { "key": "value" }
+}
+```
+
+### Viewing Logs
+
+**Docker Logs (UI health server):**
+```bash
+docker logs raysondev-ui
+```
+
+**Seq UI:**
+Navigate to http://localhost:5341 when running Docker Compose
+
+**Application Insights:**
+Use Azure Portal → Application Insights → Logs (KQL queries)
 
 ## Database Migrations
 
