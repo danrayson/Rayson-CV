@@ -10,10 +10,13 @@ interface ClientLogEvent {
 }
 
 class LoggingService {
-  private httpClient: HttpClient;
+  private httpClient: HttpClient | null = null;
 
-  constructor() {
-    this.httpClient = new HttpClient();
+  private getHttpClient(): HttpClient {
+    if (!this.httpClient) {
+      this.httpClient = new HttpClient();
+    }
+    return this.httpClient;
   }
 
   private getBrowserInfo(): string {
@@ -30,7 +33,7 @@ class LoggingService {
         additionalData,
       };
 
-      await this.httpClient.post('logs', event);
+      await this.getHttpClient().post('logs', event);
     } catch {
       console.error('Failed to send log to API');
     }
