@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln",
+                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln",
+                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Rayson.Dev/Api/TradePulseBackend.sln"
+                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -41,7 +41,7 @@
             "type": "docker-build",
             "label": "docker-build: debug",
             "dockerBuild": {
-                "tag": "tradepulse-api:dev",
+                "tag": "raysondev-api:dev",
                 "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
                 "context": "${workspaceFolder}/Rayson.Dev/Api",
                 "pull": true
@@ -57,7 +57,7 @@
             "type": "docker-build",
             "label": "docker-build: release",
             "dockerBuild": {
-                "tag": "tradepulse-api:latest",
+                "tag": "raysondev-api:latest",
                 "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
                 "context": "${workspaceFolder}/Rayson.Dev/Api",
                 "platform": {

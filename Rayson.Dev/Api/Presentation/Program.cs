@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "TradePulse Dashboard API", Version = "v1" });
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "RaysonDev Dashboard API", Version = "v1" });
 });
 
 builder.Services.AddPresentationServices();
@@ -62,7 +62,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.EnableTryItOutByDefault();
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "TradePulse Dashboard API V1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "RaysonDev Dashboard API V1");
     });
 }
 

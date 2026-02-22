@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database;
 
-public class Repository<T>(TradePulseDbContext context) : IRepository<T> where T : Entity
+public class Repository<T>(RaysonDevDbContext context) : IRepository<T> where T : Entity
 {
     protected readonly DbContext _context = context;
     protected readonly DbSet<T> _dbSet = context.Set<T>();

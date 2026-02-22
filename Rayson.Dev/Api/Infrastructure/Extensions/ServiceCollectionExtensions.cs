@@ -15,10 +15,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddDataProtection().PersistKeysToDbContext<TradePulseDbContext>();
+        services.AddDataProtection().PersistKeysToDbContext<RaysonDevDbContext>();
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<TradePulseDbContext>()
+            .AddEntityFrameworkStores<RaysonDevDbContext>()
             .AddDefaultTokenProviders();
     }
 }

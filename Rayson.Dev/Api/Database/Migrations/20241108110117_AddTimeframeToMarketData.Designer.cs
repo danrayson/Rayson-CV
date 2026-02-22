@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Database.Migrations
 {
-    [DbContext(typeof(TradePulseDbContext))]
+    [DbContext(typeof(RaysonDevDbContext))]
     [Migration("20241108110117_AddTimeframeToMarketData")]
     partial class AddTimeframeToMarketData
     {

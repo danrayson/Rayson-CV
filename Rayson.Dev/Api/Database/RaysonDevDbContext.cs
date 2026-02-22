@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database;
 
-public class TradePulseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>, IDataProtectionKeyContext
+public class RaysonDevDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>, IDataProtectionKeyContext
 {
     //Need twin constructurs because IdentityDbContext won't work in migrations without a zero parameter contructor.
-    public TradePulseDbContext()
+    public RaysonDevDbContext()
         : base() { }
     //Need to keep this one because it's the one we actually use during runtime.
-    public TradePulseDbContext(DbContextOptions<TradePulseDbContext> options)
+    public RaysonDevDbContext(DbContextOptions<RaysonDevDbContext> options)
         : base(options) { }
 
     public DbSet<Symbol> Symbols { get; set; }

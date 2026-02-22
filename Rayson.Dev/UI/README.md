@@ -68,28 +68,28 @@ docker compose up --build
 To run the web gui as standalone docker container, run the following command:
 
 ```bash
-cd solution/UserInterface/Web/trade-pulse-web-gui
-docker build -t trade-pulse-web-gui .
-docker run -p 3000:3000 trade-pulse-web-gui
+cd solution/UserInterface/Web/raysondev-web-gui
+docker build -t raysondev-web-gui .
+docker run -p 3000:3000 raysondev-web-gui
 ```
 
 To run web app only on dev, run the following command:
 
 ```bash
-cd solution/UserInterface/Web/trade-pulse-web-gui
+cd solution/UserInterface/Web/raysondev-web-gui
 npm run dev
 ```
 
 To run electron app only on dev, run the following command:
 
 ```bash
-cd solution/UserInterface/Web/trade-pulse-web-gui
+cd solution/UserInterface/Web/raysondev-web-gui
 npm run electron:dev
 ```
 
 To build production version of the desktop app, run the following command:
 
 ```bash
-cd solution/UserInterface/Web/trade-pulse-web-gui
+cd solution/UserInterface/Web/raysondev-web-gui
 npm run electron:build
 ```

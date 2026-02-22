@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Database.Migrations
 {
-    [DbContext(typeof(TradePulseDbContext))]
-    partial class TradePulseDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(RaysonDevDbContext))]
+    partial class RaysonDevDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

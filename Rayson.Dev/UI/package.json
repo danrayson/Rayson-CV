@@ -1,9 +1,9 @@
 {
-  "name": "trade-pulse-web-gui",
+  "name": "raysondev-web-gui",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "Trade Pulse is a trading platform that allows you to trade stocks, cryptocurrencies, and more.",
+  "description": "RaysonDev is a versatile application framework.",
   "author": "daniel william frederick rayson (danrayson@hotmail.co.uk)",
   "scripts": {
     "dev": "vite",
@@ -45,8 +45,8 @@
   },
   "main": "electron/main.cjs",
   "build": {
-    "appId": "com.trade-pulse",
-    "productName": "Trade Pulse",
+    "appId": "com.raysondev",
+    "productName": "RaysonDev",
     "directories": {
       "output": "build"
     },
