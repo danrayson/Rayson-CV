@@ -2,7 +2,7 @@
 # Docker Compose - Development: Database + UI
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.db-ui.yml up -d
-# Purpose: Run PostgreSQL and UI in Docker, debug API locally
+# Purpose: Run PostgreSQL, UI, and Seq in Docker, debug API locally
 # API runs on host at http://localhost:13245
 # ===========================================
 
@@ -26,6 +26,23 @@ services:
       retries: 5
       start_period: 10s
 
+  seq:
+    image: datalust/seq:latest
+    container_name: raysondev-seq
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - seq-data:/data
+    ports:
+      - "5341:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   ui:
     build:
       context: ./UI
@@ -36,6 +53,7 @@ services:
     restart: unless-stopped
     environment:
       API_HEALTH_URL: http://host.docker.internal:13245/health
+      LOG_LEVEL: info
     ports:
       - "3000:3000"
     extra_hosts:
@@ -52,3 +70,4 @@ services:
 
 volumes:
   postgres-data:
+  seq-data:

@@ -45,6 +45,12 @@ COPY --from=build /app/dist ./dist
 # Copy health server
 COPY health-server.mjs ./
 
+# Copy package.json for runtime dependencies
+COPY package*.json ./
+
+# Install only production dependencies (pino for logging)
+RUN npm install --omit=dev
+
 # Change ownership to the built-in node user
 # The node:20-alpine image already has a 'node' user with UID 1000
 RUN chown -R node:node /app
