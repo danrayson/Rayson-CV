@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddInfrastructureServices(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IEmailService, EmailService>();

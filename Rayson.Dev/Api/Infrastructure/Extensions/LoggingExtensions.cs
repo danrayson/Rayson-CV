@@ -29,7 +29,7 @@ public static class LoggingExtensions
                 .Enrich.WithEnvironmentName()
                 .Enrich.WithMachineName()
                 .Enrich.WithThreadId()
-                .Enrich.WithCorrelationId()
+                .Enrich.WithCorrelationIdHeader("X-Correlation-ID")
                 .MinimumLevel.Is(logLevel)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
