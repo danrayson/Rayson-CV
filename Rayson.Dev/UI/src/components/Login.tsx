@@ -50,7 +50,7 @@ const Login: FC<LoginProps> = ({ handleLandingPageChangeDelegate: onLandingPageC
         setErrors({});
         setShowErrors(false);
         if (response.status === 200) {
-          navigate('/market-data');
+          navigate('/dashboard');
         }
       } else {
         setErrors({ "Server error": ["Then login was successful, but there was a problem transferring the login token."] });

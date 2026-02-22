@@ -1,6 +1,4 @@
 using Database.Auth;
-using Database.Configurations;
-using Domain.Entities;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +14,8 @@ public class RaysonDevDbContext : IdentityDbContext<ApplicationUser, Application
     public RaysonDevDbContext(DbContextOptions<RaysonDevDbContext> options)
         : base(options) { }
 
-    public DbSet<Symbol> Symbols { get; set; }
-    public DbSet<Exchange> Exchanges { get; set; }
-    public DbSet<MarketPricePoint> DailyMarketDatas { get; set; }
     //Used in the identity stuff for generating tokens or something
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
-    //Required else identity stuff won't work???
-    //public DbSet<ApplicationRole> Roles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -33,7 +26,5 @@ public class RaysonDevDbContext : IdentityDbContext<ApplicationUser, Application
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(SymbolConfiguration).Assembly);
     }
 }

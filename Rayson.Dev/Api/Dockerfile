@@ -54,7 +54,6 @@ COPY --from=build /app/publish .
 # This overrides the default URL configuration
 ENV ASPNETCORE_URLS=http://+:8080
 
-ENV DataSeedLocation__RelativeFilePath=SeedData/Development
 ENV AuthOptions__Issuer=danrayson
 ENV AuthOptions__Audience=RaysonDevUsers
 ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_for_production

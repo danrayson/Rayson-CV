@@ -150,7 +150,6 @@ See `.env.example` for all required variables:
 | `JWT_ISSUER` | JWT token issuer |
 | `JWT_AUDIENCE` | JWT token audience |
 | `JWT_SIGNING_KEY` | JWT signing key (min 16 chars) |
-| `DATA_SEED_PATH` | Path to seed data files |
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Presentation.Endpoints.DailyMarketData;
 using Presentation.Extensions;
 using Database.SeedData;
 using Presentation.Exceptions;
@@ -9,11 +8,6 @@ using Infrastructure.Auth;
 using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var csvSettingsSectionName = "DataSeedLocation";
-var csvSettings = builder.Configuration.GetSection(csvSettingsSectionName).Get<DataSeedLocationSettings>()
-    ?? throw new SettingsMissingException(csvSettingsSectionName);
-builder.Services.AddSingleton(csvSettings);
 
 var authOptionsSectionName = "AuthOptions";
 builder.Services.AddOptions<AuthOptions>().Bind(builder.Configuration.GetSection(authOptionsSectionName));
@@ -51,7 +45,6 @@ builder.Services.AddInfrastructureServices();
 var app = builder.Build();
 
 //Map endpoints
-app.MapDailyMarketDataEndpoints();
 app.MapAuthEndpoints();
 
 // Configure the HTTP request pipeline.

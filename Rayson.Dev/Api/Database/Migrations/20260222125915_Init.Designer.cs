@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(RaysonDevDbContext))]
-    [Migration("20241109085902_AddedCodeProperties")]
-    partial class AddedCodeProperties
+    [Migration("20260222125915_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,111 +123,6 @@ namespace Database.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.Exchange", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Exchanges");
-                });
-
-            modelBuilder.Entity("Domain.Entities.MarketPricePoint", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AdjustedPrice")
-                        .HasColumnType("decimal(19,9)");
-
-                    b.Property<decimal>("ClosePrice")
-                        .HasColumnType("decimal(19,9)");
-
-                    b.Property<DateOnly>("DateUtc")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ExchangeId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("HighPrice")
-                        .HasColumnType("decimal(19,9)");
-
-                    b.Property<decimal>("LowPrice")
-                        .HasColumnType("decimal(19,9)");
-
-                    b.Property<decimal>("OpenPrice")
-                        .HasColumnType("decimal(19,9)");
-
-                    b.Property<int>("SymbolId")
-                        .HasColumnType("integer");
-
-                    b.Property<TimeSpan>("Timeframe")
-                        .HasColumnType("interval");
-
-                    b.Property<long?>("Volume")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExchangeId");
-
-                    b.HasIndex("SymbolId");
-
-                    b.ToTable("DailyMarketDatas");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Symbol", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Symbols");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
@@ -352,40 +247,6 @@ namespace Database.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SymbolExchange", b =>
-                {
-                    b.Property<int>("ExchangesId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SymbolsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ExchangesId", "SymbolsId");
-
-                    b.HasIndex("SymbolsId");
-
-                    b.ToTable("SymbolExchange");
-                });
-
-            modelBuilder.Entity("Domain.Entities.MarketPricePoint", b =>
-                {
-                    b.HasOne("Domain.Entities.Exchange", "Exchange")
-                        .WithMany("DailyMarketDatas")
-                        .HasForeignKey("ExchangeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Symbol", "Symbol")
-                        .WithMany("DailyMarketDatas")
-                        .HasForeignKey("SymbolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Exchange");
-
-                    b.Navigation("Symbol");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("Database.Auth.ApplicationRole", null)
@@ -435,31 +296,6 @@ namespace Database.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("SymbolExchange", b =>
-                {
-                    b.HasOne("Domain.Entities.Exchange", null)
-                        .WithMany()
-                        .HasForeignKey("ExchangesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Symbol", null)
-                        .WithMany()
-                        .HasForeignKey("SymbolsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.Exchange", b =>
-                {
-                    b.Navigation("DailyMarketDatas");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Symbol", b =>
-                {
-                    b.Navigation("DailyMarketDatas");
                 });
 #pragma warning restore 612, 618
         }
