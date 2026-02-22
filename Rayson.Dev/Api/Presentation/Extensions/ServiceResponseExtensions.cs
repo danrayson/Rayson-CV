@@ -1,4 +1,5 @@
 using Application.Core;
+using Application.Health;
 
 namespace Presentation.Extensions;
 
@@ -37,6 +38,15 @@ public static class ServiceResponseExtensions
         }
 
         return TypedResults.Ok();
+    }
+
+    public static IResult ToHealthHttpResult(this ServiceResponse<HealthResult> serviceResponse)
+    {
+        if (serviceResponse.ResultCode == ServiceResponseCodes.ServiceUnavailable)
+        {
+            return TypedResults.Json(serviceResponse.Payload, statusCode: 503);
+        }
+        return serviceResponse.ToHttpResult();
     }
 
     private static Dictionary<string, string[]> ToValidationDictionary(this IEnumerable<string> validationMessages)

@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Text.Json;
+using Application.Health;
+using Microsoft.AspNetCore.Mvc;
+using Presentation.Extensions;
 
 namespace Presentation.Endpoints.Health;
 
@@ -8,45 +8,28 @@ public static class HealthEndpoints
 {
     public static void MapHealthEndpoints(this WebApplication webApplication)
     {
-        webApplication.MapHealthChecks("/health", new HealthCheckOptions
-        {
-            ResponseWriter = WriteHealthResponse
-        });
+        var group = webApplication.MapGroup("health");
         
-        webApplication.MapHealthChecks("/health/live", new HealthCheckOptions
-        {
-            Predicate = _ => false
-        });
-        
-        webApplication.MapHealthChecks("/health/ready", new HealthCheckOptions
-        {
-            Predicate = check => check.Tags.Contains("ready"),
-            ResponseWriter = WriteHealthResponse
-        });
+        group.MapGet("", GetHealth);
+        group.MapGet("/live", GetLiveness);
+        group.MapGet("/ready", GetReadiness);
     }
 
-    private static async Task WriteHealthResponse(HttpContext context, HealthReport report)
+    private static async Task<IResult> GetHealth([FromServices] IHealthService healthService)
     {
-        context.Response.ContentType = "application/json; charset=utf-8";
-        
-        var response = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.ToDictionary(
-                e => e.Key,
-                e => new
-                {
-                    status = e.Value.Status.ToString(),
-                    description = e.Value.Description,
-                    duration = e.Value.Duration.TotalMilliseconds
-                }
-            ),
-            totalDuration = report.TotalDuration.TotalMilliseconds
-        };
-        
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
+        var response = await healthService.GetHealthAsync();
+        return response.ToHealthHttpResult();
+    }
+
+    private static async Task<IResult> GetLiveness([FromServices] IHealthService healthService)
+    {
+        var response = await healthService.GetLivenessAsync();
+        return response.ToHealthHttpResult();
+    }
+
+    private static async Task<IResult> GetReadiness([FromServices] IHealthService healthService)
+    {
+        var response = await healthService.GetReadinessAsync();
+        return response.ToHealthHttpResult();
     }
 }
