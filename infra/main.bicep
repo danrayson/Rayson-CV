@@ -20,7 +20,7 @@ param tags object = {}
 
 var containerAppsEnvName = 'cae-raysondev-${environmentName}'
 var postgresAppName = 'ca-postgres-${environmentName}'
-var seqAppName = 'ca-seq-${environmentName}'
+var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var storageAccountName = 'straysondev${environmentName}'
@@ -61,19 +61,6 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   }
 }
 
-module environmentStorage 'modules/environment-storage.bicep' = {
-  name: 'environment-storage'
-  scope: rg
-  params: {
-    environmentName: containerAppsEnvName
-    storageAccountName: storageAccountName
-  }
-  dependsOn: [
-    containerAppsEnv
-    storage
-  ]
-}
-
 module postgresService 'modules/postgres-service.bicep' = {
   name: 'postgres-service'
   scope: rg
@@ -90,13 +77,14 @@ module seq 'modules/seq-container.bicep' = {
   scope: rg
   params: {
     location: location
-    environmentId: containerAppsEnv.outputs.environmentId
-    containerAppName: seqAppName
+    containerGroupName: seqContainerName
+    storageAccountName: storage.outputs.storageAccountName
+    storageAccountKey: storage.outputs.storageAccountKey
     seqAdminPassword: seqAdminPassword
     tags: tags
   }
   dependsOn: [
-    environmentStorage
+    storage
   ]
 }
 
@@ -114,7 +102,7 @@ module api 'modules/api-container.bicep' = {
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
     corsOrigins: corsOrigins
-    seqUrl: 'http://${seqAppName}.internal.${containerAppsEnv.outputs.defaultDomain}:5341'
+    seqUrl: 'http://${seq.outputs.fqdn}:5341'
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }

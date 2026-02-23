@@ -12,6 +12,9 @@ param corsOrigins array
 @secure()
 param seqAdminPassword string
 
+param storageAccountName string
+@secure()
+param storageAccountKey string
 param environmentName string
 param tags object = {
   Environment: environmentName
@@ -19,7 +22,7 @@ param tags object = {
 }
 
 var postgresServiceName = 'ca-postgres-${environmentName}'
-var seqAppName = 'ca-seq-${environmentName}'
+var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 
@@ -37,8 +40,9 @@ module seq 'modules/seq-container.bicep' = {
   name: 'seq-container'
   params: {
     location: location
-    environmentId: environmentId
-    containerAppName: seqAppName
+    containerGroupName: seqContainerName
+    storageAccountName: storageAccountName
+    storageAccountKey: storageAccountKey
     seqAdminPassword: seqAdminPassword
     tags: tags
   }
@@ -57,7 +61,7 @@ module api 'modules/api-container.bicep' = {
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
     corsOrigins: corsOrigins
-    seqUrl: 'http://${seqAppName}.internal.${defaultDomain}:5341'
+    seqUrl: 'http://${seq.outputs.fqdn}:5341'
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }

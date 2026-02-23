@@ -1,67 +1,83 @@
 param location string = resourceGroup().location
-param environmentId string
-param containerAppName string
+param containerGroupName string
+param storageAccountName string
+@secure()
+param storageAccountKey string
 @secure()
 param seqAdminPassword string
 param tags object = {}
 
-resource seqContainer 'Microsoft.App/containerApps@2023-05-01' = {
-  name: containerAppName
+resource seqContainer 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
+  name: containerGroupName
   location: location
   properties: {
-    managedEnvironmentId: environmentId
-    configuration: {
-      secrets: [
+    osType: 'Linux'
+    ipAddress: {
+      type: 'Public'
+      ports: [
         {
-          name: 'seq-admin-password'
-          value: seqAdminPassword
+          protocol: 'TCP'
+          port: 80
+        }
+        {
+          protocol: 'TCP'
+          port: 5341
         }
       ]
-      activeRevisionsMode: 'Single'
-      ingress: {
-        external: true
-        targetPort: 80
-        transport: 'auto'
-      }
+      dnsNameLabel: containerGroupName
     }
-    template: {
-      containers: [
-        {
-          name: 'seq'
-          image: 'datalust/seq:latest'
-          env: [
-            {
-              name: 'ACCEPT_EULA'
-              value: 'Y'
-            }
-            {
-              name: 'SEQ_FIRSTRUN_ADMINPASSWORD'
-              secretRef: 'seq-admin-password'
-            }
-          ]
-          volumeMounts: [
-            {
-              volumeName: 'seq-data'
-              mountPath: '/data'
-            }
-          ]
-          resources: {
-            cpu: json('0.5')
-            memory: '1.0Gi'
+    containers: [
+      {
+        name: 'seq'
+        image: 'datalust/seq:latest'
+        ports: [
+          {
+            protocol: 'TCP'
+            port: 80
+          }
+          {
+            protocol: 'TCP'
+            port: 5341
+          }
+        ]
+        environmentVariables: [
+          {
+            name: 'ACCEPT_EULA'
+            value: 'Y'
+          }
+          {
+            name: 'SEQ_FIRSTRUN_ADMINPASSWORD'
+            secureValue: seqAdminPassword
+          }
+        ]
+        resources: {
+          requests: {
+            cpu: 1
+            memoryInGB: 1
           }
         }
-      ]
-      volumes: [
-        {
-          name: 'seq-data'
-          storageType: 'AzureFile'
-          storageName: 'seq-storage'
+        volumeMounts: [
+          {
+            name: 'seq-data'
+            mountPath: '/data'
+          }
+        ]
+      }
+    ]
+    volumes: [
+      {
+        name: 'seq-data'
+        azureFile: {
+          shareName: 'seq-data'
+          storageAccountName: storageAccountName
+          storageAccountKey: storageAccountKey
         }
-      ]
-    }
+      }
+    ]
   }
   tags: tags
 }
 
-output containerAppName string = seqContainer.name
-output fqdn string = seqContainer.properties.configuration.ingress.fqdn
+output containerGroupName string = seqContainer.name
+output fqdn string = seqContainer.properties.ipAddress.fqdn
+output ipAddress string = seqContainer.properties.ipAddress.ip
