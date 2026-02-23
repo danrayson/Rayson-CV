@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Security.Claims;
 using Application.Auth;
 using Application.Core;
@@ -57,7 +58,7 @@ public class AuthService(UserManager<ApplicationUser> userManager, RoleManager<A
         try
         {
             var user = await userManager.FindByEmailAsync(email);
-            if (user == null)
+            if (user?.Email == null)
             {
                 return ServiceResponse.Invalid("Email not found.");
             }
