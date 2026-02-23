@@ -13,8 +13,7 @@ param corsOrigins array
 param seqAdminPassword string
 
 param storageAccountName string
-@secure()
-param storageAccountKey string
+param abcdef string
 param environmentName string
 param tags object = {
   Environment: environmentName
@@ -42,7 +41,7 @@ module seq 'modules/seq-container.bicep' = {
     location: location
     containerGroupName: seqContainerName
     storageAccountName: storageAccountName
-    storageAccountKey: storageAccountKey
+    abcdef: abcdef
     seqAdminPassword: seqAdminPassword
     tags: tags
   }
