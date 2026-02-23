@@ -54,4 +54,4 @@ output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
-output storageAccountKey string = storage.outputs.storageAccountKey
+output storageKey string = storage.outputs.storageAccountKey
