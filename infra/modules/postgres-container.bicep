@@ -65,4 +65,3 @@ resource postgresContainer 'Microsoft.App/containerApps@2023-05-01' = {
 }
 
 output containerAppName string = postgresContainer.name
-output fqdn string = postgresContainer.properties.configuration.ingress.fqdn
