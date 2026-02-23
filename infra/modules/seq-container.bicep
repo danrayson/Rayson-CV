@@ -29,39 +29,41 @@ resource seqContainer 'Microsoft.ContainerInstance/containerGroups@2023-05-01' =
     containers: [
       {
         name: 'seq'
-        image: 'datalust/seq:latest'
-        ports: [
-          {
-            protocol: 'TCP'
-            port: 80
+        properties: {
+          image: 'datalust/seq:latest'
+          ports: [
+            {
+              protocol: 'TCP'
+              port: 80
+            }
+            {
+              protocol: 'TCP'
+              port: 5341
+            }
+          ]
+          environmentVariables: [
+            {
+              name: 'ACCEPT_EULA'
+              value: 'Y'
+            }
+            {
+              name: 'SEQ_FIRSTRUN_ADMINPASSWORD'
+              secureValue: seqAdminPassword
+            }
+          ]
+          resources: {
+            requests: {
+              cpu: 1
+              memoryInGB: 1
+            }
           }
-          {
-            protocol: 'TCP'
-            port: 5341
-          }
-        ]
-        environmentVariables: [
-          {
-            name: 'ACCEPT_EULA'
-            value: 'Y'
-          }
-          {
-            name: 'SEQ_FIRSTRUN_ADMINPASSWORD'
-            secureValue: seqAdminPassword
-          }
-        ]
-        resources: {
-          requests: {
-            cpu: 1
-            memoryInGB: 1
-          }
+          volumeMounts: [
+            {
+              name: 'seq-data'
+              mountPath: '/data'
+            }
+          ]
         }
-        volumeMounts: [
-          {
-            name: 'seq-data'
-            mountPath: '/data'
-          }
-        ]
       }
     ]
     volumes: [
