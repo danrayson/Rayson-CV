@@ -11,7 +11,7 @@ param tags object = {
 }
 
 var containerAppsEnvName = 'cae-raysondev-${environmentName}'
-var storageAccountName = 'st-raysondev-${environmentName}'
+var storageAccountName = 'straysondev${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName

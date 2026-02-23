@@ -23,7 +23,7 @@ var postgresAppName = 'ca-postgres-${environmentName}'
 var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
-var storageAccountName = 'st-raysondev-${environmentName}'
+var storageAccountName = 'straysondev${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
