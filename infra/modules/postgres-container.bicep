@@ -20,6 +20,10 @@ resource postgresContainer 'Microsoft.App/containerApps@2023-05-01' = {
         }
       ]
       activeRevisionsMode: 'Single'
+      ingress: {
+        external: false
+        targetPort: 5432
+      }
     }
     template: {
       containers: [
