@@ -4,10 +4,6 @@ param containerAppName string
 param pgAdminEmail string
 @secure()
 param pgAdminPassword string
-param postgresHost string
-param postgresPort int = 5432
-param postgresDb string
-param postgresUser string
 param tags object = {}
 
 resource pgAdminContainer 'Microsoft.App/containerApps@2023-05-01' = {
