@@ -49,21 +49,10 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   }
 }
 
-module environmentStorage 'modules/environment-storage.bicep' = {
-  name: 'environment-storage'
-  scope: rg
-  params: {
-    environmentName: containerAppsEnvName
-    storageAccountName: storageAccountName
-  }
-  dependsOn: [
-    containerAppsEnv
-    storage
-  ]
-}
-
 output acrLoginServer string = acr.outputs.acrLoginServer
 output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
+@secure()
+output storageAccountKey string = storage.outputs.storageAccountKey

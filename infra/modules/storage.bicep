@@ -29,3 +29,5 @@ resource seqFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@202
 }
 
 output storageAccountName string = storageAccount.name
+@secure()
+output storageAccountKey string = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
