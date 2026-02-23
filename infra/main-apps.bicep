@@ -62,7 +62,6 @@ module api 'modules/api-container.bicep' = {
     tags: tags
   }
   dependsOn: [
-    postgresService
     seq
   ]
 }
