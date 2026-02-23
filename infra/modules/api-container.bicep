@@ -1,0 +1,109 @@
+param location string = resourceGroup().location
+param environmentId string
+param containerAppName string
+param acrLoginServer string
+param acrUsername string
+param acrPassword string
+param imageTag string = 'latest'
+param jwtIssuer string
+param jwtAudience string
+param jwtSigningKey string
+param defaultConnection string
+param corsOrigins array
+param seqUrl string
+param tags object = {}
+
+resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
+  name: containerAppName
+  location: location
+  properties: {
+    managedEnvironmentId: environmentId
+    configuration: {
+      secrets: [
+        {
+          name: 'acr-password'
+          value: acrPassword
+        }
+        {
+          name: 'jwt-signing-key'
+          value: jwtSigningKey
+        }
+        {
+          name: 'default-connection'
+          value: defaultConnection
+        }
+      ]
+      activeRevisionsMode: 'Single'
+      ingress: {
+        external: true
+        targetPort: 8080
+        transport: 'auto'
+      }
+      registries: [
+        {
+          server: acrLoginServer
+          username: acrUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          name: 'api'
+          image: '${acrLoginServer}/raysondev-api:${imageTag}'
+          env: [
+            {
+              name: 'ASPNETCORE_ENVIRONMENT'
+              value: 'Staging'
+            }
+            {
+              name: 'ASPNETCORE_URLS'
+              value: 'http://+:8080'
+            }
+            {
+              name: 'SEQ_URL'
+              value: seqUrl
+            }
+            {
+              name: 'AuthOptions__Issuer'
+              value: jwtIssuer
+            }
+            {
+              name: 'AuthOptions__Audience'
+              value: jwtAudience
+            }
+            {
+              name: 'AuthOptions__IssuerSigningKey'
+              secretRef: 'jwt-signing-key'
+            }
+            {
+              name: 'ConnectionStrings__DefaultConnection'
+              secretRef: 'default-connection'
+            }
+            {
+              name: 'Cors__AllowedOrigins__0'
+              value: corsOrigins[0]
+            }
+            {
+              name: 'LOG_LEVEL'
+              value: 'Information'
+            }
+          ]
+          resources: {
+            cpu: json('0.5')
+            memory: '1.0Gi'
+          }
+        }
+      ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 3
+      }
+    }
+  }
+  tags: tags
+}
+
+output containerAppName string = apiContainer.name
+output fqdn string = apiContainer.properties.configuration.ingress.fqdn
