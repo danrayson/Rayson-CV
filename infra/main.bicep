@@ -49,56 +49,14 @@ module acr 'modules/container-registry.bicep' = {
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
-  name: storageAccountName
+module storage 'modules/storage.bicep' = {
+  name: 'storage'
   scope: rg
-}
-
-resource newStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: storageAccountName
-  location: location
-  scope: rg
-  sku: {
-    name: 'Standard_LRS'
+  params: {
+    location: location
+    storageAccountName: storageAccountName
+    tags: tags
   }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-  }
-  tags: tags
-}
-
-resource postgresFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  name: '${storageAccountName}/default/postgres-data'
-  scope: rg
-  properties: {
-    shareQuota: 5
-  }
-  dependsOn: [
-    newStorageAccount
-  ]
-}
-
-resource seqFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  name: '${storageAccountName}/default/seq-data'
-  scope: rg
-  properties: {
-    shareQuota: 2
-  }
-  dependsOn: [
-    newStorageAccount
-  ]
-}
-
-resource pgAdminFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  name: '${storageAccountName}/default/pgadmin-data'
-  scope: rg
-  properties: {
-    shareQuota: 1
-  }
-  dependsOn: [
-    newStorageAccount
-  ]
 }
 
 module containerAppsEnv 'modules/container-apps-environment.bicep' = {
@@ -111,51 +69,16 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   }
 }
 
-resource postgresEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' = {
-  name: '${containerAppsEnvName}/postgres-storage'
+module environmentStorage 'modules/environment-storage.bicep' = {
+  name: 'environment-storage'
   scope: rg
-  properties: {
-    azureFile: {
-      accountName: storageAccountName
-      shareName: 'postgres-data'
-      accessMode: 'ReadWrite'
-    }
+  params: {
+    environmentName: containerAppsEnvName
+    storageAccountName: storageAccountName
   }
   dependsOn: [
     containerAppsEnv
-    postgresFileShare
-  ]
-}
-
-resource seqEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' = {
-  name: '${containerAppsEnvName}/seq-storage'
-  scope: rg
-  properties: {
-    azureFile: {
-      accountName: storageAccountName
-      shareName: 'seq-data'
-      accessMode: 'ReadWrite'
-    }
-  }
-  dependsOn: [
-    containerAppsEnv
-    seqFileShare
-  ]
-}
-
-resource pgAdminEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' = {
-  name: '${containerAppsEnvName}/pgadmin-storage'
-  scope: rg
-  properties: {
-    azureFile: {
-      accountName: storageAccountName
-      shareName: 'pgadmin-data'
-      accessMode: 'ReadWrite'
-    }
-  }
-  dependsOn: [
-    containerAppsEnv
-    pgAdminFileShare
+    storage
   ]
 }
 
@@ -172,8 +95,7 @@ module postgres 'modules/postgres-container.bicep' = {
     tags: tags
   }
   dependsOn: [
-    containerAppsEnv
-    postgresEnvStorage
+    environmentStorage
   ]
 }
 
@@ -188,8 +110,7 @@ module seq 'modules/seq-container.bicep' = {
     tags: tags
   }
   dependsOn: [
-    containerAppsEnv
-    seqEnvStorage
+    environmentStorage
   ]
 }
 
@@ -212,7 +133,6 @@ module api 'modules/api-container.bicep' = {
     tags: tags
   }
   dependsOn: [
-    acr
     postgres
     seq
   ]
@@ -232,7 +152,6 @@ module ui 'modules/ui-container.bicep' = {
     tags: tags
   }
   dependsOn: [
-    acr
     api
   ]
 }
@@ -246,15 +165,10 @@ module pgAdmin 'modules/pgadmin-container.bicep' = {
     containerAppName: pgAdminAppName
     pgAdminEmail: pgAdminEmail
     pgAdminPassword: pgAdminPassword
-    postgresHost: '${postgresAppName}.internal.${containerAppsEnv.outputs.defaultDomain}'
-    postgresPort: 5432
-    postgresDb: postgresDb
-    postgresUser: postgresUser
     tags: tags
   }
   dependsOn: [
-    containerAppsEnv
-    pgAdminEnvStorage
+    environmentStorage
     postgres
   ]
 }
