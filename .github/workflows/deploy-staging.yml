@@ -67,6 +67,8 @@ jobs:
       acrName: ${{ steps.deploy.outputs.acrName }}
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
+      storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
+      storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
     
     steps:
       - name: Checkout code
@@ -93,11 +95,15 @@ jobs:
           ACR_NAME_OUT=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.acrName.value --output tsv)
           ENVIRONMENT_ID=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.defaultDomain.value --output tsv)
+          STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageAccountName.value --output tsv)
+          STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
+          echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "storageAccountKey=$STORAGE_ACCOUNT_KEY" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
