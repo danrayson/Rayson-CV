@@ -20,27 +20,11 @@ resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01'
   name: 'default'
 }
 
-resource postgresFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  parent: fileService
-  name: 'postgres-data'
-  properties: {
-    shareQuota: 5
-  }
-}
-
 resource seqFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   parent: fileService
   name: 'seq-data'
   properties: {
     shareQuota: 2
-  }
-}
-
-resource pgAdminFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  parent: fileService
-  name: 'pgadmin-data'
-  properties: {
-    shareQuota: 1
   }
 }
 

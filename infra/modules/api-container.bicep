@@ -8,10 +8,9 @@ param jwtIssuer string
 param jwtAudience string
 @secure()
 param jwtSigningKey string
-@secure()
-param defaultConnection string
 param corsOrigins array
 param seqUrl string
+param postgresServiceId string
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -33,10 +32,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'jwt-signing-key'
           value: jwtSigningKey
         }
-        {
-          name: 'default-connection'
-          value: defaultConnection
-        }
       ]
       activeRevisionsMode: 'Single'
       ingress: {
@@ -53,6 +48,12 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
     template: {
+      serviceBinds: [
+        {
+          serviceId: postgresServiceId
+          name: 'postgres'
+        }
+      ]
       containers: [
         {
           name: 'api'
@@ -81,10 +82,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'AuthOptions__IssuerSigningKey'
               secretRef: 'jwt-signing-key'
-            }
-            {
-              name: 'ConnectionStrings__DefaultConnection'
-              secretRef: 'default-connection'
             }
             {
               name: 'Cors__AllowedOrigins__0'

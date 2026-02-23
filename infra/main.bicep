@@ -15,22 +15,14 @@ param jwtSigningKey string
 param corsOrigins array
 @secure()
 param seqAdminPassword string
-param pgAdminEmail string
-@secure()
-param pgAdminPassword string
 param imageTag string = 'latest'
-
-param tags object = {
-  Environment: environmentName
-  Project: 'RaysonDev'
-}
+param tags object = {}
 
 var containerAppsEnvName = 'cae-raysondev-${environmentName}'
 var postgresAppName = 'ca-postgres-${environmentName}'
 var seqAppName = 'ca-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
-var pgAdminAppName = 'ca-pgadmin-${environmentName}'
 var storageAccountName = 'straysondev${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
@@ -82,21 +74,15 @@ module environmentStorage 'modules/environment-storage.bicep' = {
   ]
 }
 
-module postgres 'modules/postgres-container.bicep' = {
-  name: 'postgres-container'
+module postgresService 'modules/postgres-service.bicep' = {
+  name: 'postgres-service'
   scope: rg
   params: {
     location: location
     environmentId: containerAppsEnv.outputs.environmentId
     containerAppName: postgresAppName
-    postgresDb: postgresDb
-    postgresUser: postgresUser
-    postgresPassword: postgresPassword
     tags: tags
   }
-  dependsOn: [
-    environmentStorage
-  ]
 }
 
 module seq 'modules/seq-container.bicep' = {
@@ -127,13 +113,13 @@ module api 'modules/api-container.bicep' = {
     jwtIssuer: jwtIssuer
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
-    defaultConnection: 'Server=${postgresAppName}.internal.${containerAppsEnv.outputs.defaultDomain};Port=5432;Database=${postgresDb};User Id=${postgresUser};Password=${postgresPassword};TrustServerCertificate=True'
     corsOrigins: corsOrigins
     seqUrl: 'http://${seqAppName}.internal.${containerAppsEnv.outputs.defaultDomain}:5341'
+    postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
   dependsOn: [
-    postgres
+    postgresService
     seq
   ]
 }
@@ -156,25 +142,7 @@ module ui 'modules/ui-container.bicep' = {
   ]
 }
 
-module pgAdmin 'modules/pgadmin-container.bicep' = {
-  name: 'pgadmin-container'
-  scope: rg
-  params: {
-    location: location
-    environmentId: containerAppsEnv.outputs.environmentId
-    containerAppName: pgAdminAppName
-    pgAdminEmail: pgAdminEmail
-    pgAdminPassword: pgAdminPassword
-    tags: tags
-  }
-  dependsOn: [
-    environmentStorage
-    postgres
-  ]
-}
-
 output acrLoginServer string = acr.outputs.acrLoginServer
 output apiFqdn string = api.outputs.fqdn
 output uiFqdn string = ui.outputs.fqdn
 output seqFqdn string = seq.outputs.fqdn
-output pgAdminFqdn string = pgAdmin.outputs.fqdn
