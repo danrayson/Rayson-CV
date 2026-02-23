@@ -32,4 +32,4 @@ resource seqFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@202
 }
 
 output storageAccountName string = storageAccount.name
-output storageAccountKey string = storageAccount.listKeys().keys[0].value
+output abcdef string = storageAccount.listKeys().keys[0].value

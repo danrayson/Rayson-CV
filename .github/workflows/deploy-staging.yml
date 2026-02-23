@@ -68,7 +68,7 @@ jobs:
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
-      storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
+      abcdef: ${{ steps.deploy.outputs.abcdef }}
     
     steps:
       - name: Checkout code
@@ -96,14 +96,14 @@ jobs:
           ENVIRONMENT_ID=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageAccountName.value --output tsv)
-          STORAGE_KEY=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageKey.value --output tsv)
+          ABCDEF=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.abcdef.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
-          echo "abcdef=$STORAGE_KEY" >> $GITHUB_OUTPUT
+          echo "abcdef=$ABCDEF" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
@@ -183,7 +183,7 @@ jobs:
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
                          seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}" \
-                         storageAccountKey="${{ needs.deploy-core.outputs.abcdef }}"
+                         abcdef="${{ needs.deploy-core.outputs.abcdef }}"
           
           API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
