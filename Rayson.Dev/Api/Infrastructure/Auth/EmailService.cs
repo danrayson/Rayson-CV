@@ -25,6 +25,8 @@ namespace Infrastructure.Auth
         public async Task SendEmailAsync(string email, string subject, string body)
         {
             Console.WriteLine($"Sending email to {email} with subject '{subject}' and body '{body}'");
+            Console.WriteLine($"Details used were _smtpHost:{_smtpHost}, _smtpPort:{_smtpPort}, _smtpUsername:{_smtpUsername}, _smtpPassword:{_smtpPassword}, _enableSsl:{_enableSsl}");
+            Console.WriteLine("You should probably get this email service actually working...");
             return;
             // using (var client = new SmtpClient(_smtpHost, _smtpPort))
             // {
