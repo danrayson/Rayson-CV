@@ -43,6 +43,10 @@ resource postgresContainer 'Microsoft.App/containerApps@2023-05-01' = {
               name: 'POSTGRES_PASSWORD'
               secretRef: 'postgres-password'
             }
+            {
+              name: 'PGDATA'
+              value: '/var/lib/postgresql/data/pgdata'
+            }
           ]
           volumeMounts: [
             {
