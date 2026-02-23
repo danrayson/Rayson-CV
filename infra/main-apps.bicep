@@ -49,6 +49,7 @@ module api 'modules/api-container.bicep' = {
   params: {
     location: location
     environmentId: environmentId
+    environmentName: environmentName
     containerAppName: apiAppName
     acrLoginServer: acrLoginServer
     acrName: acrName
