@@ -11,9 +11,7 @@ param jwtSigningKey string
 param corsOrigins array
 @secure()
 param seqAdminPassword string
-
 param storageAccountName string
-param abcdef string
 param environmentName string
 param tags object = {
   Environment: environmentName
@@ -41,7 +39,6 @@ module seq 'modules/seq-container.bicep' = {
     location: location
     containerGroupName: seqContainerName
     storageAccountName: storageAccountName
-    abcdef: abcdef
     seqAdminPassword: seqAdminPassword
     tags: tags
   }

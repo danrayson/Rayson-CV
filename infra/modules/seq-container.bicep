@@ -1,10 +1,13 @@
 param location string = resourceGroup().location
 param containerGroupName string
 param storageAccountName string
-param abcdef string
 @secure()
 param seqAdminPassword string
 param tags object = {}
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: storageAccountName
+}
 
 resource seqContainer 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: containerGroupName
@@ -71,7 +74,7 @@ resource seqContainer 'Microsoft.ContainerInstance/containerGroups@2023-05-01' =
         azureFile: {
           shareName: 'seq-data'
           storageAccountName: storageAccountName
-          storageAccountKey: abcdef
+          storageAccountKey: storageAccount.listKeys().keys[0].value
         }
       }
     ]
