@@ -45,4 +45,3 @@ resource pgAdminFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares
 }
 
 output storageAccountName string = storageAccount.name
-output storageAccountKey string = storageAccount.listKeys().keys[0].value

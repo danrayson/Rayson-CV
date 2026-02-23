@@ -75,7 +75,6 @@ module environmentStorage 'modules/environment-storage.bicep' = {
   params: {
     environmentName: containerAppsEnvName
     storageAccountName: storageAccountName
-    storageAccountKey: storage.outputs.storageAccountKey
   }
   dependsOn: [
     containerAppsEnv
