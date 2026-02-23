@@ -27,7 +27,7 @@ resource seqFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@202
   parent: fileService
   name: 'seq-data'
   properties: {
-    shareQuota: 2
+    shareQuota: 6
   }
 }
 
