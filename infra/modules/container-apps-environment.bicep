@@ -5,11 +5,7 @@ param tags object = {}
 resource containerAppsEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
   name: environmentName
   location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: 'none'
-    }
-  }
+  properties: {}
   tags: tags
 }
 
