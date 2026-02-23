@@ -16,6 +16,10 @@ env:
   ACR_NAME: acrraysondevstaging
   API_IMAGE_NAME: raysondev-api
   UI_IMAGE_NAME: raysondev-ui
+  POSTGRES_DB: raysondev
+  POSTGRES_USER: raysondev_user
+  JWT_ISSUER: danrayson
+  JWT_AUDIENCE: RaysonDevUsers
 
 jobs:
   build:
@@ -88,6 +92,11 @@ jobs:
                          environmentName=staging \
                          acrName=${{ env.ACR_NAME }} \
                          imageTag=${{ needs.build.outputs.imageTag }} \
+                         postgresDb=${{ env.POSTGRES_DB }} \
+                         postgresUser=${{ env.POSTGRES_USER }} \
+                         jwtIssuer=${{ env.JWT_ISSUER }} \
+                         jwtAudience=${{ env.JWT_AUDIENCE }} \
+                         corsOrigins='["*"]' \
                          postgresPassword="${{ secrets.POSTGRES_PASSWORD }}" \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
                          seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
