@@ -11,6 +11,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   kind: 'StorageV2'
   properties: {
     accessTier: 'Hot'
+    networkAcls: {
+      defaultAction: 'Allow'
+    }
   }
   tags: tags
 }
