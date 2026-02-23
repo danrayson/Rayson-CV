@@ -23,7 +23,7 @@ var postgresAppName = 'ca-postgres-${environmentName}'
 var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
-var storageAccountName = 'straysondev${environmentName}'
+var storageAccountName = 'st-raysondev-${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
@@ -83,9 +83,6 @@ module seq 'modules/seq-container.bicep' = {
     seqAdminPassword: seqAdminPassword
     tags: tags
   }
-  dependsOn: [
-    storage
-  ]
 }
 
 module api 'modules/api-container.bicep' = {
@@ -106,10 +103,6 @@ module api 'modules/api-container.bicep' = {
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
-  dependsOn: [
-    postgresService
-    seq
-  ]
 }
 
 module ui 'modules/ui-container.bicep' = {

@@ -65,9 +65,6 @@ module api 'modules/api-container.bicep' = {
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
-  dependsOn: [
-    postgresService
-  ]
 }
 
 module ui 'modules/ui-container.bicep' = {
