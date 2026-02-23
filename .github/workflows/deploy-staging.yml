@@ -16,8 +16,6 @@ env:
   ACR_NAME: acrraysondevstaging
   API_IMAGE_NAME: raysondev-api
   UI_IMAGE_NAME: raysondev-ui
-  POSTGRES_DB: raysondev
-  POSTGRES_USER: raysondev_user
   JWT_ISSUER: danrayson
   JWT_AUDIENCE: RaysonDevUsers
 
@@ -173,26 +171,19 @@ jobs:
                          acrName=${{ needs.deploy-core.outputs.acrName }} \
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
-                         postgresDb=${{ env.POSTGRES_DB }} \
-                         postgresUser=${{ env.POSTGRES_USER }} \
                          jwtIssuer=${{ env.JWT_ISSUER }} \
                          jwtAudience=${{ env.JWT_AUDIENCE }} \
                          corsOrigins='["*"]' \
-                         postgresPassword="${{ secrets.POSTGRES_PASSWORD }}" \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
-                         seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
-                         pgAdminEmail="${{ secrets.PGADMIN_EMAIL }}" \
-                         pgAdminPassword="${{ secrets.PGADMIN_PASSWORD }}"
+                         seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}"
           
           API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
           SEQ_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.seqFqdn.value --output tsv)
-          PGADMIN_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.pgAdminFqdn.value --output tsv)
           
           echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
           echo "uiFqdn=$UI_FQDN" >> $GITHUB_OUTPUT
           echo "seqFqdn=$SEQ_FQDN" >> $GITHUB_OUTPUT
-          echo "pgAdminFqdn=$PGADMIN_FQDN" >> $GITHUB_OUTPUT
 
       - name: Deployment Summary
         run: |
@@ -203,4 +194,3 @@ jobs:
           echo "| API | https://${{ steps.deploy.outputs.apiFqdn }} |" >> $GITHUB_STEP_SUMMARY
           echo "| UI | https://${{ steps.deploy.outputs.uiFqdn }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Seq | https://${{ steps.deploy.outputs.seqFqdn }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| pgAdmin | https://${{ steps.deploy.outputs.pgAdminFqdn }} |" >> $GITHUB_STEP_SUMMARY

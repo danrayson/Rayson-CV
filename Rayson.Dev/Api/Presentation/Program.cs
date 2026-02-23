@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Presentation.Extensions;
 using Database.SeedData;
-using Presentation.Exceptions;
 using Database.Extensions;
 using Presentation.Endpoints.Auth;
 using Presentation.Endpoints.Health;
@@ -44,9 +43,7 @@ try
     });
 
     builder.Services.AddPresentationServices();
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new SettingsMissingException("DefaultConnection");
-    builder.Services.AddDatabaseServices(connectionString);
+    builder.Services.AddDatabaseServices(builder.Configuration);
     builder.Services.AddInfrastructureServices();
 
     var app = builder.Build();
