@@ -1,3 +1,4 @@
+param environmentName string
 param location string = resourceGroup().location
 param environmentId string
 param containerAppName string
@@ -61,7 +62,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             {
               name: 'ASPNETCORE_ENVIRONMENT'
-              value: 'Staging'
+              value: environmentName
             }
             {
               name: 'ASPNETCORE_URLS'
@@ -89,7 +90,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'LOG_LEVEL'
-              value: 'Information'
+              value: 'Debug'
             }
           ]
           resources: {
