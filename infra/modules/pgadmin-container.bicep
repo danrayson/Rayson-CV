@@ -2,26 +2,13 @@ param location string = resourceGroup().location
 param environmentId string
 param containerAppName string
 param pgAdminEmail string
+@secure()
 param pgAdminPassword string
 param postgresHost string
 param postgresPort int = 5432
 param postgresDb string
 param postgresUser string
 param tags object = {}
-
-var serversJson = {
-  Servers: {
-    '1': {
-      Name: 'RaysonDev Staging'
-      Group: 'Servers'
-      Host: postgresHost
-      Port: postgresPort
-      MaintenanceDB: postgresDb
-      Username: postgresUser
-      SSLMode: 'prefer'
-    }
-  }
-}
 
 resource pgAdminContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName

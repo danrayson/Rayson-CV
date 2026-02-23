@@ -2,16 +2,21 @@ param location string = resourceGroup().location
 param environmentId string
 param containerAppName string
 param acrLoginServer string
-param acrUsername string
-param acrPassword string
+param acrName string
 param imageTag string = 'latest'
 param jwtIssuer string
 param jwtAudience string
+@secure()
 param jwtSigningKey string
+@secure()
 param defaultConnection string
 param corsOrigins array
 param seqUrl string
 param tags object = {}
+
+resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
+  name: acrName
+}
 
 resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
@@ -22,7 +27,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       secrets: [
         {
           name: 'acr-password'
-          value: acrPassword
+          value: acr.listCredentials().passwords[0].value
         }
         {
           name: 'jwt-signing-key'
@@ -42,7 +47,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       registries: [
         {
           server: acrLoginServer
-          username: acrUsername
+          username: acrName
           passwordSecretRef: 'acr-password'
         }
       ]

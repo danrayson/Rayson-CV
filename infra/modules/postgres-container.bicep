@@ -3,8 +3,8 @@ param environmentId string
 param containerAppName string
 param postgresDb string
 param postgresUser string
+@secure()
 param postgresPassword string
-param storageAccountName string
 param tags object = {}
 
 resource postgresContainer 'Microsoft.App/containerApps@2023-05-01' = {
