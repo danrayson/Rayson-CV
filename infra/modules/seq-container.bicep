@@ -1,6 +1,7 @@
 param location string = resourceGroup().location
 param environmentId string
 param containerAppName string
+@secure()
 param seqAdminPassword string
 param tags object = {}
 

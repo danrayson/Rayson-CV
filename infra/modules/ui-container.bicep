@@ -2,11 +2,14 @@ param location string = resourceGroup().location
 param environmentId string
 param containerAppName string
 param acrLoginServer string
-param acrUsername string
-param acrPassword string
+param acrName string
 param imageTag string = 'latest'
 param apiHealthUrl string
 param tags object = {}
+
+resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
+  name: acrName
+}
 
 resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
@@ -17,7 +20,7 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       secrets: [
         {
           name: 'acr-password'
-          value: acrPassword
+          value: acr.listCredentials().passwords[0].value
         }
       ]
       activeRevisionsMode: 'Single'
@@ -29,7 +32,7 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       registries: [
         {
           server: acrLoginServer
-          username: acrUsername
+          username: acrName
           passwordSecretRef: 'acr-password'
         }
       ]
