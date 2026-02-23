@@ -175,7 +175,9 @@ jobs:
                          jwtAudience=${{ env.JWT_AUDIENCE }} \
                          corsOrigins='["*"]' \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
-                         seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}"
+                         seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
+                         storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}" \
+                         storageAccountKey="${{ needs.deploy-core.outputs.storageAccountKey }}"
           
           API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
