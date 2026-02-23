@@ -1,5 +1,6 @@
 param environmentName string
 param storageAccountName string
+param storageAccountKey string
 
 resource postgresEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' = {
   name: '${environmentName}/postgres-storage'
@@ -8,6 +9,7 @@ resource postgresEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-
       accountName: storageAccountName
       shareName: 'postgres-data'
       accessMode: 'ReadWrite'
+      accountKey: storageAccountKey
     }
   }
 }
@@ -19,6 +21,7 @@ resource seqEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' =
       accountName: storageAccountName
       shareName: 'seq-data'
       accessMode: 'ReadWrite'
+      accountKey: storageAccountKey
     }
   }
 }
@@ -30,6 +33,7 @@ resource pgAdminEnvStorage 'Microsoft.App/managedEnvironments/storages@2023-05-0
       accountName: storageAccountName
       shareName: 'pgadmin-data'
       accessMode: 'ReadWrite'
+      accountKey: storageAccountKey
     }
   }
 }
