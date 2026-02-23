@@ -1,0 +1,69 @@
+targetScope = 'subscription'
+
+param location string
+param resourceGroupName string
+param environmentName string
+param acrName string
+
+param tags object = {
+  Environment: environmentName
+  Project: 'RaysonDev'
+}
+
+var containerAppsEnvName = 'cae-raysondev-${environmentName}'
+var storageAccountName = 'straysondev${environmentName}'
+
+resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
+  name: resourceGroupName
+  location: location
+  tags: tags
+}
+
+module acr 'modules/container-registry.bicep' = {
+  name: 'container-registry'
+  scope: rg
+  params: {
+    location: location
+    acrName: acrName
+    tags: tags
+  }
+}
+
+module storage 'modules/storage.bicep' = {
+  name: 'storage'
+  scope: rg
+  params: {
+    location: location
+    storageAccountName: storageAccountName
+    tags: tags
+  }
+}
+
+module containerAppsEnv 'modules/container-apps-environment.bicep' = {
+  name: 'container-apps-environment'
+  scope: rg
+  params: {
+    location: location
+    environmentName: containerAppsEnvName
+    tags: tags
+  }
+}
+
+module environmentStorage 'modules/environment-storage.bicep' = {
+  name: 'environment-storage'
+  scope: rg
+  params: {
+    environmentName: containerAppsEnvName
+    storageAccountName: storageAccountName
+  }
+  dependsOn: [
+    containerAppsEnv
+    storage
+  ]
+}
+
+output acrLoginServer string = acr.outputs.acrLoginServer
+output acrName string = acr.outputs.acrName
+output environmentId string = containerAppsEnv.outputs.environmentId
+output defaultDomain string = containerAppsEnv.outputs.defaultDomain
+output storageAccountName string = storage.outputs.storageAccountName
