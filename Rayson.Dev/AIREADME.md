@@ -11,7 +11,7 @@ RaysonDev is a bootstrapping project to create new applications with:
 - **Backend**: .NET 8.0 Web API with clean architecture
 - **Database**: PostgreSQL 16 with Entity Framework Core
 - **Authentication**: JWT-based token authentication with email/password
-- **Logging**: Serilog with Seq for development, Application Insights for production
+- **Logging**: Serilog with Seq for local development, Application Insights for staging/production
 - **Containerization**: Docker with multi-stage builds
 
 ### Architecture Pattern
@@ -205,7 +205,7 @@ Api/
 ### Docker Compose Files
 - `docker-compose.dev.db.yml` - PostgreSQL only
 - `docker-compose.dev.db-ui.yml` - PostgreSQL + UI
-- `docker-compose.dev.db-api.yml` - PostgreSQL + API
+- `docker-compose.dev.db-api.yml` - PostgreSQL + API + Seq
 - `docker-compose.dev.full.yml` - Full stack (PostgreSQL, Seq, API, UI)
 
 ### Services
@@ -214,10 +214,11 @@ Api/
    - Health check: `pg_isready`
    - Volume: `postgres-data`
 
-2. **seq**: Datalust Seq for structured logging
+2. **seq**: Datalust Seq for local structured logging (development only)
    - Port: 5341
    - No authentication in development
    - Volume: `seq-data`
+   - Note: Staging uses Application Insights instead of Seq
 
 3. **api**: .NET 8.0 ASP.NET Core
    - Port: 8080 (container), 13245 (host)
@@ -267,24 +268,24 @@ See `.env.example` for complete list:
 Infrastructure is defined in Bicep and located at project root `/infra/`:
 
 **Main Templates:**
-- `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
-- `main-apps.bicep` - Creates workload resources: PostgreSQL, Seq, API Container App, UI Container App
+- `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment, Application Insights
+- `main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
 
 **Modules:**
 - `modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
 - `modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
 - `modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
-- `modules/seq-container.bicep` - Seq logging container with Azure Files storage
+- `modules/app-insights.bicep` - Azure Application Insights for logging
 - `modules/container-apps-environment.bicep` - Container Apps Environment
-- `modules/storage.bicep` - Azure Storage Account (for Seq logs)
+- `modules/storage.bicep` - Azure Storage Account
 - `modules/container-registry.bicep` - Azure Container Registry
 
 ### Azure Services
 - **Azure Container Apps** - Hosts API and UI containers
 - **Azure Container Registry** - Stores Docker images
 - **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
-- **Azure Storage Account** - File storage for Seq logs
-- **Application Insights** - For production logging (connection string configurable)
+- **Azure Storage Account** - General purpose storage
+- **Application Insights** - For production/staging logging
 
 ### CI/CD
 GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
@@ -295,16 +296,15 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 
 **Jobs:**
 1. **build** - Compiles .NET API and builds React UI
-2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
+2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment, Application Insights)
 3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, Seq, API, UI) via Bicep
+4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
 
 **Environment:** Staging (Azure `uksouth` region, resource group `rg-raysondev-staging`)
 
 **Secrets Required:**
 - `AZURE_CREDENTIALS` - Azure service principal credentials
 - `JWT_SIGNING_KEY` - JWT token signing key
-- `SEQ_ADMIN_PASSWORD` - Seq admin password
 
 ### Conventions
 
@@ -450,8 +450,8 @@ npm run e2e:staging
 - Database connection should use SSL
 
 ### Monitoring
-- **Development**: Seq for structured logging
-- **Production**: Azure Application Insights
+- **Development**: Seq for structured logging (local only)
+- **Staging/Production**: Azure Application Insights
 - Health endpoints (`/health/live`, `/health/ready`) for container orchestrator
 - Serilog with enrichment: correlation ID, environment, thread info
 

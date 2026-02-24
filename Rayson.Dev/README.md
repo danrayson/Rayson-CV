@@ -9,7 +9,7 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 | Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
-| Seq (Logging) | Datalust Seq | 5341 |
+| Seq (Logging) | Datalust Seq | 5341 (local dev only) |
 
 ## Prerequisites
 
@@ -281,8 +281,13 @@ Logs from the API and UI (client-side errors) are sent to Seq. The UI health ser
 
 ### Production (Application Insights)
 
-For production deployments to Azure:
+For production deployments to Azure, the API sends logs to Application Insights.
 
+**Staging:**
+- Application Insights is automatically created and configured via Bicep
+- Connection string is passed to the API container automatically
+
+**Production (custom):**
 1. Create an Application Insights resource in Azure Portal
 2. Copy the Connection String from Overview blade
 3. Set the environment variable in your Azure Container App:

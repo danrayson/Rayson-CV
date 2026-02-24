@@ -12,6 +12,7 @@ param tags object = {
 
 var containerAppsEnvName = 'cae-raysondev-${environmentName}'
 var storageAccountName = 'straysondev${environmentName}'
+var appInsightsName = 'ai-raysondev-${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
@@ -39,6 +40,16 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
+module appInsights 'modules/app-insights.bicep' = {
+  name: 'app-insights'
+  scope: rg
+  params: {
+    location: location
+    appInsightsName: appInsightsName
+    tags: tags
+  }
+}
+
 module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   name: 'container-apps-environment'
   scope: rg
@@ -54,3 +65,4 @@ output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
+output appInsightsConnectionString string = appInsights.outputs.connectionString
