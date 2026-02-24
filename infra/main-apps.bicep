@@ -8,8 +8,7 @@ param jwtIssuer string
 param jwtAudience string
 @secure()
 param jwtSigningKey string
-@secure()
-param seqAdminPassword string
+param appInsightsConnectionString string
 param storageAccountName string
 param environmentName string
 param tags object = {
@@ -18,7 +17,6 @@ param tags object = {
 }
 
 var postgresServiceName = 'ca-postgres-${environmentName}'
-var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
@@ -29,17 +27,6 @@ module postgresService 'modules/postgres-service.bicep' = {
     location: location
     environmentId: environmentId
     containerAppName: postgresServiceName
-    tags: tags
-  }
-}
-
-module seq 'modules/seq-container.bicep' = {
-  name: 'seq-container'
-  params: {
-    location: location
-    containerGroupName: seqContainerName
-    storageAccountName: storageAccountName
-    seqAdminPassword: seqAdminPassword
     tags: tags
   }
 }
@@ -58,7 +45,7 @@ module api 'modules/api-container.bicep' = {
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
     uiFqdn: uiFqdn
-    seqUrl: 'http://${seq.outputs.fqdn}:5341'
+    appInsightsConnectionString: appInsightsConnectionString
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
@@ -83,4 +70,3 @@ module ui 'modules/ui-container.bicep' = {
 
 output apiFqdn string = api.outputs.fqdn
 output uiFqdn string = ui.outputs.fqdn
-output seqFqdn string = seq.outputs.fqdn
