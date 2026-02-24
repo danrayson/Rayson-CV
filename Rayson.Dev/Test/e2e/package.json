@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "e2e:local": "cucumber-js --config=cucumber.js",
-    "e2e:staging": "E2E_UI_URL=https://ca-api-staging.uksouth.azurecontainerapps.io E2E_API_URL=https://ca-api-staging.uksouth.azurecontainerapps.io cucumber-js --config=cucumber.js",
+    "e2e:staging": "cucumber-js --config=cucumber.js",
     "e2e:report": "echo 'Reports generated in reports/ folder'"
   },
   "dependencies": {
