@@ -373,14 +373,11 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 Test/e2e/
 ├── features/                    # Gherkin scenario files (.feature)
 │   └── auth.feature             # Authentication test scenarios
-├── step-definitions/            # TypeScript step definitions
-│   ├── hooks.ts                 # Before/After setup
-│   └── auth.steps.ts            # Auth step definitions
 ├── support/                     # Helper utilities
 │   ├── api-client.ts            # Direct API calls for test data
 │   └── browser-utils.ts         # Shared browser helpers
-├── playwright.config.ts          # Staging configuration
-├── playwright.local.config.ts    # Local configuration
+├── steps.js                     # Cucumber step definitions (JavaScript)
+├── cucumber.js                   # Cucumber configuration
 └── package.json
 ```
 
@@ -388,8 +385,9 @@ Test/e2e/
 - **Local**: Runs against `http://localhost:3000` (UI) and `http://localhost:13245` (API)
 - **Staging**: Runs against Azure staging URLs via GitHub Actions
 - **Environment variables**:
-  - `E2E_API_URL` - API base URL
-  - `E2E_UI_URL` - UI base URL
+  - `E2E_API_URL` - API base URL (defaults to `http://localhost:13245`)
+  - `E2E_UI_URL` - UI base URL (defaults to `http://localhost:3000`)
+- **Cucumber config**: `cucumber.js` at project root (not Playwright config)
 
 ### Test Data Strategy
 - **Static test user**: Seeded in database for login tests
@@ -407,6 +405,13 @@ npx playwright install chromium
 npm run e2e:local
 ```
 
+**Staging:**
+```bash
+E2E_API_URL=https://your-staging-api.example.com \
+E2E_UI_URL=https://your-staging-ui.example.com \
+npm run e2e:staging
+```
+
 **Staging (via CI):**
 - Runs automatically in GitHub Actions after deploy to staging
 - Triggered on push to `develop` branch
@@ -415,16 +420,17 @@ npm run e2e:local
 
 **To Follow:**
 - Use **Gherkin syntax** (.feature files) for scenarios - readable by non-technical stakeholders
-- Use **functional components** with TypeScript in step definitions
+- Use **JavaScript** for step definitions (in `steps.js` at root)
 - Follow the **Given-When-Then** pattern
 - Use the **API client** in `support/api-client.ts` for test data setup
-- Take **screenshots on failure** for debugging
-- Use **soft assertions** where possible (don't fail on first error)
+- Take **screenshots on failure** for debugging (saved to `reports/screenshots/`)
+- Use environment variables for URLs (`E2E_API_URL`, `E2E_UI_URL`)
 
 **To Avoid:**
 - Do NOT write tests that depend on implementation details
 - Do NOT hardcode test data that changes per environment (use API client)
 - Do NOT create tests that are tightly coupled (prefer independent scenarios)
+- Do NOT use TypeScript for step definitions (use plain JavaScript)
 
 ---
 
