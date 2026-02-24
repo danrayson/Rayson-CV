@@ -57,7 +57,6 @@ module api 'modules/api-container.bicep' = {
     jwtIssuer: jwtIssuer
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
-    corsOrigins: []
     uiFqdn: uiFqdn
     seqUrl: 'http://${seq.outputs.fqdn}:5341'
     postgresServiceId: postgresService.outputs.serviceId
