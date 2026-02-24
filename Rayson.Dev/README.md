@@ -1,6 +1,6 @@
 # RaysonDev
 
-A financial market data dashboard application with .NET API backend and React frontend.
+A bootstrapping project to create new applications with .NET API backend and React frontend.
 
 ## Architecture
 
