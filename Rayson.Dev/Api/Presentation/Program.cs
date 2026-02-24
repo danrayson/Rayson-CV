@@ -68,7 +68,7 @@ try
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.UseAuthentication();
-    app.RunMigrations();
+    await app.RunMigrations();
     if (!app.Environment.IsDevelopment())
     {
         app.UseHttpsRedirection();

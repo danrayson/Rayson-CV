@@ -363,7 +363,68 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 
 ## Testing
 
-TODO: Add testing documentation once test frameworks are implemented
+### Technology Stack
+- **Playwright** - Browser automation for React frontend + .NET backend
+- **Cucumber** - Parses Gherkin scenarios, executes step definitions
+- **TypeScript** - Type-safe step definitions
+
+### Project Structure
+```
+Test/e2e/
+├── features/                    # Gherkin scenario files (.feature)
+│   └── auth.feature             # Authentication test scenarios
+├── step-definitions/            # TypeScript step definitions
+│   ├── hooks.ts                 # Before/After setup
+│   └── auth.steps.ts            # Auth step definitions
+├── support/                     # Helper utilities
+│   ├── api-client.ts            # Direct API calls for test data
+│   └── browser-utils.ts         # Shared browser helpers
+├── playwright.config.ts          # Staging configuration
+├── playwright.local.config.ts    # Local configuration
+└── package.json
+```
+
+### Configuration
+- **Local**: Runs against `http://localhost:3000` (UI) and `http://localhost:13245` (API)
+- **Staging**: Runs against Azure staging URLs via GitHub Actions
+- **Environment variables**:
+  - `E2E_API_URL` - API base URL
+  - `E2E_UI_URL` - UI base URL
+
+### Test Data Strategy
+- **Static test user**: Seeded in database for login tests
+  - Email: `testuser@test.com`
+  - Password: `TestPassword123!`
+- **Dynamic users**: Created via API for registration tests (unique per test run)
+
+### Running Tests
+
+**Local development:**
+```bash
+cd Test/e2e
+npm install
+npx playwright install chromium
+npm run e2e:local
+```
+
+**Staging (via CI):**
+- Runs automatically in GitHub Actions after deploy to staging
+- Triggered on push to `develop` branch
+
+### Conventions
+
+**To Follow:**
+- Use **Gherkin syntax** (.feature files) for scenarios - readable by non-technical stakeholders
+- Use **functional components** with TypeScript in step definitions
+- Follow the **Given-When-Then** pattern
+- Use the **API client** in `support/api-client.ts` for test data setup
+- Take **screenshots on failure** for debugging
+- Use **soft assertions** where possible (don't fail on first error)
+
+**To Avoid:**
+- Do NOT write tests that depend on implementation details
+- Do NOT hardcode test data that changes per environment (use API client)
+- Do NOT create tests that are tightly coupled (prefer independent scenarios)
 
 ---
 

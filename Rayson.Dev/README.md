@@ -350,10 +350,93 @@ Rayson.Dev/
 │   ├── Infrastructure/     # External services
 │   └── Database/           # EF Core, migrations, seed data
 ├── UI/                     # React + Vite frontend
+├── Test/
+│   └── e2e/               # End-to-end BDD tests
 ├── .env                    # Local environment variables (gitignored)
 ├── .env.example            # Environment template
 └── docker-compose.*.yml    # Docker Compose configurations
 ```
+
+## Testing
+
+### E2E Tests (Playwright + Cucumber)
+
+The project includes an end-to-end testing framework using Playwright for browser automation and Cucumber for BDD-style scenarios written in Gherkin syntax.
+
+#### Test Structure
+
+```
+Test/e2e/
+├── features/               # Gherkin scenario files (.feature)
+├── step-definitions/      # TypeScript step definitions
+├── support/               # API client and utilities
+├── playwright.config.ts   # Staging configuration
+├── playwright.local.config.ts  # Local configuration
+└── package.json
+```
+
+#### Running Tests Locally
+
+1. Install dependencies:
+   ```bash
+   cd Test/e2e
+   npm install
+   npx playwright install chromium
+   ```
+
+2. Start the full stack:
+   ```bash
+   docker compose -f docker-compose.dev.full.yml up -d
+   ```
+
+3. Run tests:
+   ```bash
+   npm run e2e:local
+   ```
+
+#### Running Tests Against Staging
+
+Tests run automatically in CI after deployment to staging. To run manually:
+
+```bash
+cd Test/e2e
+npm install
+npx playwright install chromium
+E2E_API_URL=https://your-staging-api.example.com \
+E2E_UI_URL=https://your-staging-ui.example.com \
+npm run e2e:staging
+```
+
+#### Test User
+
+E2E tests use a static test user that must be seeded in the database:
+
+- **Email**: `testuser@test.com`
+- **Password**: `TestPassword123!`
+
+To seed this user, add it to the database seed data or manually create it.
+
+#### Writing New Tests
+
+1. Create a `.feature` file in `Test/e2e/features/`:
+   ```gherkin
+   Feature: Feature Name
+     Scenario: Description
+       Given I am on the login page
+       When I enter valid credentials
+       Then I should see the dashboard
+   ```
+
+2. Add step definitions in `Test/e2e/step-definitions/` or extend existing files.
+
+3. Run tests to verify:
+   ```bash
+   npm run e2e:local
+   ```
+
+#### Reports
+
+HTML reports are generated in `Test/e2e/reports/html/` after each test run. Screenshots are captured on failure.
 
 ## Deployment
 
