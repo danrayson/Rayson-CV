@@ -367,11 +367,12 @@ The project includes an end-to-end testing framework using Playwright for browse
 
 ```
 Test/e2e/
-├── features/               # Gherkin scenario files (.feature)
-├── step-definitions/      # TypeScript step definitions
+├── features/              # Gherkin scenario files (.feature)
 ├── support/               # API client and utilities
-├── playwright.config.ts   # Staging configuration
-├── playwright.local.config.ts  # Local configuration
+│   ├── api-client.ts      # Direct API calls for test data
+│   └── browser-utils.ts   # Shared browser helpers
+├── steps.js               # Cucumber step definitions
+├── cucumber.js            # Cucumber configuration
 └── package.json
 ```
 
@@ -393,6 +394,8 @@ Test/e2e/
    ```bash
    npm run e2e:local
    ```
+
+Tests connect to the API at `http://localhost:13245` and UI at `http://localhost:3000` by default. The API health is checked before tests run with automatic retries.
 
 #### Running Tests Against Staging
 
@@ -427,7 +430,7 @@ To seed this user, add it to the database seed data or manually create it.
        Then I should see the dashboard
    ```
 
-2. Add step definitions in `Test/e2e/step-definitions/` or extend existing files.
+2. Add step definitions in `Test/e2e/steps.js` (JavaScript, not TypeScript).
 
 3. Run tests to verify:
    ```bash
@@ -436,7 +439,7 @@ To seed this user, add it to the database seed data or manually create it.
 
 #### Reports
 
-HTML reports are generated in `Test/e2e/reports/html/` after each test run. Screenshots are captured on failure.
+HTML reports are generated in `Test/e2e/reports/cucumber.html` after each test run. Screenshots are captured on failure and saved to `Test/e2e/reports/screenshots/`.
 
 ## Deployment
 
