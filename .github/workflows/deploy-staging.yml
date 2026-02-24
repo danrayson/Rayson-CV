@@ -150,6 +150,10 @@ jobs:
   deploy-apps:
     runs-on: ubuntu-latest
     needs: [build, deploy-core, push]
+    outputs:
+      apiFqdn: ${{ steps.deploy.outputs.apiFqdn }}
+      uiFqdn: ${{ steps.deploy.outputs.uiFqdn }}
+      seqFqdn: ${{ steps.deploy.outputs.seqFqdn }}
     
     steps:
       - name: Checkout code
