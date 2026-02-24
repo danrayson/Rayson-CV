@@ -6,12 +6,12 @@ namespace Presentation.Extensions;
 
 public static class WebApplicationExtensions
 {
-    public static void RunMigrations(this WebApplication webApplication)
+    public static async Task RunMigrations(this WebApplication webApplication)
     {
         var scope = webApplication.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<RaysonDevDbContext>();
-        context.Database.Migrate();
+        await context.Database.MigrateAsync();
         var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
-        seeder.SeedDatabase();
+        await seeder.SeedDatabase();
     }
 }

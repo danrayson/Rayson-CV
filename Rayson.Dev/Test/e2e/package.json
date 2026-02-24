@@ -1,0 +1,19 @@
+{
+  "name": "raysondev-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end BDD tests for RaysonDev using Playwright and Cucumber",
+  "private": true,
+  "scripts": {
+    "e2e:local": "cucumber-js --config=cucumber.js",
+    "e2e:staging": "E2E_UI_URL=https://ca-api-staging.uksouth.azurecontainerapps.io E2E_API_URL=https://ca-api-staging.uksouth.azurecontainerapps.io cucumber-js --config=cucumber.js",
+    "e2e:report": "echo 'Reports generated in reports/ folder'"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "^11.0.0",
+    "@playwright/test": "^1.48.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}
