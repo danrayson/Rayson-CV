@@ -9,7 +9,7 @@ param jwtIssuer string
 param jwtAudience string
 @secure()
 param jwtSigningKey string
-param corsOrigins array
+param uiFqdn string
 param seqUrl string
 param postgresServiceId string
 param tags object = {}
@@ -86,7 +86,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'Cors__AllowedOrigins__0'
-              value: corsOrigins[0]
+              value: 'https://${uiFqdn}'
             }
             {
               name: 'LOG_LEVEL'

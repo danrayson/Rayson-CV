@@ -8,7 +8,6 @@ param jwtIssuer string
 param jwtAudience string
 @secure()
 param jwtSigningKey string
-param corsOrigins array
 @secure()
 param seqAdminPassword string
 param storageAccountName string
@@ -22,6 +21,7 @@ var postgresServiceName = 'ca-postgres-${environmentName}'
 var seqContainerName = 'ci-seq-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
+var uiFqdn = '${uiAppName}.${defaultDomain}'
 
 module postgresService 'modules/postgres-service.bicep' = {
   name: 'postgres-service'
@@ -57,7 +57,8 @@ module api 'modules/api-container.bicep' = {
     jwtIssuer: jwtIssuer
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
-    corsOrigins: corsOrigins
+    corsOrigins: []
+    uiFqdn: uiFqdn
     seqUrl: 'http://${seq.outputs.fqdn}:5341'
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags

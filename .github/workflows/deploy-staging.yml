@@ -176,7 +176,6 @@ jobs:
                          environmentName=staging \
                          jwtIssuer=${{ env.JWT_ISSUER }} \
                          jwtAudience=${{ env.JWT_AUDIENCE }} \
-                         corsOrigins='["*"]' \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
                          seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
