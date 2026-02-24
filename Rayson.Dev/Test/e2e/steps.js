@@ -261,7 +261,8 @@ Then('I should see an error message', async function () {
 Then('I should remain on the login page', async function () {
   const page = getPage();
   
-  await page.waitForURL(/\/#\/login|\/login/);
+  // Verify we're still on the login page by checking for the email input
+  await page.waitForSelector('#email', { timeout: 5000 });
 });
 
 Then('I should be redirected to the login page', async function () {

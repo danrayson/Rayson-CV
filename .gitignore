@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Environment files (may contain secrets)
 .env
 .env.*
+
+# E2E test reports
+Rayson.Dev/Test/e2e/reports/
