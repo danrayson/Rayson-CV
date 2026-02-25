@@ -229,7 +229,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-windows
-          path: Rayson.CV/UI/build/*-Setup.exe
+          path: Rayson.CV/UI/build/*.exe
 
   upload-electron:
     runs-on: ubuntu-latest
@@ -250,13 +250,15 @@ jobs:
           path: artifacts
 
       - name: Upload to Blob Storage
-        uses: azure/storage-blob-upload-action@v4
-        with:
-          account-name: strraysoncvstaging
-          connection-string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          container-name: '$web'
-          blob-type: BlockBlob
-          source-dir: artifacts
+        run: |
+          echo "Uploading Linux app..."
+          az storage blob upload --container-name '$web' --file artifacts/electron-linux/*.AppImage --name "RaysonCV.AppImage" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
+          
+          echo "Uploading macOS app..."
+          az storage blob upload --container-name '$web' --file artifacts/electron-mac/*.dmg --name "RaysonCV.dmg" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
+          
+          echo "Uploading Windows app..."
+          az storage blob upload --container-name '$web' --file artifacts/electron-windows/*.exe --name "RaysonCV-Setup.exe" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
 
   deploy-apps:
     runs-on: ubuntu-latest
