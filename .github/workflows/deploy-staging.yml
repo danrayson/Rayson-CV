@@ -66,6 +66,7 @@ jobs:
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
+      staticWebsiteUrl: ${{ steps.deploy.outputs.staticWebsiteUrl }}
     
     steps:
       - name: Checkout code
@@ -93,12 +94,14 @@ jobs:
           ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
+          STATIC_WEBSITE_URL=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.staticWebsiteUrl.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "staticWebsiteUrl=$STATIC_WEBSITE_URL" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
@@ -130,8 +133,10 @@ jobs:
       - name: Build and push UI image
         run: |
           API_FQDN="ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}"
+          STATIC_URL="${{ needs.deploy-core.outputs.staticWebsiteUrl }}"
           docker build \
             --build-arg VITE_API_BASE_URL=https://$API_FQDN/ \
+            --build-arg VITE_APP_DOWNLOAD_URL=$STATIC_URL \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest \
             ./Rayson.CV/UI
@@ -144,6 +149,78 @@ jobs:
         id: set-fqdn
         run: |
           echo "apiFqdn=ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}" >> $GITHUB_OUTPUT
+
+  build-electron:
+    runs-on: ubuntu-latest
+    needs: [build, deploy-core]
+    strategy:
+      matrix:
+        include:
+          - platform: 'linux'
+            artifact: 'RaysonCV.AppImage'
+          - platform: 'mac'
+            artifact: 'RaysonCV.dmg'
+          - platform: 'win'
+            artifact: 'RaysonCV-Setup.exe'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
+
+      - name: Install dependencies
+        run: cd Rayson.CV/UI && npm ci
+
+      - name: Build Electron app
+        run: |
+          cd Rayson.CV/UI
+          if [[ "${{ matrix.platform }}" == "linux" ]]; then
+            npm run electron:build -- --linux
+          elif [[ "${{ matrix.platform }}" == "mac" ]]; then
+            npm run electron:build -- --mac
+          elif [[ "${{ matrix.platform }}" == "win" ]]; then
+            npm run electron:build -- --win
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-${{ matrix.platform }}
+          path: |
+            Rayson.CV/UI/build/${{ matrix.artifact }}
+
+  upload-electron:
+    runs-on: ubuntu-latest
+    needs: [build-electron, deploy-core]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload to Blob Storage
+        uses: azure/storage-blob-upload-action@v4
+        with:
+          account-name: strraysoncvstaging
+          connection-string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          container-name: '$web'
+          blob-type: BlockBlob
+          source-dir: artifacts
 
   deploy-apps:
     runs-on: ubuntu-latest
@@ -175,7 +252,8 @@ jobs:
                          acrName=${{ needs.deploy-core.outputs.acrName }} \
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
-                         storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
+                         storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}" \
+                         staticWebsiteUrl="${{ needs.deploy-core.outputs.staticWebsiteUrl }}"
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)

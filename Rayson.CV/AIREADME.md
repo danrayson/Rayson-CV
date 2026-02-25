@@ -69,7 +69,6 @@ All API calls go through `httpClient.ts` which:
 **To Avoid:**
 - Do NOT use class components
 - Do NOT use JavaScript (`.js`/`.jsx`) - use TypeScript only
-- Do NOT use `.env` files directly - use `.env.example` as template
 - Do NOT hardcode API URLs - use `config.ts` and environment variables
 - Do NOT put secrets in UI code - API handles authentication
 - Do NOT use CSS modules or styled-components - use Tailwind
@@ -226,7 +225,7 @@ Api/
    - Uses custom `health-server.mjs` for serving static files
 
 ### Environment Variables
-See `.env.example` for complete list:
+The following variables are required:
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_SIGNING_KEY`
 - `VITE_API_BASE_URL` - UI build argument
@@ -318,7 +317,7 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 ## Development Workflow
 
 ### Local Development
-1. Copy `.env.example` to `.env` and configure
+1. Configure `.env` with your values
 2. Run `docker compose -f docker-compose.dev.db.yml up -d` for database
 3. For API: Open `Api/Presentation` in VSCode, run/debug with .NET debugger
 4. For UI: Run `npm install && npm run dev` in `UI/` directory
