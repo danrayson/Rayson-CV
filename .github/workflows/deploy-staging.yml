@@ -249,16 +249,32 @@ jobs:
         with:
           path: artifacts
 
-      - name: Upload to Blob Storage
+      - name: List downloaded artifacts
         run: |
-          echo "Uploading Linux app..."
-          az storage blob upload --container-name '$web' --file artifacts/electron-linux/*.AppImage --name "RaysonCV.AppImage" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
-          
-          echo "Uploading macOS app..."
-          az storage blob upload --container-name '$web' --file artifacts/electron-mac/*.dmg --name "RaysonCV.dmg" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
-          
-          echo "Uploading Windows app..."
-          az storage blob upload --container-name '$web' --file artifacts/electron-windows/*.exe --name "RaysonCV-Setup.exe" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
+          echo "=== Linux ==="
+          find artifacts/electron-linux -type f -exec ls -lh {} \;
+          echo "=== macOS ==="
+          find artifacts/electron-mac -type f -exec ls -lh {} \;
+          echo "=== Windows ==="
+          find artifacts/electron-windows -type f -exec ls -lh {} \;
+
+      - name: Upload Linux app
+        run: |
+          FILE=$(ls artifacts/electron-linux/*.AppImage | head -1)
+          echo "Uploading Linux: $FILE"
+          az storage blob upload --container-name '$web' --file "$FILE" --name "RaysonCV.AppImage" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
+
+      - name: Upload macOS app
+        run: |
+          FILE=$(ls artifacts/electron-mac/*.dmg | head -1)
+          echo "Uploading macOS: $FILE"
+          az storage blob upload --container-name '$web' --file "$FILE" --name "RaysonCV.dmg" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
+
+      - name: Upload Windows app
+        run: |
+          FILE=$(ls artifacts/electron-windows/*.exe | head -1)
+          echo "Uploading Windows: $FILE"
+          az storage blob upload --container-name '$web' --file "$FILE" --name "RaysonCV-Setup.exe" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --overwrite
 
   deploy-apps:
     runs-on: ubuntu-latest
