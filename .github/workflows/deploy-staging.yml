@@ -153,7 +153,6 @@ jobs:
     outputs:
       apiFqdn: ${{ steps.deploy.outputs.apiFqdn }}
       uiFqdn: ${{ steps.deploy.outputs.uiFqdn }}
-      seqFqdn: ${{ steps.deploy.outputs.seqFqdn }}
     
     steps:
       - name: Checkout code
@@ -181,16 +180,13 @@ jobs:
                          jwtIssuer=${{ env.JWT_ISSUER }} \
                          jwtAudience=${{ env.JWT_AUDIENCE }} \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
-                         seqAdminPassword="${{ secrets.SEQ_ADMIN_PASSWORD }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
           
           API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
-          SEQ_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.seqFqdn.value --output tsv)
           
           echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
           echo "uiFqdn=$UI_FQDN" >> $GITHUB_OUTPUT
-          echo "seqFqdn=$SEQ_FQDN" >> $GITHUB_OUTPUT
 
       - name: Deployment Summary
         run: |
@@ -200,7 +196,6 @@ jobs:
           echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| API | https://${{ steps.deploy.outputs.apiFqdn }} |" >> $GITHUB_STEP_SUMMARY
           echo "| UI | https://${{ steps.deploy.outputs.uiFqdn }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Seq | https://${{ steps.deploy.outputs.seqFqdn }} |" >> $GITHUB_STEP_SUMMARY
 
   e2e-tests:
     runs-on: ubuntu-latest

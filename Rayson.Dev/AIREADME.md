@@ -214,12 +214,7 @@ Api/
    - Health check: `pg_isready`
    - Volume: `postgres-data`
 
-2. **seq**: Datalust Seq for structured logging
-   - Port: 5341
-   - No authentication in development
-   - Volume: `seq-data`
-
-3. **api**: .NET 8.0 ASP.NET Core
+2. **api**: .NET 8.0 ASP.NET Core
    - Port: 8080 (container), 13245 (host)
    - Health check: `http://localhost:8080/health/live`
    - Multi-stage build (SDK + Runtime)
@@ -235,7 +230,6 @@ See `.env.example` for complete list:
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_SIGNING_KEY`
 - `VITE_API_BASE_URL` - UI build argument
-- `SEQ_URL` - Log aggregation
 - `LOG_LEVEL` - Debug/Information/Warning/Error
 - `ASPNETCORE_ENVIRONMENT` - Development/Production
 
@@ -268,22 +262,21 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 
 **Main Templates:**
 - `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
-- `main-apps.bicep` - Creates workload resources: PostgreSQL, Seq, API Container App, UI Container App
+- `main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
 
 **Modules:**
 - `modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
 - `modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
 - `modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
-- `modules/seq-container.bicep` - Seq logging container with Azure Files storage
 - `modules/container-apps-environment.bicep` - Container Apps Environment
-- `modules/storage.bicep` - Azure Storage Account (for Seq logs)
+- `modules/storage.bicep` - Azure Storage Account
 - `modules/container-registry.bicep` - Azure Container Registry
 
 ### Azure Services
 - **Azure Container Apps** - Hosts API and UI containers
 - **Azure Container Registry** - Stores Docker images
 - **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
-- **Azure Storage Account** - File storage for Seq logs
+- **Azure Storage Account** - General purpose storage
 - **Application Insights** - For production logging (connection string configurable)
 
 ### CI/CD
@@ -297,14 +290,13 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 1. **build** - Compiles .NET API and builds React UI
 2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
 3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, Seq, API, UI) via Bicep
+4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
 
 **Environment:** Staging (Azure `uksouth` region, resource group `rg-raysondev-staging`)
 
 **Secrets Required:**
 - `AZURE_CREDENTIALS` - Azure service principal credentials
 - `JWT_SIGNING_KEY` - JWT token signing key
-- `SEQ_ADMIN_PASSWORD` - Seq admin password
 
 ### Conventions
 

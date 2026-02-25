@@ -2,7 +2,7 @@
 # Docker Compose - Development: Database + API
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.db-api.yml up -d
-# Purpose: Run PostgreSQL, API, and Seq in Docker, debug UI locally
+# Purpose: Run PostgreSQL and API in Docker, debug UI locally
 # UI connects to API at http://localhost:13245
 # ===========================================
 
@@ -26,25 +26,6 @@ services:
       retries: 5
       start_period: 10s
 
-  seq:
-    image: datalust/seq:latest
-    container_name: raysondev-seq
-    restart: unless-stopped
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
-    volumes:
-      - seq-data:/data
-    ports:
-      - "5341:80"
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   api:
     build:
       context: ./Api
@@ -58,14 +39,11 @@ services:
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
-      SEQ_URL: http://seq:5341
       LOG_LEVEL: Debug
     ports:
       - "13245:8080"
     depends_on:
       postgres:
-        condition: service_healthy
-      seq:
         condition: service_healthy
     networks:
       - internal
@@ -82,4 +60,3 @@ networks:
 
 volumes:
   postgres-data:
-  seq-data:
