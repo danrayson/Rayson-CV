@@ -2,8 +2,9 @@
 # Docker Compose - Development: Database + API
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.db-api.yml up -d
-# Purpose: Run PostgreSQL, API, and Seq in Docker, debug UI locally
+# Purpose: Run PostgreSQL, API, Loki, and Grafana in Docker, debug UI locally
 # UI connects to API at http://localhost:13245
+# Grafana available at http://localhost:3001 (admin/admin)
 # ===========================================
 
 services:
@@ -12,35 +13,55 @@ services:
     container_name: raysondev-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
 
-  seq:
-    image: datalust/seq:latest
-    container_name: raysondev-seq
+  loki:
+    image: grafana/loki:3.2.0
+    container_name: raysondev-loki
     restart: unless-stopped
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
-    volumes:
-      - seq-data:/data
+    command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "5341:80"
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: raysondev-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./loki.yml:/etc/grafana/provisioning/datasources/loki.yml
+    networks:
+      - internal
+    depends_on:
+      - loki
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -52,20 +73,20 @@ services:
     container_name: raysondev-api
     restart: unless-stopped
     environment:
-      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DATABASE};User Id=${POSTGRES_USERNAME};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
       AuthOptions__Issuer: ${JWT_ISSUER}
       AuthOptions__Audience: ${JWT_AUDIENCE}
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
-      SEQ_URL: http://seq:5341
+      LOKI_URL: http://loki:3100
       LOG_LEVEL: Debug
     ports:
       - "13245:8080"
     depends_on:
       postgres:
         condition: service_healthy
-      seq:
+      loki:
         condition: service_healthy
     networks:
       - internal
@@ -82,4 +103,5 @@ networks:
 
 volumes:
   postgres-data:
-  seq-data:
+  loki-data:
+  grafana-data:
