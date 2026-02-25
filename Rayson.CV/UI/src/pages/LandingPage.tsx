@@ -63,7 +63,7 @@ const LandingPage: React.FC = () => {
         </a>
         
         <a
-          href="https://github.com"
+          href="https://github.com/danrayson/Rayson-CV"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-accent aspect-square flex-1 text-2xl font-bold"
