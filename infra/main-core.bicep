@@ -53,4 +53,4 @@ output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
-output staticWebsiteUrl string = storage.outputs.staticWebsiteUrl
+output blobBaseUrl string = storage.outputs.blobBaseUrl

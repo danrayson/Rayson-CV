@@ -66,7 +66,7 @@ jobs:
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
-      staticWebsiteUrl: ${{ steps.deploy.outputs.staticWebsiteUrl }}
+      blobBaseUrl: ${{ steps.deploy.outputs.blobBaseUrl }}
     
     steps:
       - name: Checkout code
@@ -94,14 +94,14 @@ jobs:
           ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
-          STATIC_WEBSITE_URL=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.staticWebsiteUrl.value --output tsv)
+          BLOB_BASE_URL=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.blobBaseUrl.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
-          echo "staticWebsiteUrl=$STATIC_WEBSITE_URL" >> $GITHUB_OUTPUT
+          echo "blobBaseUrl=$BLOB_BASE_URL" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
@@ -133,10 +133,10 @@ jobs:
       - name: Build and push UI image
         run: |
           API_FQDN="ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}"
-          STATIC_URL="${{ needs.deploy-core.outputs.staticWebsiteUrl }}"
+          BLOB_URL="${{ needs.deploy-core.outputs.blobBaseUrl }}"
           docker build \
             --build-arg VITE_API_BASE_URL=https://$API_FQDN/ \
-            --build-arg VITE_APP_DOWNLOAD_URL=$STATIC_URL \
+            --build-arg VITE_APP_DOWNLOAD_URL=$BLOB_URL \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest \
             ./Rayson.CV/UI
@@ -253,7 +253,7 @@ jobs:
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}" \
-                         staticWebsiteUrl="${{ needs.deploy-core.outputs.staticWebsiteUrl }}"
+                         blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}"
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)

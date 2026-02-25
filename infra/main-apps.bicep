@@ -5,7 +5,7 @@ param acrLoginServer string
 param acrName string
 param imageTag string
 param storageAccountName string
-param staticWebsiteUrl string
+param blobBaseUrl string
 param environmentName string
 param tags object = {
   Environment: environmentName
@@ -53,7 +53,7 @@ module ui 'modules/ui-container.bicep' = {
     acrName: acrName
     imageTag: imageTag
     apiHealthUrl: 'http://${apiAppName}.internal.${defaultDomain}:8080/health'
-    appDownloadUrl: staticWebsiteUrl
+    appDownloadUrl: blobBaseUrl
     tags: tags
   }
   dependsOn: [

@@ -16,13 +16,16 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     networkAcls: {
       defaultAction: 'Allow'
     }
-    staticWebsite: {
-      enabled: true
-      indexDocument: 'index.html'
-    }
   }
   tags: tags
 }
 
+resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  name: '${storageAccountName}/default/$web'
+  properties: {
+    publicAccess: 'Blob'
+  }
+}
+
 output storageAccountName string = storageAccount.name
-output staticWebsiteUrl string = 'https://${storageAccount.name}.z13.web.${environment().suffixes.storage}'
+output blobBaseUrl string = 'https://${storageAccount.name}.blob.${environment().suffixes.storage}'
