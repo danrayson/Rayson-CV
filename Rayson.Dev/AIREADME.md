@@ -11,7 +11,7 @@ RaysonDev is a bootstrapping project to create new applications with:
 - **Backend**: .NET 8.0 Web API with clean architecture
 - **Database**: PostgreSQL 16 with Entity Framework Core
 - **Authentication**: JWT-based token authentication with email/password
-- **Logging**: Serilog with Seq for development, Application Insights for production
+- **Logging**: Serilog writing to container console
 - **Containerization**: Docker with multi-stage builds
 
 ### Architecture Pattern
@@ -206,7 +206,7 @@ Api/
 - `docker-compose.dev.db.yml` - PostgreSQL only
 - `docker-compose.dev.db-ui.yml` - PostgreSQL + UI
 - `docker-compose.dev.db-api.yml` - PostgreSQL + API
-- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, Seq, API, UI)
+- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, API, UI)
 
 ### Services
 1. **postgres**: PostgreSQL 16 Alpine
@@ -277,7 +277,6 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 - **Azure Container Registry** - Stores Docker images
 - **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
 - **Azure Storage Account** - General purpose storage
-- **Application Insights** - For production logging (connection string configurable)
 
 ### CI/CD
 GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
@@ -304,7 +303,6 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 - Use **Bicep** for infrastructure as code (not Terraform)
 - Use **modules** to organize reusable infrastructure components
 - Use **environment variables** for all configuration (12-factor app)
-- Use **Azure Application Insights** for production monitoring
 - Use **Azure Key Vault** for secrets in production
 - Store secrets as **secure parameters** in Bicep (`@secure()`)
 - Use **dependsOn** explicitly for resource dependencies
@@ -432,7 +430,6 @@ npm run e2e:staging
 - Docker containers for API and UI
 - Azure Container Apps for orchestration
 - Azure PostgreSQL Flexible Server for database
-- Azure Application Insights for monitoring
 
 ### Environment Configuration
 - `ASPNETCORE_ENVIRONMENT=Production` in production
@@ -442,8 +439,7 @@ npm run e2e:staging
 - Database connection should use SSL
 
 ### Monitoring
-- **Development**: Seq for structured logging
-- **Production**: Azure Application Insights
+- **Development**: Container console logs
 - Health endpoints (`/health/live`, `/health/ready`) for container orchestrator
 - Serilog with enrichment: correlation ID, environment, thread info
 

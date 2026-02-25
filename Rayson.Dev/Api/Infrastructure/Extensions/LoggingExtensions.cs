@@ -33,14 +33,6 @@ public static class LoggingExtensions
                 .MinimumLevel.Is(logLevel)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
-
-            var appInsightsConnStr = context.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
-            if (!string.IsNullOrEmpty(appInsightsConnStr))
-            {
-                loggerConfiguration.WriteTo.ApplicationInsights(
-                    connectionString: appInsightsConnStr,
-                    telemetryConverter: new Serilog.Sinks.ApplicationInsights.TelemetryConverters.TraceTelemetryConverter());
-            }
         });
     }
 }
