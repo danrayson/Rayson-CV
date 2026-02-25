@@ -4,10 +4,6 @@ param defaultDomain string
 param acrLoginServer string
 param acrName string
 param imageTag string
-param jwtIssuer string
-param jwtAudience string
-@secure()
-param jwtSigningKey string
 param storageAccountName string
 param environmentName string
 param tags object = {
@@ -40,9 +36,6 @@ module api 'modules/api-container.bicep' = {
     acrLoginServer: acrLoginServer
     acrName: acrName
     imageTag: imageTag
-    jwtIssuer: jwtIssuer
-    jwtAudience: jwtAudience
-    jwtSigningKey: jwtSigningKey
     uiFqdn: uiFqdn
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
