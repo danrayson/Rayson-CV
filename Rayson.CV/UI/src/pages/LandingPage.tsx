@@ -1,16 +1,17 @@
 const getDownloadUrl = () => {
   const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
+  const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
   const platform = navigator.platform.toLowerCase();
   const userAgent = navigator.userAgent.toLowerCase();
   
   if (platform.includes('mac') || userAgent.includes('mac')) {
-    return `${baseUrl}/RaysonCV.dmg`;
+    return `${blobBaseUrl}/RaysonCV.dmg`;
   }
   if (platform.includes('win') || userAgent.includes('win')) {
-    return `${baseUrl}/RaysonCV-Setup.exe`;
+    return `${blobBaseUrl}/RaysonCV-Setup.exe`;
   }
   if (platform.includes('linux')) {
-    return `${baseUrl}/RaysonCV.AppImage`;
+    return `${blobBaseUrl}/RaysonCV.AppImage`;
   }
   return null;
 };
