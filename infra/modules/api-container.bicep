@@ -10,8 +10,7 @@ param jwtAudience string
 @secure()
 param jwtSigningKey string
 param uiFqdn string
-@secure()
-param appInsightsConnectionString string
+param seqUrl string
 param postgresServiceId string
 param tags object = {}
 
@@ -70,8 +69,8 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'http://+:8080'
             }
             {
-              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-              value: appInsightsConnectionString
+              name: 'SEQ_URL'
+              value: seqUrl
             }
             {
               name: 'AuthOptions__Issuer'
