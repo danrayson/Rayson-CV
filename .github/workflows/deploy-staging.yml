@@ -177,6 +177,10 @@ jobs:
       - name: Install dependencies
         run: cd Rayson.CV/UI && npm ci
 
+      - name: Install wine for Windows builds
+        if: matrix.platform == 'win'
+        run: sudo apt-get install -y wine
+
       - name: Build Electron app
         run: |
           cd Rayson.CV/UI
