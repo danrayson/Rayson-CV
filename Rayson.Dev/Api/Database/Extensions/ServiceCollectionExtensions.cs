@@ -34,14 +34,13 @@ public static class ServiceCollectionExtensions
         var password = configuration["POSTGRES_PASSWORD"];
         var database = configuration["POSTGRES_DATABASE"];
         
-        if (!string.IsNullOrEmpty(host) && !string.IsNullOrEmpty(port) && 
-            !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password) && 
-            !string.IsNullOrEmpty(database))
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || 
+            string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || 
+            string.IsNullOrEmpty(database))
         {
-            return $"Server={host};Port={port};Database={database};User Id={username};Password={password};TrustServerCertificate=True";
+            throw new DatabaseConfigurationException("Database connection string is missing. Please provide all PostgreSQL environment variables (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DATABASE).");
         }
         
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        return connectionString ?? throw new DatabaseConfigurationException("Database connection string is missing. Either provide 'ConnectionStrings:DefaultConnection' or PostgreSQL service binding environment variables (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DATABASE).");
+        return $"Server={host};Port={port};Database={database};User Id={username};Password={password};TrustServerCertificate=True";
     }
 }

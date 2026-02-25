@@ -2,7 +2,7 @@
 # Docker Compose - Development: Database + UI
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.db-ui.yml up -d
-# Purpose: Run PostgreSQL, UI, and Seq in Docker, debug API locally
+# Purpose: Run PostgreSQL and UI in Docker, debug API locally
 # API runs on host at http://localhost:13245
 # ===========================================
 
@@ -12,36 +12,19 @@ services:
     container_name: raysondev-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  seq:
-    image: datalust/seq:latest
-    container_name: raysondev-seq
-    restart: unless-stopped
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
-    volumes:
-      - seq-data:/data
-    ports:
-      - "5341:80"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   ui:
     build:
@@ -70,4 +53,3 @@ services:
 
 volumes:
   postgres-data:
-  seq-data:

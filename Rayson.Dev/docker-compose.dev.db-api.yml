@@ -2,7 +2,7 @@
 # Docker Compose - Development: Database + API
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.db-api.yml up -d
-# Purpose: Run PostgreSQL, API, and Seq in Docker, debug UI locally
+# Purpose: Run PostgreSQL and API in Docker, debug UI locally
 # UI connects to API at http://localhost:13245
 # ===========================================
 
@@ -12,38 +12,19 @@ services:
     container_name: raysondev-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  seq:
-    image: datalust/seq:latest
-    container_name: raysondev-seq
-    restart: unless-stopped
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
-    volumes:
-      - seq-data:/data
-    ports:
-      - "5341:80"
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   api:
     build:
@@ -52,20 +33,21 @@ services:
     container_name: raysondev-api
     restart: unless-stopped
     environment:
-      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};TrustServerCertificate=True"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       AuthOptions__Issuer: ${JWT_ISSUER}
       AuthOptions__Audience: ${JWT_AUDIENCE}
       AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
-      SEQ_URL: http://seq:5341
       LOG_LEVEL: Debug
     ports:
       - "13245:8080"
     depends_on:
       postgres:
-        condition: service_healthy
-      seq:
         condition: service_healthy
     networks:
       - internal
@@ -82,4 +64,3 @@ networks:
 
 volumes:
   postgres-data:
-  seq-data:
