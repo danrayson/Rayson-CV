@@ -1,39 +1,10 @@
-import Login from '../components/Login';
-import SignUp from '../components/SignUp';
-import ForgottenPassword from '../components/ForgottenPassword';
-import ResetPassword from '../components/ResetPassword';
-import { useEffect, useState } from 'react';
-
 const LandingPage: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState('login');
-  const [token, setToken] = useState('');
-  //useLocation not working inside App's HashRouter.  Use window.location instead.
-  const location = window.location;
-
-  useEffect(() => {
-    // Extract query parameters
-    const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get('token');
-    if (token) {
-      setToken(token);
-      setCurrentPage('resetpassword')
-    }
-  }, [location.search]);
-
-  const handleLandingPageChange = (page: string) => {
-    setCurrentPage(page);
-  };
-
-  const componentsMap: { [key: string]: React.ReactNode } = {
-    "login": <Login handleLandingPageChangeDelegate={(path: string) => handleLandingPageChange(path)} />,
-    "signup": <SignUp handleLandingPageChange={(path: string) => handleLandingPageChange(path)} />,
-    "forgottenpassword": <ForgottenPassword handleLandingPageChange={(path: string) => handleLandingPageChange(path)} />,
-    "resetpassword": <ResetPassword token={token} handleLandingPageChange={(path: string) => handleLandingPageChange(path)} />
-  };
-
   return (
-    <div>
-      {componentsMap[currentPage]}
+    <div className="flex items-center justify-center min-h-screen bg-base-200">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to RaysonCV</h1>
+        <p className="text-lg">Your professional CV platform</p>
+      </div>
     </div>
   );
 };

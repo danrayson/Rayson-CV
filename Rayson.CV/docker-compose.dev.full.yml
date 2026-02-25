@@ -43,9 +43,6 @@ services:
       POSTGRES_DATABASE: ${POSTGRES_DATABASE}
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      AuthOptions__Issuer: ${JWT_ISSUER}
-      AuthOptions__Audience: ${JWT_AUDIENCE}
-      AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
       LOG_LEVEL: Debug

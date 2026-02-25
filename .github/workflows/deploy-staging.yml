@@ -16,8 +16,6 @@ env:
   ACR_NAME: acrraysoncvstaging
   API_IMAGE_NAME: raysoncv-api
   UI_IMAGE_NAME: raysoncv-ui
-  JWT_ISSUER: danrayson
-  JWT_AUDIENCE: RaysonCVUsers
 
 jobs:
   build:
@@ -177,9 +175,6 @@ jobs:
                          acrName=${{ needs.deploy-core.outputs.acrName }} \
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
-                         jwtIssuer=${{ env.JWT_ISSUER }} \
-                         jwtAudience=${{ env.JWT_AUDIENCE }} \
-                         jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)

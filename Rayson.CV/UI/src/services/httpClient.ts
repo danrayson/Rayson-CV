@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { API_BASE_URL } from '../config';
 import { loggingService } from './loggingService';
 
@@ -7,22 +7,9 @@ class HttpClient {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: API_BASE_URL // Set the base URL for all requests made by this instance
+      baseURL: API_BASE_URL
     });
 
-    // Add interceptor to handle adding authorization tokens to requests
-    this.instance.interceptors.request.use(
-      (config: AxiosRequestConfig) => {
-        const token = localStorage.getItem('x-auth-token'); // Retrieve the token from local storage
-        if (token && config.headers) { // Check if the token exists and headers are defined
-          config.headers['Authorization'] = `Bearer ${token}`; // Add the token to the Authorization header
-        }
-        return Promise.resolve(config as InternalAxiosRequestConfig); // Return the modified request configuration
-      },
-      (error) => Promise.reject(error) // Reject any errors that occur during the request
-    );
-
-    // Add response interceptor to log API errors
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
@@ -40,12 +27,8 @@ class HttpClient {
     );
   }
 
-  public setAuthToken(token: string): void {
-    localStorage.setItem('x-auth-token', token); // Store the token in local storage for use in requests
-  }
-
   private async request<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, bodyData?: any, queryStringData?: any): Promise<AxiosResponse<T>> {
-    url = API_BASE_URL + url;// This seems superfluous considering we've set the base url during construction.
+    url = API_BASE_URL + url;
     if (queryStringData) {
       const queryString = Object.keys(queryStringData).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryStringData[key])}`).join('&');
       url += `?${queryString}`;
@@ -55,27 +38,27 @@ class HttpClient {
         method,
         url,
         data: bodyData,
-      }); // Make a request using the Axios instance
-      return response; // Return the response
+      });
+      return response;
     } catch (error) {
-      throw error; // Rethrow any errors that occur during the request
+      throw error;
     }
   }
 
   public async get<T>(url: string, queryStringData?: any): Promise<AxiosResponse<T>> {
-    return this.request('get', url, undefined, queryStringData); // Make a GET request to the specified URL with optional query string data
+    return this.request('get', url, undefined, queryStringData);
   }
 
   public async post<T>(url: string, data?: any, queryStringData?: any): Promise<AxiosResponse<T>> {
-    return this.request('post', url, data, queryStringData); // Make a POST request to the specified URL with optional data
+    return this.request('post', url, data, queryStringData);
   }
 
   public async put<T>(url: string, data?: any, queryStringData?: any): Promise<AxiosResponse<T>> {
-    return this.request('put', url, data, queryStringData); // Make a PUT request to the specified URL with optional data
+    return this.request('put', url, data, queryStringData);
   }
 
   public async delete<T>(url: string, queryStringData?: any): Promise<AxiosResponse<T>> {
-    return this.request('delete', url, null, queryStringData); // Make a DELETE request to the specified URL
+    return this.request('delete', url, null, queryStringData);
   }
 }
 
