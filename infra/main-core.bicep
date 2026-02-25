@@ -7,11 +7,11 @@ param acrName string
 
 param tags object = {
   Environment: environmentName
-  Project: 'RaysonDev'
+  Project: 'RaysonCV'
 }
 
-var containerAppsEnvName = 'cae-raysondev-${environmentName}'
-var storageAccountName = 'straysondev${environmentName}'
+var containerAppsEnvName = 'cae-raysoncv-${environmentName}'
+var storageAccountName = 'straysoncv${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName

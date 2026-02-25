@@ -11,13 +11,13 @@ on:
         default: 'latest'
 
 env:
-  AZURE_RESOURCE_GROUP: rg-raysondev-staging
+  AZURE_RESOURCE_GROUP: rg-raysoncv-staging
   LOCATION: uksouth
-  ACR_NAME: acrraysondevstaging
-  API_IMAGE_NAME: raysondev-api
-  UI_IMAGE_NAME: raysondev-ui
+  ACR_NAME: acrraysoncvstaging
+  API_IMAGE_NAME: raysoncv-api
+  UI_IMAGE_NAME: raysoncv-ui
   JWT_ISSUER: danrayson
-  JWT_AUDIENCE: RaysonDevUsers
+  JWT_AUDIENCE: RaysonCVUsers
 
 jobs:
   build:
@@ -39,16 +39,16 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: Rayson.Dev/UI/package-lock.json
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
 
       - name: Build API
-        run: dotnet build Rayson.Dev/Api/Presentation/Presentation.csproj --configuration Release
+        run: dotnet build Rayson.CV/Api/Presentation/Presentation.csproj --configuration Release
 
       - name: Install UI dependencies
-        run: cd Rayson.Dev/UI && npm ci
+        run: cd Rayson.CV/UI && npm ci
 
       - name: Build UI
-        run: cd Rayson.Dev/UI && npm run build
+        run: cd Rayson.CV/UI && npm run build
 
       - name: Set image tag
         id: set-tag
@@ -82,7 +82,7 @@ jobs:
         id: deploy
         run: |
           az deployment sub create \
-            --name raysondev-staging-core \
+            --name raysoncv-staging-core \
             --location ${{ env.LOCATION }} \
             --template-file infra/main-core.bicep \
             --parameters location=${{ env.LOCATION }} \
@@ -90,11 +90,11 @@ jobs:
                          environmentName=staging \
                          acrName=${{ env.ACR_NAME }}
           
-          ACR_LOGIN_SERVER=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
-          ACR_NAME_OUT=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.acrName.value --output tsv)
-          ENVIRONMENT_ID=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.environmentId.value --output tsv)
-          DEFAULT_DOMAIN=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.defaultDomain.value --output tsv)
-          STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageAccountName.value --output tsv)
+          ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
+          ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
+          ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.environmentId.value --output tsv)
+          DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
+          STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
@@ -125,7 +125,7 @@ jobs:
           docker build \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:latest \
-            ./Rayson.Dev/Api
+            ./Rayson.CV/Api
           docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
           docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:latest
 
@@ -136,7 +136,7 @@ jobs:
             --build-arg VITE_API_BASE_URL=https://$API_FQDN/ \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
             -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest \
-            ./Rayson.Dev/UI
+            ./Rayson.CV/UI
           docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
           docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest
           
@@ -167,7 +167,7 @@ jobs:
         id: deploy
         run: |
           az deployment group create \
-            --name raysondev-staging-apps \
+            --name raysoncv-staging-apps \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/main-apps.bicep \
             --parameters location=${{ env.LOCATION }} \
@@ -182,8 +182,8 @@ jobs:
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
           
-          API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
-          UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
+          API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
+          UI_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
           
           echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
           echo "uiFqdn=$UI_FQDN" >> $GITHUB_OUTPUT
@@ -212,13 +212,13 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd Rayson.Dev/Test/e2e && npm ci
+        run: cd Rayson.CV/Test/e2e && npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
       - name: Run E2E tests
-        working-directory: Rayson.Dev/Test/e2e
+        working-directory: Rayson.CV/Test/e2e
         run: npm run e2e:staging
         env:
           E2E_API_URL: https://${{ needs.deploy-apps.outputs.apiFqdn }}
@@ -229,4 +229,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-report
-          path: Rayson.Dev/Test/e2e/reports/
+          path: Rayson.CV/Test/e2e/reports/

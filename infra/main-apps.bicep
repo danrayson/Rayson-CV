@@ -12,7 +12,7 @@ param storageAccountName string
 param environmentName string
 param tags object = {
   Environment: environmentName
-  Project: 'RaysonDev'
+  Project: 'RaysonCV'
 }
 
 var postgresServiceName = 'ca-postgres-${environmentName}'

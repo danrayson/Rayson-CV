@@ -41,7 +41,7 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'ui'
-          image: '${acrLoginServer}/raysondev-ui:${imageTag}'
+          image: '${acrLoginServer}/raysoncv-ui:${imageTag}'
           env: [
             {
               name: 'API_HEALTH_URL'

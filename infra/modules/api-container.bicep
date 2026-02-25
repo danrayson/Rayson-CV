@@ -57,7 +57,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'api'
-          image: '${acrLoginServer}/raysondev-api:${imageTag}'
+          image: '${acrLoginServer}/raysoncv-api:${imageTag}'
           env: [
             {
               name: 'ASPNETCORE_ENVIRONMENT'

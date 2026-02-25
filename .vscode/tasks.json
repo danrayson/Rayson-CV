@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln",
+                "${workspaceFolder}/Rayson.CV/Api/RaysonCVBackend.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln",
+                "${workspaceFolder}/Rayson.CV/Api/RaysonCVBackend.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Rayson.Dev/Api/RaysonDevBackend.sln"
+                "${workspaceFolder}/Rayson.CV/Api/RaysonCVBackend.sln"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -41,25 +41,25 @@
             "type": "docker-build",
             "label": "docker-build: debug",
             "dockerBuild": {
-                "tag": "raysondev-api:dev",
-                "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
-                "context": "${workspaceFolder}/Rayson.Dev/Api",
+                "tag": "raysoncv-api:dev",
+                "dockerfile": "${workspaceFolder}/Rayson.CV/Api/Dockerfile",
+                "context": "${workspaceFolder}/Rayson.CV/Api",
                 "pull": true
             },
             "dependsOn": [
                 "build"
             ],
             "netCore": {
-                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+                "appProject": "${workspaceFolder}/Rayson.CV/Api/Presentation/Presentation.csproj"
             }
         },
         {
             "type": "docker-build",
             "label": "docker-build: release",
             "dockerBuild": {
-                "tag": "raysondev-api:latest",
-                "dockerfile": "${workspaceFolder}/Rayson.Dev/Api/Dockerfile",
-                "context": "${workspaceFolder}/Rayson.Dev/Api",
+                "tag": "raysoncv-api:latest",
+                "dockerfile": "${workspaceFolder}/Rayson.CV/Api/Dockerfile",
+                "context": "${workspaceFolder}/Rayson.CV/Api",
                 "platform": {
                     "os": "linux",
                     "architecture": "amd64"
@@ -67,7 +67,7 @@
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+                "appProject": "${workspaceFolder}/Rayson.CV/Api/Presentation/Presentation.csproj"
             }
         },
         {
@@ -91,7 +91,7 @@
                 ]
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj",
+                "appProject": "${workspaceFolder}/Rayson.CV/Api/Presentation/Presentation.csproj",
                 "enableDebugging": true
             }
         },
@@ -103,7 +103,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/Rayson.Dev/Api/Presentation/Presentation.csproj"
+                "appProject": "${workspaceFolder}/Rayson.CV/Api/Presentation/Presentation.csproj"
             }
         }
     ]
