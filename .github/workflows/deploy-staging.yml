@@ -151,16 +151,18 @@ jobs:
           echo "apiFqdn=ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}" >> $GITHUB_OUTPUT
 
   build-electron:
-    runs-on: ubuntu-latest
-    needs: [build, deploy-core]
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         include:
           - platform: 'linux'
+            runner: 'ubuntu-latest'
             artifact: 'RaysonCV.AppImage'
           - platform: 'mac'
+            runner: 'macos-latest'
             artifact: 'RaysonCV.dmg'
           - platform: 'win'
+            runner: 'windows-latest'
             artifact: 'RaysonCV-Setup.exe'
 
     steps:
@@ -176,10 +178,6 @@ jobs:
 
       - name: Install dependencies
         run: cd Rayson.CV/UI && npm ci
-
-      - name: Install wine for Windows builds
-        if: matrix.platform == 'win'
-        run: sudo apt-get install -y wine
 
       - name: Build Electron app
         run: |
