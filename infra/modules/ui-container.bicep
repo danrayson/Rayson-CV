@@ -5,6 +5,7 @@ param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
 param apiHealthUrl string
+param appDownloadUrl string
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -46,6 +47,10 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'API_HEALTH_URL'
               value: apiHealthUrl
+            }
+            {
+              name: 'VITE_APP_DOWNLOAD_URL'
+              value: appDownloadUrl
             }
             {
               name: 'LOG_LEVEL'

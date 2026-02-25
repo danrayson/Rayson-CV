@@ -11,7 +11,6 @@ param tags object = {
 }
 
 var containerAppsEnvName = 'cae-raysoncv-${environmentName}'
-var storageAccountName = 'straysoncv${environmentName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
@@ -34,7 +33,7 @@ module storage 'modules/storage.bicep' = {
   scope: rg
   params: {
     location: location
-    storageAccountName: storageAccountName
+    environmentName: environmentName
     tags: tags
   }
 }
@@ -54,3 +53,4 @@ output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
+output staticWebsiteUrl string = storage.outputs.staticWebsiteUrl

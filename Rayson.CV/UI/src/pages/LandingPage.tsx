@@ -1,4 +1,29 @@
+const getDownloadUrl = () => {
+  const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
+  const platform = navigator.platform.toLowerCase();
+  const userAgent = navigator.userAgent.toLowerCase();
+  
+  if (platform.includes('mac') || userAgent.includes('mac')) {
+    return `${baseUrl}/RaysonCV.dmg`;
+  }
+  if (platform.includes('win') || userAgent.includes('win')) {
+    return `${baseUrl}/RaysonCV-Setup.exe`;
+  }
+  if (platform.includes('linux')) {
+    return `${baseUrl}/RaysonCV.AppImage`;
+  }
+  return null;
+};
+
 const LandingPage: React.FC = () => {
+  const downloadUrl = getDownloadUrl();
+
+  const handleAppClick = () => {
+    if (!downloadUrl) {
+      alert('Desktop app is not available for your operating system. Supported platforms: Windows, macOS, and Linux.');
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
       <h1 className="text-7xl font-bold mb-12 text-center">Design, Develop, Deploy</h1>
@@ -12,13 +37,22 @@ const LandingPage: React.FC = () => {
           Download CV
         </a>
 
-        <a
-          href="/app/latest"
-          download
-          className="btn btn-info aspect-square flex-1 text-2xl font-bold"
-        >
-          Download App
-        </a>
+        {downloadUrl ? (
+          <a
+            href={downloadUrl}
+            download
+            className="btn btn-info aspect-square flex-1 text-2xl font-bold"
+          >
+            Download App
+          </a>
+        ) : (
+          <button
+            onClick={handleAppClick}
+            className="btn btn-info aspect-square flex-1 text-2xl font-bold"
+          >
+            Download App
+          </button>
+        )}
         
         <a
           href="#/chatbot"

@@ -21,10 +21,9 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 
 ### 1. Environment Setup
 
-Copy the example environment file and configure:
+Configure `.env` with your values:
 
 ```bash
-cp .env.example .env
 # Edit .env with your values
 ```
 
@@ -140,7 +139,7 @@ docker compose -f docker-compose.dev.full.yml up -d
 
 ## Environment Variables
 
-See `.env.example` for all required variables:
+The following environment variables are required:
 
 | Variable | Description |
 |----------|-------------|
@@ -322,7 +321,6 @@ Rayson.Dev/
 ├── Test/
 │   └── e2e/               # End-to-end BDD tests
 ├── .env                    # Local environment variables (gitignored)
-├── .env.example            # Environment template
 └── docker-compose.*.yml    # Docker Compose configurations
 ```
 
