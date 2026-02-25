@@ -175,7 +175,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-linux
-          path: Rayson.CV/UI/build/RaysonCV.AppImage
+          path: Rayson.CV/UI/build/*.AppImage
 
   build-electron-mac:
     runs-on: macos-latest
@@ -202,7 +202,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-mac
-          path: Rayson.CV/UI/build/RaysonCV.dmg
+          path: Rayson.CV/UI/build/*.dmg
 
   build-electron-windows:
     runs-on: windows-latest
@@ -229,7 +229,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-windows
-          path: Rayson.CV/UI/build/RaysonCV-Setup.exe
+          path: Rayson.CV/UI/build/*-Setup.exe
 
   upload-electron:
     runs-on: ubuntu-latest
