@@ -263,10 +263,10 @@ jobs:
           FILE=$(ls artifacts/electron-linux/*.AppImage | head -1)
           echo "Uploading Linux: $FILE"
           az storage blob upload \
-            --account-name strraysoncvstaging \
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV.AppImage" \
+            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
             --overwrite
 
       - name: Upload macOS app
@@ -274,10 +274,10 @@ jobs:
           FILE=$(ls artifacts/electron-mac/*.dmg | head -1)
           echo "Uploading macOS: $FILE"
           az storage blob upload \
-            --account-name strraysoncvstaging \
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV.dmg" \
+            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
             --overwrite
 
       - name: Upload Windows app
@@ -285,10 +285,10 @@ jobs:
           FILE=$(ls artifacts/electron-windows/*.exe | head -1)
           echo "Uploading Windows: $FILE"
           az storage blob upload \
-            --account-name strraysoncvstaging \
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV-Setup.exe" \
+            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
             --overwrite
 
   deploy-apps:
