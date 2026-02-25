@@ -10,7 +10,8 @@ param jwtAudience string
 @secure()
 param jwtSigningKey string
 param uiFqdn string
-param lokiUrl string
+@secure()
+param appInsightsConnectionString string
 param postgresServiceId string
 param tags object = {}
 
@@ -69,8 +70,8 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'http://+:8080'
             }
             {
-              name: 'LOKI_URL'
-              value: lokiUrl
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsightsConnectionString
             }
             {
               name: 'AuthOptions__Issuer'

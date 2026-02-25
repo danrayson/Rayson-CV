@@ -16,14 +16,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
   }
   tags: tags
-
-  resource lokiBlobContainer 'containers@2023-01-01' = {
-    name: 'loki'
-    properties: {
-      publicAccess: 'None'
-    }
-  }
 }
 
 output storageAccountName string = storageAccount.name
-output lokiBlobEndpoint string = '${storageAccount.properties.primaryEndpoints.blob}loki'

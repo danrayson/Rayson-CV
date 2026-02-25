@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.Grafana.Loki;
 
 namespace Infrastructure.Extensions;
 
@@ -35,10 +34,18 @@ public static class LoggingExtensions
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
-            var lokiUrl = context.Configuration["LOKI_URL"];
-            if (!string.IsNullOrEmpty(lokiUrl))
+            var seqUrl = context.Configuration["SEQ_URL"];
+            if (!string.IsNullOrEmpty(seqUrl))
             {
-                loggerConfiguration.WriteTo.GrafanaLoki(lokiUrl);
+                loggerConfiguration.WriteTo.Seq(seqUrl);
+            }
+
+            var appInsightsConnStr = context.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+            if (!string.IsNullOrEmpty(appInsightsConnStr))
+            {
+                loggerConfiguration.WriteTo.ApplicationInsights(
+                    connectionString: appInsightsConnStr,
+                    telemetryConverter: new Serilog.Sinks.ApplicationInsights.TelemetryConverters.TraceTelemetryConverter());
             }
         });
     }

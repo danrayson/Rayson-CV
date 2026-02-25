@@ -68,6 +68,7 @@ jobs:
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
+      appInsightsConnectionString: ${{ steps.deploy.outputs.appInsightsConnectionString }}
     
     steps:
       - name: Checkout code
@@ -95,12 +96,14 @@ jobs:
           ENVIRONMENT_ID=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.storageAccountName.value --output tsv)
+          APPINSIGHTS_CONNECTION_STRING=$(az deployment sub show --name raysondev-staging-core --query properties.outputs.appInsightsConnectionString.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "appInsightsConnectionString=$APPINSIGHTS_CONNECTION_STRING" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
@@ -153,8 +156,6 @@ jobs:
     outputs:
       apiFqdn: ${{ steps.deploy.outputs.apiFqdn }}
       uiFqdn: ${{ steps.deploy.outputs.uiFqdn }}
-      lokiFqdn: ${{ steps.deploy.outputs.lokiFqdn }}
-      grafanaFqdn: ${{ steps.deploy.outputs.grafanaFqdn }}
     
     steps:
       - name: Checkout code
@@ -182,17 +183,14 @@ jobs:
                          jwtIssuer=${{ env.JWT_ISSUER }} \
                          jwtAudience=${{ env.JWT_AUDIENCE }} \
                          jwtSigningKey="${{ secrets.JWT_SIGNING_KEY }}" \
+                         appInsightsConnectionString="${{ needs.deploy-core.outputs.appInsightsConnectionString }}" \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}"
           
           API_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
-          LOKI_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.lokiFqdn.value --output tsv)
-          GRAFANA_FQDN=$(az deployment group show --name raysondev-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.grafanaFqdn.value --output tsv)
           
           echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
           echo "uiFqdn=$UI_FQDN" >> $GITHUB_OUTPUT
-          echo "lokiFqdn=$LOKI_FQDN" >> $GITHUB_OUTPUT
-          echo "grafanaFqdn=$GRAFANA_FQDN" >> $GITHUB_OUTPUT
 
       - name: Deployment Summary
         run: |
@@ -202,8 +200,6 @@ jobs:
           echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| API | https://${{ steps.deploy.outputs.apiFqdn }} |" >> $GITHUB_STEP_SUMMARY
           echo "| UI | https://${{ steps.deploy.outputs.uiFqdn }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Loki | http://${{ steps.deploy.outputs.lokiFqdn }}:3100 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Grafana | https://${{ steps.deploy.outputs.grafanaFqdn }} |" >> $GITHUB_STEP_SUMMARY
 
   e2e-tests:
     runs-on: ubuntu-latest

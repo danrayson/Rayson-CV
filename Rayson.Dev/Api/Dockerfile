@@ -54,19 +54,10 @@ COPY --from=build /app/publish .
 # This overrides the default URL configuration
 ENV ASPNETCORE_URLS=http://+:8080
 
-# PostgreSQL service binding variables for local development
-ENV POSTGRES_HOST=host.docker.internal
-ENV POSTGRES_PORT=5433
-ENV POSTGRES_DATABASE=raysondev
-ENV POSTGRES_USERNAME=raysondev_user
-ENV POSTGRES_PASSWORD=development_password
-
-# JWT Authentication Configuration for local development
 ENV AuthOptions__Issuer=danrayson
 ENV AuthOptions__Audience=RaysonDevUsers
 ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_for_production
-
-# CORS Configuration for local development
+ENV ConnectionStrings__DefaultConnection="Server=host.docker.internal;Port=5433;Database=raysondev;User Id=raysondev_user;Password=development_password;TrustServerCertificate=True"
 ENV Cors__AllowedOrigins__0=http://localhost:3000
 
 EXPOSE 8080
