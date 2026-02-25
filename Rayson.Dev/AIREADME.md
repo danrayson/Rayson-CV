@@ -11,7 +11,7 @@ RaysonDev is a bootstrapping project to create new applications with:
 - **Backend**: .NET 8.0 Web API with clean architecture
 - **Database**: PostgreSQL 16 with Entity Framework Core
 - **Authentication**: JWT-based token authentication with email/password
-- **Logging**: Serilog with Seq for local development, Application Insights for staging/production
+- **Logging**: Serilog with Grafana Loki for local development and staging/production
 - **Containerization**: Docker with multi-stage builds
 
 ### Architecture Pattern
@@ -205,8 +205,8 @@ Api/
 ### Docker Compose Files
 - `docker-compose.dev.db.yml` - PostgreSQL only
 - `docker-compose.dev.db-ui.yml` - PostgreSQL + UI
-- `docker-compose.dev.db-api.yml` - PostgreSQL + API + Seq
-- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, Seq, API, UI)
+- `docker-compose.dev.db-api.yml` - PostgreSQL + API + Loki + Grafana
+- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, API, UI, Loki, Grafana)
 
 ### Services
 1. **postgres**: PostgreSQL 16 Alpine
@@ -214,13 +214,18 @@ Api/
    - Health check: `pg_isready`
    - Volume: `postgres-data`
 
-2. **seq**: Datalust Seq for local structured logging (development only)
-   - Port: 5341
+2. **loki**: Grafana Loki for log aggregation
+   - Port: 3100
    - No authentication in development
-   - Volume: `seq-data`
-   - Note: Staging uses Application Insights instead of Seq
+   - Volume: `loki-data`
 
-3. **api**: .NET 8.0 ASP.NET Core
+3. **grafana**: Grafana for log visualization
+   - Port: 3001 (to avoid conflict with UI on 3000)
+   - No authentication in development
+   - Pre-configured with Loki datasource
+   - Volume: `grafana-data`
+
+4. **api**: .NET 8.0 ASP.NET Core
    - Port: 8080 (container), 13245 (host)
    - Health check: `http://localhost:8080/health/live`
    - Multi-stage build (SDK + Runtime)
@@ -268,24 +273,26 @@ See `.env.example` for complete list:
 Infrastructure is defined in Bicep and located at project root `/infra/`:
 
 **Main Templates:**
-- `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment, Application Insights
-- `main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
+- `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
+- `main-apps.bicep` - Creates workload resources: PostgreSQL, Loki, Grafana, API Container App, UI Container App
 
 **Modules:**
 - `modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
 - `modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
 - `modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
-- `modules/app-insights.bicep` - Azure Application Insights for logging
+- `modules/loki-container.bicep` - Grafana Loki for log aggregation
+- `modules/grafana-container.bicep` - Grafana for log visualization
 - `modules/container-apps-environment.bicep` - Container Apps Environment
 - `modules/storage.bicep` - Azure Storage Account
 - `modules/container-registry.bicep` - Azure Container Registry
 
 ### Azure Services
-- **Azure Container Apps** - Hosts API and UI containers
+- **Azure Container Apps** - Hosts API, UI, Loki, and Grafana containers
 - **Azure Container Registry** - Stores Docker images
 - **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
 - **Azure Storage Account** - General purpose storage
-- **Application Insights** - For production/staging logging
+- **Grafana Loki** - Log aggregation (running on Container Apps)
+- **Grafana** - Log visualization (running on Container Apps)
 
 ### CI/CD
 GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
@@ -296,9 +303,9 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 
 **Jobs:**
 1. **build** - Compiles .NET API and builds React UI
-2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment, Application Insights)
+2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
 3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
+4. **deploy-apps** - Deploys container apps (PostgreSQL, Loki, Grafana, API, UI) via Bicep
 
 **Environment:** Staging (Azure `uksouth` region, resource group `rg-raysondev-staging`)
 
@@ -312,7 +319,7 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 - Use **Bicep** for infrastructure as code (not Terraform)
 - Use **modules** to organize reusable infrastructure components
 - Use **environment variables** for all configuration (12-factor app)
-- Use **Azure Application Insights** for production monitoring
+- Use **Grafana Loki** for staging/production logging
 - Use **Azure Key Vault** for secrets in production
 - Store secrets as **secure parameters** in Bicep (`@secure()`)
 - Use **dependsOn** explicitly for resource dependencies
@@ -450,8 +457,8 @@ npm run e2e:staging
 - Database connection should use SSL
 
 ### Monitoring
-- **Development**: Seq for structured logging (local only)
-- **Staging/Production**: Azure Application Insights
+- **Development**: Grafana Loki + Grafana (local)
+- **Staging/Production**: Grafana Loki + Grafana (on Azure Container Apps)
 - Health endpoints (`/health/live`, `/health/ready`) for container orchestrator
 - Serilog with enrichment: correlation ID, environment, thread info
 

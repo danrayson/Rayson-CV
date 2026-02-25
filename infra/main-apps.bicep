@@ -8,8 +8,6 @@ param jwtIssuer string
 param jwtAudience string
 @secure()
 param jwtSigningKey string
-param appInsightsConnectionString string
-param storageAccountName string
 param environmentName string
 param tags object = {
   Environment: environmentName
@@ -17,6 +15,8 @@ param tags object = {
 }
 
 var postgresServiceName = 'ca-postgres-${environmentName}'
+var lokiAppName = 'ca-loki-${environmentName}'
+var grafanaAppName = 'ca-grafana-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
@@ -27,6 +27,26 @@ module postgresService 'modules/postgres-service.bicep' = {
     location: location
     environmentId: environmentId
     containerAppName: postgresServiceName
+    tags: tags
+  }
+}
+
+module loki 'modules/loki-container.bicep' = {
+  name: 'loki-container'
+  params: {
+    location: location
+    environmentId: environmentId
+    containerAppName: lokiAppName
+    tags: tags
+  }
+}
+
+module grafana 'modules/grafana-container.bicep' = {
+  name: 'grafana-container'
+  params: {
+    location: location
+    environmentId: environmentId
+    containerAppName: grafanaAppName
     tags: tags
   }
 }
@@ -45,7 +65,7 @@ module api 'modules/api-container.bicep' = {
     jwtAudience: jwtAudience
     jwtSigningKey: jwtSigningKey
     uiFqdn: uiFqdn
-    appInsightsConnectionString: appInsightsConnectionString
+    lokiUrl: loki.outputs.url
     postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
@@ -70,3 +90,5 @@ module ui 'modules/ui-container.bicep' = {
 
 output apiFqdn string = api.outputs.fqdn
 output uiFqdn string = ui.outputs.fqdn
+output lokiFqdn string = loki.outputs.fqdn
+output grafanaFqdn string = grafana.outputs.fqdn
