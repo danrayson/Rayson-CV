@@ -70,7 +70,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'OLLAMA__BASEURL'
-              value: 'http://${ollamaFqdn}'
+              value: ollamaFqdn
             }
           ]
           resources: {
