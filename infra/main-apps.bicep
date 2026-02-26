@@ -15,6 +15,7 @@ param tags object = {
 var postgresServiceName = 'ca-postgres-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
+var ollamaAppName = 'ca-ollama-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
 
 module postgresService 'modules/postgres-service.bicep' = {
@@ -23,6 +24,19 @@ module postgresService 'modules/postgres-service.bicep' = {
     location: location
     environmentId: environmentId
     containerAppName: postgresServiceName
+    tags: tags
+  }
+}
+
+module ollama 'modules/ollama-container.bicep' = {
+  name: 'ollama-container'
+  params: {
+    location: location
+    environmentId: environmentId
+    containerAppName: ollamaAppName
+    acrLoginServer: acrLoginServer
+    acrName: acrName
+    imageTag: imageTag
     tags: tags
   }
 }
@@ -39,6 +53,7 @@ module api 'modules/api-container.bicep' = {
     imageTag: imageTag
     uiFqdn: uiFqdn
     postgresServiceId: postgresService.outputs.serviceId
+    ollamaServiceId: ollama.outputs.serviceId
     tags: tags
   }
 }

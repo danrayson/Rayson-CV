@@ -16,6 +16,7 @@ env:
   ACR_NAME: acrraysoncvstaging
   API_IMAGE_NAME: raysoncv-api
   UI_IMAGE_NAME: raysoncv-ui
+  OLLAMA_IMAGE_NAME: raysoncv-ollama
 
 jobs:
   build:
@@ -144,6 +145,16 @@ jobs:
           docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest
           
           echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
+
+      - name: Build and push Ollama image
+        run: |
+          docker build \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:latest \
+            -f Rayson.CV/ollama.Dockerfile \
+            Rayson.CV
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:latest
 
       - name: Set FQDN output
         id: set-fqdn
