@@ -23,9 +23,21 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 
 resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   name: '${storageAccountName}/default/$web'
-  dependsOn: [storageAccount]
   properties: {
     publicAccess: 'Blob'
+  }
+}
+
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource ollamaModels 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
+  parent: fileService
+  name: 'ollama-models'
+  properties: {
+    shareQuota: 10
   }
 }
 

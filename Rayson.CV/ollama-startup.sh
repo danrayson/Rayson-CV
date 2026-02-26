@@ -11,8 +11,12 @@ until curl -s http://localhost:11434/api/tags > /dev/null 2>&1; do
 done
 
 # Pull tinyllama model if not already present
-echo "Pulling tinyllama model..."
-ollama pull tinyllama
+if ! ollama list | grep -q "^tinyllama"; then
+    echo "Pulling tinyllama model..."
+    ollama pull tinyllama
+else
+    echo "tinyllama model already present, skipping pull"
+fi
 
 echo "Ollama is ready with tinyllama!"
 

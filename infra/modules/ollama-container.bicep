@@ -5,9 +5,19 @@ param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
 param tags object = {}
+param storageAccountName string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
+}
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: storageAccountName
+}
+
+resource storageAccountKeys 'Microsoft.Storage/storageAccounts/listKeys@2023-01-01' = {
+  name: storageAccountName
+  dependsOn: [storageAccount]
 }
 
 resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
@@ -20,6 +30,10 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
+        }
+        {
+          name: 'storage-account-key'
+          value: storageAccountKeys.keys[0].value
         }
       ]
       activeRevisionsMode: 'Single'
@@ -51,12 +65,29 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
             cpu: json('1.0')
             memory: '2.0Gi'
           }
+          volumeMounts: [
+            {
+              volumeName: 'ollama-models'
+              mountPath: '/root/.ollama'
+            }
+          ]
         }
       ]
       scale: {
         minReplicas: 1
         maxReplicas: 1
       }
+      volumes: [
+        {
+          name: 'ollama-models'
+          storageType: 'AzureFile'
+          storage: {
+            storageAccountName: storageAccountName
+            shareName: 'ollama-models'
+            accountKeySecretRef: 'storage-account-key'
+          }
+        }
+      ]
     }
   }
   tags: tags

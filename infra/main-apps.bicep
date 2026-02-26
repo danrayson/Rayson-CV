@@ -38,6 +38,7 @@ module ollama 'modules/ollama-container.bicep' = {
     acrLoginServer: acrLoginServer
     acrName: acrName
     imageTag: imageTag
+    storageAccountName: storageAccountName
     tags: tags
   }
 }
