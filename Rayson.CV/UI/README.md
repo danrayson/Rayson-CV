@@ -1,95 +1,86 @@
-# React + TypeScript + Vite
+# RaysonCV UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend for the RaysonCV application.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 18.3 + Vite 5.4
+- TypeScript 5.5
+- Tailwind CSS 3.4 + DaisyUI 4.12
+- React Router DOM 6.27 (HashRouter for Electron compatibility)
+- Axios for HTTP requests
+- Highcharts for data visualization
 
-## Configuring the styles
+## Styles
 
-Run this to update the css
-```Bash
+Tailwind CSS is used with DaisyUI. The compiled CSS is generated automatically by Vite during development and build.
+
+To manually rebuild styles (if needed):
+```bash
 npx tailwindcss -i ./src/index.css -o ./src/styles/tailwind.css --watch
 ```
 
-## Expanding the ESLint configuration
+## Scripts
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview production build |
+| `npm run electron:dev` | Run as Electron desktop app (dev) |
+| `npm run electron:build` | Build Electron desktop app |
 
-- Configure the top-level `parserOptions` property like this:
+## Running
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Development
+
+```bash
+npm install
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+The app will be available at `http://localhost:5173` (Vite default)
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
-
-# Docker
-
-To run the web gui services as a whole, run the following command:
+### Docker
 
 ```bash
 cd ../../
-docker compose -f docker-compose.dev.full.yml up --build
+docker compose -f docker-compose.dev.full.yml up -d --build
 ```
 
-To run the web gui as standalone docker container, run the following command:
+Or build and run standalone:
 
 ```bash
-cd UI
+cd Rayson.CV/UI
 docker build -t raysoncv-web-gui .
 docker run -p 3000:3000 raysoncv-web-gui
 ```
 
-To run web app only on dev, run the following command:
+### Electron Desktop App
 
 ```bash
-cd UI
-npm run dev
+npm run electron:dev    # Development mode
+npm run electron:build  # Build production executable
 ```
 
-To run electron app only on dev, run the following command:
+## API Integration
 
-```bash
-cd UI
-npm run electron:dev
-```
+All API calls go through `src/services/httpClient.ts` which:
+- Uses Axios instance with base URL from `config.ts`
+- Automatically adds `Authorization: Bearer <token>` header from localStorage
+- Has response interceptor that logs API errors
+- Provides typed methods: `get()`, `post()`, `put()`, `delete()`
 
-To build production version of the desktop app, run the following command:
+Token is stored in `localStorage` under key `x-auth-token`.
 
-```bash
-cd UI
-npm run electron:build
-```
+## Routing
+
+Uses `HashRouter` (not BrowserRouter) for Electron compatibility. Routes are defined in `App.tsx`.
+
+## Key Components
+
+- **Pages**: `LandingPage.tsx`, `Basic.tsx` (in `src/pages/`)
+- **Components**: `Login.tsx`, `SignUp.tsx`, `ForgottenPassword.tsx`, `ResetPassword.tsx`, `ErrorBoundary.tsx` (in `src/components/`)
+- **Elements**: `FormRow.tsx`, `ValidationMessages.tsx` (in `src/elements/`)
+- **Services**: `httpClient.ts`, `loggingService.ts` (in `src/services/`)
