@@ -165,6 +165,136 @@ Api/
 
 ---
 
+## Chatbot
+
+### Overview
+The chatbot feature uses Ollama with the TinyLlama model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
+
+### Architecture
+
+```
+User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (TinyLlama)
+```
+
+### Components
+
+1. **UI**: `UI/src/pages/ChatbotPage.tsx`
+   - WhatsApp-style chat interface
+   - Message history maintained in component state
+   - DaisyUI dark theme styling
+
+2. **UI Service**: `UI/src/services/chatbotService.ts`
+   - Calls API `/chatbot` endpoint
+   - Sends message + conversation history
+
+3. **API Endpoint**: `Api/Presentation/Endpoints/Chatbot/ChatbotEndpoints.cs`
+   - `POST /chatbot` - anonymous endpoint
+   - Accepts: `{ message: string, history?: { role: string, content: string }[] }`
+   - Returns: `{ message: string }`
+
+4. **Application Layer**: `Api/Application/Chatbot/`
+   - `IChatbotService` interface
+   - `ChatbotRequest`, `ChatbotResponse` DTOs
+   - `ICvProvider` interface (contract for CV content)
+
+5. **Infrastructure Layer**: `Api/Infrastructure/Chatbot/`
+   - `OllamaChatbotService` - calls Ollama API
+   - `CvProvider` - reads CV content from embedded resource
+   - `OllamaSettings`, `OllamaChatRequest`, `OllamaMessage`, `OllamaChatResponse`
+
+6. **Domain Layer**: `Api/Domain/Resources/cv.md`
+   - Embedded resource containing CV content
+   - Copied to output as embedded resource
+
+### API Endpoint
+
+- **URL**: `POST /chatbot`
+- **Auth**: Anonymous (`.AllowAnonymous()`)
+- **Request**:
+  ```json
+  {
+    "message": "What is Rayson's primary skill?",
+    "history": [
+      { "role": "user", "content": "Hi" },
+      { "role": "assistant", "content": "Hello! How can I help?" }
+    ]
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Daniel's primary skill is..."
+  }
+  ```
+
+### Configuration
+
+The chatbot service is configured via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OLLAMA__BASEURL` | Ollama server URL | `http://ollama:11434` |
+
+The following are hardcoded in the service:
+- **Model**: `tinyllama` (not configurable)
+- **Max tokens**: 128 (limits response length)
+
+### System Prompt
+
+The chatbot uses a system prompt that includes:
+- Instructions to answer only CV-related questions
+- Instructions to keep answers brief (1-2 sentences)
+- Instructions to politely decline off-topic questions
+- The CV content
+
+This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
+
+### Docker Setup
+
+**Custom Dockerfile**: `ollama.Dockerfile`
+- Based on `ollama/ollama:latest`
+- Installs curl for health checks
+- Uses startup script to pull TinyLlama model on first run
+
+**Startup Script**: `ollama-startup.sh`
+- Starts Ollama server
+- Waits for server to be ready
+- Pulls TinyLlama model (if not already present)
+- Keeps container running
+
+**Docker Compose Files**:
+- `docker-compose.dev.db-api.yml` - Includes Ollama
+- `docker-compose.dev.full.yml` - Includes Ollama
+- Healthcheck confirms TinyLlama model is available before marking container healthy
+
+### Azure Bicep
+
+**Modules**:
+- `infra/modules/ollama-container.bicep` - Deploys Ollama container app
+- `infra/modules/api-container.bicep` - Updated with `OLLAMA__BASEURL` env var
+
+**Internal Communication**:
+- API connects to Ollama via internal FQDN: `http://ca-ollama-{environment}.internal.{domain}:11434`
+- No service binding used (Azure Container Apps service bindings don't work for container-to-container)
+
+### Conventions
+
+**To Follow:**
+- Use `ICvProvider` in Application layer for CV content contract
+- Use `CvProvider` in Infrastructure layer for implementation
+- Embed CV data in Domain layer as resource
+- Use `ServiceResponse<T>` wrapper for API responses
+- Use Minimal API pattern for endpoints
+- Keep environment variables for configuration
+- Hardcode model name (only one model is used)
+
+**To Avoid:**
+- Do NOT make model configurable - always use TinyLlama
+- Do NOT store CV in database - use embedded resource
+- Do NOT use service bindings for container apps - use internal DNS
+
+---
+
 ## Database
 
 ### Technology Stack
@@ -204,8 +334,8 @@ Api/
 ### Docker Compose Files
 - `docker-compose.dev.db.yml` - PostgreSQL only
 - `docker-compose.dev.db-ui.yml` - PostgreSQL + UI
-- `docker-compose.dev.db-api.yml` - PostgreSQL + API
-- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, API, UI)
+- `docker-compose.dev.db-api.yml` - PostgreSQL + API + Ollama
+- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, API, UI, Ollama)
 
 ### Services
 1. **postgres**: PostgreSQL 16 Alpine
@@ -217,6 +347,13 @@ Api/
    - Port: 8080 (container), 13245 (host)
    - Health check: `http://localhost:8080/health/live`
    - Multi-stage build (SDK + Runtime)
+
+3. **ollama**: Ollama AI server
+   - Port: 11434 (container), 11435 (host)
+   - Uses custom Dockerfile (`ollama.Dockerfile`) with curl + startup script
+   - Health check: `curl -s http://localhost:11434/api/tags | grep -q tinyllama`
+   - Volume: `ollama-data` (persists downloaded models)
+   - Custom entrypoint: `ollama-startup.sh` (pulls TinyLlama model on first run)
 
 4. **ui**: Node.js with health server
    - Port: 3000
@@ -231,6 +368,7 @@ The following variables are required:
 - `VITE_API_BASE_URL` - UI build argument
 - `LOG_LEVEL` - Debug/Information/Warning/Error
 - `ASPNETCORE_ENVIRONMENT` - Development/Production
+- `OLLAMA__BASEURL` - Ollama server URL (e.g., `http://ollama:11434` for Docker, `http://ca-ollama-staging.internal.<domain>:11434` for Azure)
 
 ### Conventions
 

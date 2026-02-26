@@ -9,6 +9,7 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 | Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
+| Ollama | AI Chatbot | 11435 (host), 11434 (container) |
 
 ## Prerequisites
 
@@ -71,6 +72,25 @@ docker compose -f docker-compose.dev.full.yml up -d
 docker compose -f docker-compose.dev.full.yml down
 ```
 
+## Chatbot
+
+The chatbot feature uses Ollama with the TinyLlama model to answer questions about the CV.
+
+### Usage
+
+1. Start the API (with database and Ollama):
+   ```bash
+   docker compose -f docker-compose.dev.db-api.yml up -d
+   ```
+
+2. Run the UI locally:
+   ```bash
+   cd UI
+   npm run dev
+   ```
+
+3. Navigate to the chatbot page and ask questions about the CV.
+
 ## VSCode Debugging
 
 ### Debug API in Docker Container
@@ -114,6 +134,7 @@ docker ps
 docker logs raysoncv-api
 docker logs raysoncv-ui
 docker logs raysoncv-postgres
+docker logs raysoncv-ollama
 ```
 
 ### Stop All Containers
