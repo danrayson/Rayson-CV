@@ -29,5 +29,18 @@ resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers
   }
 }
 
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource ollamaModels 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
+  parent: fileService
+  name: 'ollama-models'
+  properties: {
+    shareQuota: 10
+  }
+}
+
 output storageAccountName string = storageAccount.name
 output blobBaseUrl string = 'https://${storageAccount.name}.blob.${environment().suffixes.storage}'
