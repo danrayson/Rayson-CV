@@ -51,5 +51,30 @@ services:
       retries: 3
       start_period: 10s
 
+  # ===========================================
+  # Ollama (AI Chatbot)
+  # ===========================================
+  ollama:
+    build:
+      context: .
+      dockerfile: ollama.Dockerfile
+    container_name: raysoncv-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11435:11434"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:11434/api/tags | grep -q tinyllama"]
+      interval: 5s
+      timeout: 10s
+      retries: 180
+      start_period: 0s
+
 volumes:
   postgres-data:
+  ollama-data:

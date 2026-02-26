@@ -3,6 +3,7 @@ using Database.SeedData;
 using Database.Extensions;
 using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
+using Presentation.Endpoints.Chatbot;
 using Infrastructure.Extensions;
 using Infrastructure.Logging;
 using Serilog;
@@ -37,7 +38,7 @@ try
 
     builder.Services.AddPresentationServices();
     builder.Services.AddDatabaseServices(builder.Configuration);
-    builder.Services.AddInfrastructureServices();
+    builder.Services.AddInfrastructureServices(builder.Configuration);
 
     var app = builder.Build();
 
@@ -45,6 +46,7 @@ try
 
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();
+    app.MapChatbotEndpoints();
 
     if (app.Environment.IsDevelopment())
     {
