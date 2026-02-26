@@ -5,9 +5,6 @@ param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
 param tags object = {}
-param storageAccountName string
-@secure()
-param storageAccountKey string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
@@ -23,10 +20,6 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
-        }
-        {
-          name: 'storage-account-key'
-          value: storageAccountKey
         }
       ]
       activeRevisionsMode: 'Single'
@@ -74,11 +67,7 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'ollama-models'
           storageType: 'AzureFile'
-          storage: {
-            storageAccountName: storageAccountName
-            shareName: 'ollama-models'
-            accountKeySecretRef: 'storage-account-key'
-          }
+          storageName: 'ollama-models'
         }
       ]
     }

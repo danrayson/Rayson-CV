@@ -45,6 +45,9 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
     location: location
     environmentName: containerAppsEnvName
     tags: tags
+    storageAccountName: storage.outputs.storageAccountName
+    storageAccountKey: storage.outputs.storageAccountKey
+    storageShareName: 'ollama-models'
   }
 }
 
