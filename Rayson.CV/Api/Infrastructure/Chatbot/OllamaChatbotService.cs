@@ -75,27 +75,3 @@ public class OllamaChatbotService(IHttpClientFactory httpClientFactory, IOptions
         }
     }
 }
-
-public class OllamaSettings
-{
-    public required string BaseUrl { get; set; }
-}
-
-internal class OllamaChatRequest
-{
-    public required string Model { get; set; }
-    public required List<OllamaMessage> Messages { get; set; }
-    public bool Stream { get; set; }
-    public int NumPredict { get; set; }
-}
-
-internal class OllamaMessage
-{
-    public required string Role { get; set; }
-    public required string Content { get; set; }
-}
-
-internal class OllamaChatResponse
-{
-    public OllamaMessage? Message { get; set; }
-}
