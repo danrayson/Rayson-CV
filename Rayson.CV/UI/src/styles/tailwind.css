@@ -1151,6 +1151,14 @@ html {
   opacity: 1;
 }
 
+.alert-warning {
+  border-color: var(--fallback-wa,oklch(var(--wa)/0.2));
+  --tw-text-opacity: 1;
+  color: var(--fallback-wac,oklch(var(--wac)/var(--tw-text-opacity)));
+  --alert-bg: var(--fallback-wa,oklch(var(--wa)/1));
+  --alert-bg-mix: var(--fallback-b1,oklch(var(--b1)/1));
+}
+
 .btm-nav > *.disabled,
     .btm-nav > *[disabled] {
   pointer-events: none;
@@ -1901,10 +1909,6 @@ html {
   flex: 1 1 0%;
 }
 
-.shrink-0 {
-  flex-shrink: 0;
-}
-
 @keyframes bounce {
   0%, 100% {
     transform: translateY(-25%);
@@ -2001,10 +2005,6 @@ html {
 
 .bg-warning\/20 {
   background-color: var(--fallback-wa,oklch(var(--wa)/0.2));
-}
-
-.stroke-current {
-  stroke: currentColor;
 }
 
 .p-4 {

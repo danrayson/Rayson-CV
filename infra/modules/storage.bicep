@@ -21,6 +21,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   tags: tags
 }
 
+resource storageAccountKeys 'Microsoft.Storage/storageAccounts/listKeys@2021-04-01' = {
+  name: storageAccountName
+}
+
 resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   name: '${storageAccountName}/default/$web'
   dependsOn: [storageAccount]
@@ -44,3 +48,4 @@ resource ollamaModels 'Microsoft.Storage/storageAccounts/fileServices/shares@202
 
 output storageAccountName string = storageAccount.name
 output blobBaseUrl string = 'https://${storageAccount.name}.blob.${environment().suffixes.storage}'
+output storageAccountKey string = any(storageAccountKeys).keys[0].value

@@ -65,7 +65,7 @@ const ChatbotPage: React.FC = () => {
         Home
       </button>
 
-      <div className="alert bg-warning/20 text-warning-content mt-16">
+      <div className="alert alert-warning mt-16">
         <ExclamationTriangleIcon className="h-6 w-6" />
         <div>
           <p className="font-bold">AI Limitation Warning</p>
