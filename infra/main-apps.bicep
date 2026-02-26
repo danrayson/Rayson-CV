@@ -17,7 +17,7 @@ var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var ollamaAppName = 'ca-ollama-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
-var ollamaFqdn = '${ollamaAppName}.internal.${defaultDomain}:11434'
+var ollamaFqdn = 'http://${ollamaAppName}:11434'
 
 module postgresService 'modules/postgres-service.bicep' = {
   name: 'postgres-service'
