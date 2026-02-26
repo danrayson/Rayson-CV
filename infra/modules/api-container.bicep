@@ -6,8 +6,8 @@ param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
 param uiFqdn string
+param ollamaFqdn string
 param postgresServiceId string
-param ollamaServiceId string
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -46,10 +46,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
           serviceId: postgresServiceId
           name: 'postgres'
         }
-        {
-          serviceId: ollamaServiceId
-          name: 'ollama'
-        }
       ]
       containers: [
         {
@@ -74,7 +70,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'OLLAMA__BASEURL'
-              value: 'http://ollama:11434'
+              value: 'http://${ollamaFqdn}'
             }
           ]
           resources: {
