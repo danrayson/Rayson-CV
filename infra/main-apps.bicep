@@ -5,7 +5,6 @@ param acrLoginServer string
 param acrName string
 param imageTag string
 param storageAccountName string
-param storageAccountKey string
 param blobBaseUrl string
 param environmentName string
 param tags object = {
@@ -39,8 +38,6 @@ module ollama 'modules/ollama-container.bicep' = {
     acrLoginServer: acrLoginServer
     acrName: acrName
     imageTag: imageTag
-    storageAccountName: storageAccountName
-    storageAccountKey: storageAccountKey
     tags: tags
   }
 }

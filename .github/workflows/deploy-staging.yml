@@ -333,7 +333,6 @@ jobs:
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
                          storageAccountName="${{ needs.deploy-core.outputs.storageAccountName }}" \
-                         storageAccountKey="${{ needs.deploy-core.outputs.storageAccountKey }}" \
                          blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}"
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
