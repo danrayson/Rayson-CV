@@ -21,7 +21,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   tags: tags
 }
 
-resource storageAccountKeys 'Microsoft.Storage/storageAccounts/listKeys@2021-04-01' = {
+resource storageAccountKeys 'Microsoft.Storage/storageAccounts/listKeys@2021-04-01' existing = {
   name: storageAccountName
 }
 
