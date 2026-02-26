@@ -78,6 +78,28 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             memory: '1.0Gi'
           }
         }
+        {
+          name: 'ollama'
+          image: '${acrLoginServer}/raysoncv-ollama:${imageTag}'
+          command: ['/bin/bash', '/ollama-startup.sh']
+          resources: {
+            cpu: json('2.0')
+            memory: '4.0Gi'
+          }
+          volumeMounts: [
+            {
+              volumeName: 'ollama-models'
+              mountPath: '/root/.ollama'
+            }
+          ]
+        }
+      ]
+      volumes: [
+        {
+          name: 'ollama-models'
+          storageType: 'AzureFile'
+          storageName: 'ollama-models'
+        }
       ]
       scale: {
         minReplicas: 1
