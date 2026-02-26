@@ -255,6 +255,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Wait for storage account
+        run: |
+          echo "Waiting for storage account to be ready..."
+          until STORAGE_STATE=$(az storage account show \
+            --name strraysoncvstaging \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "provisioningState" \
+            --output tsv 2>/dev/null) && [ "$STORAGE_STATE" = "Succeeded" ]; do
+            echo "Storage account status: $STORAGE_STATE. Waiting..."
+            sleep 5
+          done
+          echo "Storage account is ready!"
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
