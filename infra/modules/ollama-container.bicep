@@ -44,7 +44,7 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             {
               name: 'OLLAMA_HOST'
-              value: '0.0.0.0'
+              value: '0.0.0.0:11434'
             }
           ]
           resources: {
