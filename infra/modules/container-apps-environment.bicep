@@ -18,6 +18,7 @@ resource ollamaStorage 'Microsoft.App/managedEnvironments/storages@2023-05-01' =
   parent: containerAppsEnv
   properties: {
     azureFile: {
+      accessMode: 'ReadWrite'
       accountName: storageAccountName
       shareName: storageShareName
       accountKey: storageAccountKey
