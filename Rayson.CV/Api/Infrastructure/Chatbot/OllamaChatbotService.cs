@@ -37,7 +37,8 @@ public class OllamaChatbotService(IHttpClientFactory httpClientFactory, IOptions
             {
                 Model = _settings.Model,
                 Messages = messages,
-                Stream = false
+                Stream = false,
+                NumPredict = 512
             };
 
             var jsonContent = new StringContent(
@@ -86,6 +87,7 @@ internal class OllamaChatRequest
     public required string Model { get; set; }
     public required List<OllamaMessage> Messages { get; set; }
     public bool Stream { get; set; }
+    public int NumPredict { get; set; }
 }
 
 internal class OllamaMessage
