@@ -23,6 +23,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 
 resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   name: '${storageAccountName}/default/$web'
+  dependsOn: [storageAccount]
   properties: {
     publicAccess: 'Blob'
   }
