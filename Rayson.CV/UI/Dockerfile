@@ -23,6 +23,9 @@ RUN npm install
 # Copy the rest of the application source code
 COPY . .
 
+# Generate Tailwind CSS
+RUN npx tailwindcss -i ./src/index.css -o ./src/styles/tailwind.css
+
 # Build the application with Vite
 # VITE_API_BASE_URL is injected at build time and embedded into the JS bundle
 RUN npm run build

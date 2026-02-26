@@ -62,25 +62,50 @@ const ChatbotPage: React.FC = () => {
         className="absolute top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
-        Back
       </button>
 
+      <div className="alert bg-warning/20 text-warning-content mt-16 mb-4 mx-4 max-w-3xl">
+        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <p className="font-bold">AI Limitation Warning</p>
+          <p className="text-sm">
+            This chatbot uses TinyLlama and may occasionally provide inaccurate information. 
+            For accurate details, please{' '}
+            <a href="/CV September 2024.pdf" download className="underline font-bold">
+              download the real CV
+            </a>.
+          </p>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4 pb-24">
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-3xl mx-auto space-y-2">
           {messages.map((message, index) => (
             <div
               key={index}
               className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}
             >
-              <div className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
+              <div 
+                className={`chat-bubble ${
+                  message.role === 'user' 
+                    ? 'chat-bubble-primary rounded-2xl rounded-tr-sm' 
+                    : 'chat-bubble-secondary rounded-2xl rounded-tl-sm'
+                }`}
+              >
                 {message.content}
               </div>
             </div>
           ))}
           {isLoading && (
             <div className="chat chat-start">
-              <div className="chat-bubble chat-bubble-secondary">
-                <span className="loading loading-dots loading-md"></span>
+              <div className="chat-bubble bg-base-300 rounded-2xl rounded-tl-sm">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
               </div>
             </div>
           )}
@@ -88,19 +113,19 @@ const ChatbotPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-base-200 p-4 border-t border-base-300">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-base-100 px-4 py-3">
+        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me about Rayson's CV..."
-            className="input input-bordered flex-1"
+            className="flex-1 bg-base-300 rounded-full px-4 py-2.5 outline-none placeholder-base-content/50"
             disabled={isLoading}
           />
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn btn-circle btn-primary"
             disabled={isLoading || !input.trim()}
           >
             {isLoading ? (
