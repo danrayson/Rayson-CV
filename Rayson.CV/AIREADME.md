@@ -40,6 +40,7 @@ The API follows **Clean Architecture** with these layers:
 - **Elements**: `FormRow.tsx`, `ValidationMessages.tsx` (in `/src/elements/`)
 - **Services**: `httpClient.ts`, `loggingService.ts` (in `/src/services/`)
 - **Routing**: Uses `HashRouter` (not BrowserRouter) - important for Electron compatibility
+- **Electron**: Desktop app support via `UI/electron/main.cjs` and `UI/electron/preload.cjs`
 
 ### State Management
 - Currently uses **local component state** with `useState` and `useEffect`
@@ -118,8 +119,8 @@ Api/
 - **Health** (`/health`):
   - `GET /health/live` - Liveness probe
   - `GET /health/ready` - Readiness probe
-- **Logging** (`/logging`):
-  - `POST /logging/client` - Receive client-side logs
+- **Logging** (`/logs`):
+  - `POST /logs` - Receive client-side logs
 
 ### Authentication
 - JWT tokens with 12-hour expiration
@@ -366,6 +367,7 @@ The following variables are required:
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_SIGNING_KEY`
 - `VITE_API_BASE_URL` - UI build argument
+- `API_HEALTH_URL` - API health URL for UI health checks
 - `LOG_LEVEL` - Debug/Information/Warning/Error
 - `ASPNETCORE_ENVIRONMENT` - Development/Production
 - `OLLAMA__BASEURL` - Ollama server URL (e.g., `http://ollama:11434` for Docker, `http://ca-ollama-staging.internal.<domain>:11434` for Azure)
@@ -419,7 +421,7 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 
 **Trigger:**
-- Push to `develop` branch
+- Merge to `develop` branch via GitHub Pull Request
 - Manual workflow dispatch (with optional imageTag input)
 
 **Jobs:**
@@ -454,12 +456,29 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 
 ## Development Workflow
 
+### Project Structure Note
+The repository has a nested structure:
+- `Rayson-CV/` (repository root)
+  - `Rayson.CV/` (main project folder containing code)
+    - `Api/` - .NET backend
+    - `UI/` - React frontend
+    - `Test/` - E2E tests
+    - `.env` - Environment variables
+
 ### Local Development
-1. Configure `.env` with your values
+1. Configure `.env` in `Rayson.CV/` with your values
 2. Run `docker compose -f docker-compose.dev.db.yml up -d` for database
-3. For API: Open `Api/Presentation` in VSCode, run/debug with .NET debugger
-4. For UI: Run `npm install && npm run dev` in `UI/` directory
-5. Access UI at `http://localhost:3000`, API at `http://localhost:13245`
+3. For API (local debugging):
+   - Start database: `docker compose -f docker-compose.dev.db.yml up -d`
+   - Open `Rayson.CV/Api/Presentation` in VSCode
+   - Run with ".NET Core Launch (web)" config
+   - API runs at `http://localhost:5000`
+4. For API (Docker debugging):
+   - Start: `docker compose -f docker-compose.dev.db-ui.yml up -d`
+   - Use "Docker: .NET Core Debug" in VSCode
+   - API at `http://localhost:13245`
+5. For UI: Run `npm install && npm run dev` in `Rayson.CV/UI/`
+6. Access UI at `http://localhost:3000`
 
 ### Debugging
 - **API**: Use VSCode .NET debugger with `.vscode/launch.json` (if configured)
