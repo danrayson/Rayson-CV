@@ -4,7 +4,6 @@ param defaultDomain string
 param acrLoginServer string
 param acrName string
 param imageTag string
-param storageAccountName string
 param blobBaseUrl string
 param environmentName string
 param tags object = {
@@ -15,9 +14,8 @@ param tags object = {
 var postgresServiceName = 'ca-postgres-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
-var ollamaAppName = 'ca-ollama-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
-var ollamaFqdn = '${ollamaAppName}.internal.${defaultDomain}:11434'
+var ollamaFqdn = 'http://localhost:11434'
 
 module postgresService 'modules/postgres-service.bicep' = {
   name: 'postgres-service'
@@ -25,19 +23,6 @@ module postgresService 'modules/postgres-service.bicep' = {
     location: location
     environmentId: environmentId
     containerAppName: postgresServiceName
-    tags: tags
-  }
-}
-
-module ollama 'modules/ollama-container.bicep' = {
-  name: 'ollama-container'
-  params: {
-    location: location
-    environmentId: environmentId
-    containerAppName: ollamaAppName
-    acrLoginServer: acrLoginServer
-    acrName: acrName
-    imageTag: imageTag
     tags: tags
   }
 }
