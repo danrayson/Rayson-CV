@@ -6,18 +6,11 @@ param acrName string
 param imageTag string = 'latest'
 param tags object = {}
 param storageAccountName string
+@secure()
+param storageAccountKey string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
-}
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
-  name: storageAccountName
-}
-
-resource storageAccountKeys 'Microsoft.Storage/storageAccounts/listKeys@2023-01-01' = {
-  name: storageAccountName
-  dependsOn: [storageAccount]
 }
 
 resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
@@ -33,7 +26,7 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
         }
         {
           name: 'storage-account-key'
-          value: storageAccountKeys.keys[0].value
+          value: storageAccountKey
         }
       ]
       activeRevisionsMode: 'Single'
