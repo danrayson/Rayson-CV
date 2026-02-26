@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Hi! I\'m here to answer questions about Rayson\'s CV. What would you like to know?'
+      content: 'Hi! I\'m here to answer questions about Dan Rayson\'s CV. What would you like to know?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -62,16 +62,15 @@ const ChatbotPage: React.FC = () => {
         className="absolute top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
+        Home
       </button>
 
       <div className="alert bg-warning/20 text-warning-content mt-16">
-        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+        <ExclamationTriangleIcon className="h-6 w-6" />
         <div>
           <p className="font-bold">AI Limitation Warning</p>
           <p className="text-sm">
-            This chatbot uses TinyLlama and may occasionally provide inaccurate information. 
+            This chatbot uses TinyLlama and provides inaccurate information on a regular basis. 
             For accurate details, please{' '}
             <a href="/CV September 2024.pdf" download className="underline font-bold">
               download the real CV
@@ -119,7 +118,7 @@ const ChatbotPage: React.FC = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me about Rayson's CV..."
+            placeholder="Ask me about Dan Rayson's CV..."
             className="flex-1 bg-base-300 rounded-full px-4 py-2.5 outline-none placeholder-base-content/50"
             disabled={isLoading}
           />
