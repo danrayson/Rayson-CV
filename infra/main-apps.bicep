@@ -17,6 +17,7 @@ var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var ollamaAppName = 'ca-ollama-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
+var ollamaFqdn = '${ollamaAppName}.internal.${defaultDomain}:11434'
 
 module postgresService 'modules/postgres-service.bicep' = {
   name: 'postgres-service'
@@ -52,8 +53,8 @@ module api 'modules/api-container.bicep' = {
     acrName: acrName
     imageTag: imageTag
     uiFqdn: uiFqdn
+    ollamaFqdn: ollamaFqdn
     postgresServiceId: postgresService.outputs.serviceId
-    ollamaServiceId: ollama.outputs.serviceId
     tags: tags
   }
 }
