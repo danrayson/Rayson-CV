@@ -43,7 +43,6 @@ services:
       Cors__AllowedOrigins__1: http://localhost:5173
       LOG_LEVEL: Debug
       OLLAMA__BASEURL: http://ollama:11434
-      OLLAMA__MODEL: tinyllama
     ports:
       - "13245:8080"
     depends_on:

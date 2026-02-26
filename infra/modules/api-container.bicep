@@ -76,10 +76,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               name: 'OLLAMA__BASEURL'
               value: 'http://ollama:11434'
             }
-            {
-              name: 'OLLAMA__MODEL'
-              value: 'tinyllama'
-            }
           ]
           resources: {
             cpu: json('0.5')

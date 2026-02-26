@@ -35,7 +35,7 @@ public class OllamaChatbotService(IHttpClientFactory httpClientFactory, IOptions
 
             var ollamaRequest = new OllamaChatRequest
             {
-                Model = _settings.Model,
+                Model = "tinyllama",
                 Messages = messages,
                 Stream = false,
                 NumPredict = 128
@@ -79,7 +79,6 @@ public class OllamaChatbotService(IHttpClientFactory httpClientFactory, IOptions
 public class OllamaSettings
 {
     public required string BaseUrl { get; set; }
-    public required string Model { get; set; }
 }
 
 internal class OllamaChatRequest
