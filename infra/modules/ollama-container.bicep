@@ -62,8 +62,8 @@ resource ollamaContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
           ]
           resources: {
-            cpu: json('1.0')
-            memory: '2.0Gi'
+            cpu: json('2.0')
+            memory: '4.0Gi'
           }
           volumeMounts: [
             {
