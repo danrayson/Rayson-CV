@@ -2,6 +2,7 @@
 set -e
 
 # Start Ollama server in background
+export OLLAMA_HOST=0.0.0.0:11434
 ollama serve &
 
 # Wait for server to be ready
