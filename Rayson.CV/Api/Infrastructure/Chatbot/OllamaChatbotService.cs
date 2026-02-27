@@ -50,7 +50,7 @@ public class OllamaChatbotService(
 
             var ollamaRequest = new OllamaChatRequest
             {
-                Model = "tinyllama",
+                Model = "smollm2:135m",
                 Messages = messages,
                 Stream = false,
                 NumPredict = 128
@@ -123,7 +123,7 @@ public class OllamaChatbotService(
 
         var ollamaRequest = new OllamaChatRequest
         {
-            Model = "tinyllama",
+            Model = "smollm2:135m",
             Messages = messages,
             Stream = true,
             NumPredict = 128

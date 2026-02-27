@@ -30,7 +30,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8080
         transport: 'auto'
-        timeout: 300
       }
       registries: [
         {
