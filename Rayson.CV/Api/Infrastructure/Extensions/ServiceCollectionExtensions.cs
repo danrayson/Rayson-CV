@@ -26,7 +26,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient("Ollama")
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                ConnectTimeout = TimeSpan.FromMinutes(5)
+                ConnectTimeout = TimeSpan.FromMinutes(5),
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                MaxConnectionsPerServer = 1
             })
             .ConfigureHttpClient((serviceProvider, client) =>
             {
