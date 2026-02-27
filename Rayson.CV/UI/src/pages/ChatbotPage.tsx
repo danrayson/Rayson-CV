@@ -84,11 +84,11 @@ const ChatbotPage: React.FC = () => {
         <div>
           <p className="font-bold">AI Limitation Warning</p>
           <p className="text-sm">
-            This chatbot uses TinyLlama and provides inaccurate information on a regular basis. 
+            This chatbot uses smollm2:135m, RAG, CPU inference, and halucinates. 
             For accurate details, please{' '}
             <a href="/CV September 2024.pdf" download className="underline font-bold">
               download the real CV
-            </a>.
+            </a>.  This is due to cost limitations.
           </p>
         </div>
       </div>

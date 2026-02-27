@@ -169,12 +169,12 @@ Api/
 ## Chatbot
 
 ### Overview
-The chatbot feature uses Ollama with the TinyLlama model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
+The chatbot feature uses Ollama with the smollm2:135m model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
 
 ### Architecture
 
 ```
-User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (TinyLlama)
+User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (smollm2:135m)
 ```
 
 ### Components
@@ -237,7 +237,7 @@ The chatbot service is configured via environment variables:
 | `OLLAMA__BASEURL` | Ollama server URL | `http://ollama:11434` |
 
 The following are hardcoded in the service:
-- **Model**: `tinyllama` (not configurable)
+- **Model**: `smollm2:135m` (not configurable)
 - **Max tokens**: 128 (limits response length)
 
 ### System Prompt
@@ -255,18 +255,19 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 **Custom Dockerfile**: `ollama.Dockerfile`
 - Based on `ollama/ollama:latest`
 - Installs curl for health checks
-- Uses startup script to pull TinyLlama model on first run
+- Uses startup script to pull smollm2:135m model on first run
 
 **Startup Script**: `ollama-startup.sh`
 - Starts Ollama server
 - Waits for server to be ready
-- Pulls TinyLlama model (if not already present)
+- Pulls smollm2:135m model (if not already present)
 - Keeps container running
 
 **Docker Compose Files**:
-- `docker-compose.dev.db-api.yml` - Includes Ollama
-- `docker-compose.dev.full.yml` - Includes Ollama
-- Healthcheck confirms TinyLlama model is available before marking container healthy
+- `docker-compose.dev.ui.yml` - UI + Ollama
+- `docker-compose.dev.api.yml` - API + Ollama
+- `docker-compose.dev.full.yml` - Full stack (API, UI, Ollama)
+- Healthcheck confirms smollm2:135m model is available before marking container healthy
 
 ### Azure Bicep
 
@@ -290,7 +291,7 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 - Hardcode model name (only one model is used)
 
 **To Avoid:**
-- Do NOT make model configurable - always use TinyLlama
+- Do NOT make model configurable - always use smollm2:135m
 - Do NOT store CV in database - use embedded resource
 - Do NOT use service bindings for container apps - use internal DNS
 
@@ -352,9 +353,9 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 3. **ollama**: Ollama AI server
    - Port: 11434 (container), 11435 (host)
    - Uses custom Dockerfile (`ollama.Dockerfile`) with curl + startup script
-   - Health check: `curl -s http://localhost:11434/api/tags | grep -q tinyllama`
+   - Health check: `curl -s http://localhost:11434/api/tags | grep -q smollm2:135m`
    - Volume: `ollama-data` (persists downloaded models)
-   - Custom entrypoint: `ollama-startup.sh` (pulls TinyLlama model on first run)
+   - Custom entrypoint: `ollama-startup.sh` (pulls smollm2:135m model on first run)
 
 4. **ui**: Node.js with health server
    - Port: 3000

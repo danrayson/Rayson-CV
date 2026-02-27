@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Start Ollama server in background
@@ -11,15 +11,15 @@ until curl -s http://localhost:11434/api/tags > /dev/null 2>&1; do
     sleep 1
 done
 
-# Pull tinyllama model if not already present
-if ! ollama list | grep -q "^tinyllama"; then
-    echo "Pulling tinyllama model..."
-    ollama pull tinyllama
+# Pull smollm2:135m model if not already present
+if ! ollama list | grep -q "^smollm2:135m"; then
+    echo "Pulling smollm2:135m model..."
+    ollama pull smollm2:135m
 else
-    echo "tinyllama model already present, skipping pull"
+    echo "smollm2:135m model already present, skipping pull"
 fi
 
-echo "Ollama is ready with tinyllama!"
+echo "Ollama is ready with smollm2:135m!"
 
 # Keep container running
 wait
