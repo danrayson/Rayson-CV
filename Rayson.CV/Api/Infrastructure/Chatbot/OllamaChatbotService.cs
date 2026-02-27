@@ -93,18 +93,18 @@ public class OllamaChatbotService(
     public async Task StreamChatResponseAsync(ChatbotRequest request, ICvProvider cvProvider, Func<string, Task> onChunk, CancellationToken cancellationToken)
     {
         var cvContent = cvProvider.GetCvContent();
-        var systemPrompt = $"""
-            You are a helpful assistant answering questions about Daniel Rayson's CV.
+        // var systemPrompt = $"""
+        //     You are a helpful assistant answering questions about Daniel Rayson's CV.
             
-            Only answer questions related to Daniel's professional background, skills, experience, and education.
-            Keep your answers brief and concise, preferably 1-2 sentences maximum.
-            If asked about something not in the CV, politely say you don't have that information.
+        //     Only answer questions related to Daniel's professional background, skills, experience, and education.
+        //     Keep your answers brief and concise, preferably 1-2 sentences maximum.
+        //     If asked about something not in the CV, politely say you don't have that information.
             
-            ---
+        //     ---
             
-            {cvContent}
-            """;
-
+        //     {cvContent}
+        //     """;
+        var systemPrompt = "";
         var messages = new List<OllamaMessage>
         {
             new() { Role = "system", Content = systemPrompt }
