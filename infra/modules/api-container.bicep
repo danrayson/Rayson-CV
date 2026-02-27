@@ -74,7 +74,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'ollama'
           image: '${acrLoginServer}/raysoncv-ollama:${imageTag}'
-          command: ['/bin/bash', '/ollama-startup.sh']
+          command: ['/bin/sh', '/ollama-startup.sh']
           resources: {
             cpu: json('1.5')
             memory: '3.0Gi'

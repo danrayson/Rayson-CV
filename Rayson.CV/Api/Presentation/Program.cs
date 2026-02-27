@@ -41,6 +41,13 @@ try
 
     app.UseMiddleware<RequestLoggingMiddleware>();
 
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.EnableTryItOutByDefault();
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Rayson CV API V1");
+    });
+
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();
     app.MapChatbotEndpoints();
@@ -48,18 +55,11 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-        {
-            options.EnableTryItOutByDefault();
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Rayson CV API V1");
-        });
     }
 
     app.UseHttpsRedirection();
     if (!app.Environment.IsDevelopment())
     {
-        app.UseHttpsRedirection();
         app.UseHsts();
     }
     app.UseCors();
