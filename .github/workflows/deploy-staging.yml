@@ -67,6 +67,7 @@ jobs:
       environmentId: ${{ steps.deploy.outputs.environmentId }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
+      storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
       blobBaseUrl: ${{ steps.deploy.outputs.blobBaseUrl }}
     
     steps:
@@ -95,6 +96,7 @@ jobs:
           ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.environmentId.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
+          STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
           BLOB_BASE_URL=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.blobBaseUrl.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
@@ -102,6 +104,7 @@ jobs:
           echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "storageAccountKey=$STORAGE_ACCOUNT_KEY" >> $GITHUB_OUTPUT
           echo "blobBaseUrl=$BLOB_BASE_URL" >> $GITHUB_OUTPUT
 
   push:
@@ -290,7 +293,8 @@ jobs:
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV.AppImage" \
-            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
             --overwrite
 
       - name: Upload macOS app
@@ -301,7 +305,8 @@ jobs:
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV.dmg" \
-            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
             --overwrite
 
       - name: Upload Windows app
@@ -312,7 +317,8 @@ jobs:
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV-Setup.exe" \
-            --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
             --overwrite
 
   deploy-apps:
