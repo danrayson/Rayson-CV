@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Application.Chatbot;
 using Application.Core;
+using Infrastructure.RAG;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,51 +11,18 @@ namespace Infrastructure.Chatbot;
 public class OllamaChatbotService(
     IHttpClientFactory httpClientFactory,
     IOptions<OllamaSettings> options,
+    IRagService ragService,
     ILogger<OllamaChatbotService> logger) : IChatbotService
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Ollama");
     private readonly OllamaSettings _settings = options.Value;
 
-    public async Task<ServiceResponse<ChatbotResponse>> GetChatResponseAsync(ChatbotRequest request, ICvProvider cvProvider)
+    public async Task<ServiceResponse<ChatbotResponse>> GetChatResponseAsync(ChatbotRequest request)
     {
         try
         {
-            var cvContent = cvProvider.GetCvContent();
-            var systemPrompt = $"""
-                You are a helpful assistant answering questions about Daniel Rayson's CV.
-                
-                Only answer questions related to Daniel's professional background, skills, experience, and education.
-                Keep your answers brief and concise, preferably 1-2 sentences maximum.
-                If asked about something not in the CV, politely say you don't have that information.
-                
-                ---
-                
-                {cvContent}
-                """;
-
-            var messages = new List<OllamaMessage>
-            {
-                new() { Role = "system", Content = systemPrompt }
-            };
-
-            if (request.History != null)
-            {
-                messages.AddRange(request.History.Select(h => new OllamaMessage
-                {
-                    Role = h.Role,
-                    Content = h.Content
-                }));
-            }
-
-            messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
-
-            var ollamaRequest = new OllamaChatRequest
-            {
-                Model = "smollm2:135m",
-                Messages = messages,
-                Stream = false,
-                NumPredict = 128
-            };
+            var messages = await BuildMessagesAsync(request);
+            var ollamaRequest = CreateChatRequest(messages, stream: false);
 
             var jsonContent = new StringContent(
                 JsonSerializer.Serialize(ollamaRequest),
@@ -90,44 +58,10 @@ public class OllamaChatbotService(
         }
     }
 
-    public async Task StreamChatResponseAsync(ChatbotRequest request, ICvProvider cvProvider, Func<string, Task> onChunk, CancellationToken cancellationToken)
+    public async Task StreamChatResponseAsync(ChatbotRequest request, Func<string, Task> onChunk, CancellationToken cancellationToken)
     {
-        var cvContent = cvProvider.GetCvContent();
-        var systemPrompt = $"""
-            You are a helpful assistant answering questions about Daniel Rayson's CV.
-            
-            Only answer questions related to Daniel's professional background, skills, experience, and education.
-            Keep your answers brief and concise, preferably 1-2 sentences maximum.
-            If asked about something not in the CV, politely say you don't have that information.
-            
-            ---
-            
-            {cvContent}
-            """;
-
-        var messages = new List<OllamaMessage>
-        {
-            new() { Role = "system", Content = systemPrompt }
-        };
-
-        if (request.History != null)
-        {
-            messages.AddRange(request.History.Select(h => new OllamaMessage
-            {
-                Role = h.Role,
-                Content = h.Content
-            }));
-        }
-
-        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
-
-        var ollamaRequest = new OllamaChatRequest
-        {
-            Model = "smollm2:135m",
-            Messages = messages,
-            Stream = true,
-            NumPredict = 128
-        };
+        var messages = await BuildMessagesAsync(request);
+        var ollamaRequest = CreateChatRequest(messages, stream: true);
 
         var jsonContent = new StringContent(
             JsonSerializer.Serialize(ollamaRequest),
@@ -179,5 +113,59 @@ public class OllamaChatbotService(
                 logger.LogWarning(ex, "Failed to parse JSON chunk: {Json}", line);
             }
         }
+    }
+
+    private async Task<List<OllamaMessage>> BuildMessagesAsync(ChatbotRequest request)
+    {
+        var systemPrompt = await BuildSystemPromptAsync(request.Message);
+
+        var messages = new List<OllamaMessage>
+        {
+            new() { Role = "system", Content = systemPrompt }
+        };
+
+        if (request.History != null)
+        {
+            messages.AddRange(request.History.Select(h => new OllamaMessage
+            {
+                Role = h.Role,
+                Content = h.Content
+            }));
+        }
+
+        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
+
+        return messages;
+    }
+
+    private async Task<string> BuildSystemPromptAsync(string message)
+    {
+        var relevantChunks = await ragService.SearchAsync(message, topK: 4);
+        var chunksText = string.Join("\n---\n", relevantChunks);
+
+        return $"""
+            You are a helpful assistant answering questions about Daniel Rayson's CV.
+            
+            Only answer questions related to Daniel's professional background, skills, experience, and education.
+            Keep your answers brief and concise, preferably 1-2 sentences maximum.
+            If asked about something not in the CV, politely say you don't have that information.
+            
+            ---
+            
+            Relevant sections from Daniel's CV:
+            ---
+            {chunksText}
+            """;
+    }
+
+    private static OllamaChatRequest CreateChatRequest(List<OllamaMessage> messages, bool stream)
+    {
+        return new OllamaChatRequest
+        {
+            Model = "smollm2:135m",
+            Messages = messages,
+            Stream = stream,
+            NumPredict = 128
+        };
     }
 }

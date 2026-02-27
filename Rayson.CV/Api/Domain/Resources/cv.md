@@ -8,8 +8,9 @@ ADDRESS | 85 Bagots Oak, ST17 9SB
 TELEPHONE | 07703 574867
 EMAIL | danrayson@hotmail.co.uk
 
-EDUCATION 1999-2005
+EDUCATION
 
+1999-2005
 Mathematics | A*
 Sciences Double Award | Band B
 ICT Studies | Pass

@@ -16,7 +16,6 @@ public static class ChatbotEndpoints
 
     private static async Task<IResult> GetChatResponse(
         [FromServices] IChatbotService chatbotService,
-        [FromServices] ICvProvider cvProvider,
         [FromBody] ChatbotRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Message))
@@ -24,13 +23,12 @@ public static class ChatbotEndpoints
             return ServiceResponse<ChatbotResponse>.Invalid("Message is required").ToHttpResult();
         }
 
-        var response = await chatbotService.GetChatResponseAsync(request, cvProvider);
+        var response = await chatbotService.GetChatResponseAsync(request);
         return response.ToHttpResult();
     }
 
     private static async Task StreamChatResponse(
         [FromServices] IChatbotService chatbotService,
-        [FromServices] ICvProvider cvProvider,
         [FromBody] ChatbotRequest request,
         HttpContext httpContext,
         [FromServices] ILoggerFactory loggerFactory)
@@ -54,7 +52,6 @@ public static class ChatbotEndpoints
         {
             await chatbotService.StreamChatResponseAsync(
                 request,
-                cvProvider,
                 async chunk =>
                 {
                     var data = $"data: {System.Text.Json.JsonSerializer.Serialize(new { message = new { content = chunk } })}\n\n";

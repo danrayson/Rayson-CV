@@ -10,7 +10,7 @@ services:
   # PostgreSQL Database
   # ===========================================
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: raysoncv-postgres
     restart: unless-stopped
     environment:
@@ -109,7 +109,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:11434/api/tags | grep -q smollm2"]
+      test: ["CMD-SHELL", "curl -s http://localhost:11434/api/tags | grep -q smollm2 && curl -s http://localhost:11434/api/tags | grep -q nomic-embed-text"]
       interval: 5s
       timeout: 10s
       retries: 180
