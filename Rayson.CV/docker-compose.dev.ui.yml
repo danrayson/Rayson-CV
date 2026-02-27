@@ -1,31 +1,12 @@
 # ===========================================
-# Docker Compose - Development: Database + UI
+# Docker Compose - Development: UI
 # ===========================================
-# Usage: docker compose -f docker-compose.dev.db-ui.yml up -d
-# Purpose: Run PostgreSQL and UI in Docker, debug API locally
+# Usage: docker compose -f docker-compose.dev.ui.yml up -d
+# Purpose: Run UI + Ollama in Docker, debug API locally
 # API runs on host at http://localhost:13245
 # ===========================================
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: raysoncv-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   ui:
     build:
       context: ./UI
@@ -41,9 +22,6 @@ services:
       - "3000:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health/live"]
       interval: 30s
@@ -75,6 +53,9 @@ services:
       retries: 180
       start_period: 0s
 
+networks:
+  internal:
+    driver: bridge
+
 volumes:
-  postgres-data:
   ollama-data:

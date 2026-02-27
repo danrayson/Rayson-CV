@@ -9,7 +9,6 @@ This file contains AI-generated documentation for the RaysonCV project. Content 
 RaysonCV is a bootstrapping project to create new applications with:
 - **Frontend**: React + Vite SPA with Tailwind CSS and DaisyUI
 - **Backend**: .NET 8.0 Web API with clean architecture
-- **Database**: PostgreSQL 16 with Entity Framework Core
 - **Authentication**: JWT-based token authentication with email/password
 - **Logging**: Serilog writing to container console
 - **Containerization**: Docker with multi-stage builds
@@ -19,7 +18,7 @@ The API follows **Clean Architecture** with these layers:
 - **Presentation**: Minimal API endpoints, request/response models
 - **Application**: Business logic, service interfaces
 - **Domain**: Entities, domain interfaces
-- **Infrastructure**: External services (Auth, Email, Logging, Database)
+- **Infrastructure**: External services (Chatbot, Logging)
 
 ---
 
@@ -81,7 +80,6 @@ All API calls go through `httpClient.ts` which:
 
 ### Technology Stack
 - .NET 8.0 ASP.NET Core
-- Entity Framework Core 8.0
 - Minimal API endpoints (not MVC controllers)
 - FluentValidation for request validation
 - Swashbuckle/Swagger for API documentation
@@ -92,17 +90,13 @@ All API calls go through `httpClient.ts` which:
 ```
 Api/
 ├── Application/       # Business logic, interfaces, DTOs
-│   ├── Auth/
+│   ├── Chatbot/
 │   ├── Core/
 │   ├── Health/
 │   └── Logging/
-├── Database/          # EF Core context, migrations, repositories
-│   ├── Auth/          # Identity entities
-│   ├── Migrations/
-│   └── SeedData/
 ├── Domain/            # Entities, domain interfaces
 ├── Infrastructure/    # External services implementation
-│   ├── Auth/         # TokenService, AuthService
+│   ├── Chatbot/
 │   ├── Logging/
 │   └── Health/
 └── Presentation/      # Minimal API endpoints
@@ -111,28 +105,18 @@ Api/
 ```
 
 ### Endpoints
-- **Auth** (`/auth`):
-  - `POST /auth/signup` - Register with email/password
-  - `POST /auth/signin` - Login, returns token in `X-Auth-Token` header
-  - `POST /auth/request-password-reset` - Send password reset email
-  - `PUT /auth/reset-password` - Reset password with token
 - **Health** (`/health`):
   - `GET /health/live` - Liveness probe
   - `GET /health/ready` - Readiness probe
 - **Logging** (`/logs`):
   - `POST /logs` - Receive client-side logs
+- **Chatbot** (`/chatbot`):
+  - `POST /chatbot` - AI chatbot for CV questions
 
 ### Authentication
 - JWT tokens with 12-hour expiration
 - Token passed via `X-Auth-Token` header (also exposed in response header)
 - Claims include: `sub` (user ID), `name`, `email`, `role`
-- Uses ASP.NET Core Identity with PostgreSQL store
-
-### Database Integration
-- Entity Framework Core with Npgsql (PostgreSQL provider)
-- Repository pattern with generic `Repository<T>` class
-- Soft delete via `DeletedAt` field on `Entity` base class
-- Identity tables for user/role management
 
 ### Conventions
 
@@ -148,19 +132,16 @@ Api/
 - Use **primary constructor injection** for DI
 - Use async/await for all I/O operations
 - **Interfaces** in Application/Domain layers, **implementations** in Infrastructure layer
-- **Request models** in Presentation layer (e.g., `SignUpEmailPasswordRequest`)
-- **Validators** co-located with endpoints (e.g., `SignUpEmailPasswordRequestValidator`)
+- **Request models** in Presentation layer
+- **Validators** co-located with endpoints
 - Use `required` keyword for required request properties
 - Use `IOptions<T>` pattern for configuration classes
-- Use `Domain.Entity` base class with `Id` and `DeletedAt` for soft deletes
-- Use `IRepository<T>` interface in Domain, implementation in Database layer
 
 **To Avoid:**
 - Do NOT use MVC controllers (`[ApiController]` + `ControllerBase`)
 - Do NOT return `void` or raw types from endpoints - always use `IResult`
 - Do NOT use `IActionResult` - use `IResult` with `Results.Ok()`, `Results.Created()`, etc.
 - Do NOT put business logic in endpoints - delegate to Application layer services
-- Do NOT use synchronous database calls
 - Do NOT return exceptions directly - convert to `ServiceResponse` with error codes
 - Do NOT add external dependencies (NuGet packages) in Application or Domain layers - only in Infrastructure
 
@@ -264,19 +245,20 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 - Keeps container running
 
 **Docker Compose Files**:
-- `docker-compose.dev.db-api.yml` - Includes Ollama
-- `docker-compose.dev.full.yml` - Includes Ollama
+- `docker-compose.dev.ui.yml` - UI + Ollama
+- `docker-compose.dev.api.yml` - API + Ollama
+- `docker-compose.dev.full.yml` - Full stack (API, UI, Ollama)
 - Healthcheck confirms TinyLlama model is available before marking container healthy
 
 ### Azure Bicep
 
 **Modules**:
 - `infra/modules/ollama-container.bicep` - Deploys Ollama container app
-- `infra/modules/api-container.bicep` - Updated with `OLLAMA__BASEURL` env var
+- `infra/modules/api-container.bicep` - Contains Ollama container alongside API
 
 **Internal Communication**:
 - API connects to Ollama via internal FQDN: `http://ca-ollama-{environment}.internal.{domain}:11434`
-- No service binding used (Azure Container Apps service bindings don't work for container-to-container)
+- Ollama runs in same container app as API (sidecar pattern)
 
 ### Conventions
 
@@ -291,72 +273,32 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 
 **To Avoid:**
 - Do NOT make model configurable - always use TinyLlama
-- Do NOT store CV in database - use embedded resource
 - Do NOT use service bindings for container apps - use internal DNS
-
----
-
-## Database
-
-### Technology Stack
-- PostgreSQL 16 (Alpine image for smaller footprint)
-- Entity Framework Core 8.0
-- Npgsql as database provider
-
-### Schema
-- Uses ASP.NET Core Identity schema (Users, Roles, RoleClaims, UserRoles, UserClaims, UserLogins, UserTokens)
-- Custom `ApplicationUser` and `ApplicationRole` extending Identity base classes
-- All entities inherit from `Domain.Entity` base class with `Id` and `DeletedAt` fields
-
-### Migrations
-- Located in `Api/Database/Migrations/`
-- Initial migration: `20260222125915_Init.cs`
-- Run automatically on startup via `app.RunMigrations()` extension
-
-### Conventions
-
-**To Follow:**
-- Use **soft deletes** (set `DeletedAt` field) instead of hard deletes
-- Use **EF Core migrations** for schema changes
-- Use **repository pattern** for data access (via `Repository<T>`)
-- Follow naming: `PascalCase` for tables and columns
-- Use **async** methods for all database operations
-
-**To Avoid:**
-- Do NOT use hard deletes - always use soft delete
-- Do NOT write raw SQL queries unless absolutely necessary
-- Do NOT modify migrations manually after creation
-- Do NOT create stored procedures for simple CRUD - use EF Core
 
 ---
 
 ## Docker Setup
 
 ### Docker Compose Files
-- `docker-compose.dev.db.yml` - PostgreSQL only
-- `docker-compose.dev.db-ui.yml` - PostgreSQL + UI
-- `docker-compose.dev.db-api.yml` - PostgreSQL + API + Ollama
-- `docker-compose.dev.full.yml` - Full stack (PostgreSQL, API, UI, Ollama)
+- `docker-compose.dev.ui.yml` - UI + Ollama
+- `docker-compose.dev.api.yml` - API + Ollama
+- `docker-compose.dev.full.yml` - Full stack (API, UI, Ollama)
 
 ### Services
-1. **postgres**: PostgreSQL 16 Alpine
-   - Port: 5432 (internal), 5433 (host)
-   - Health check: `pg_isready`
-   - Volume: `postgres-data`
-
-2. **api**: .NET 8.0 ASP.NET Core
+1. **api**: .NET 8.0 ASP.NET Core
    - Port: 8080 (container), 13245 (host)
    - Health check: `http://localhost:8080/health/live`
    - Multi-stage build (SDK + Runtime)
+   - Includes Ollama as sidecar container
 
-3. **ollama**: Ollama AI server
+2. **ollama**: Ollama AI server
    - Port: 11434 (container), 11435 (host)
    - Uses custom Dockerfile (`ollama.Dockerfile`) with curl + startup script
    - Health check: `curl -s http://localhost:11434/api/tags | grep -q tinyllama`
    - Volume: `ollama-data` (persists downloaded models)
    - Custom entrypoint: `ollama-startup.sh` (pulls TinyLlama model on first run)
 
-4. **ui**: Node.js with health server
+3. **ui**: Node.js with health server
    - Port: 3000
    - Health check: `http://localhost:3000/health/live`
    - Multi-stage build (node:20-alpine)
@@ -364,7 +306,6 @@ This is constructed in `OllamaChatbotService.GetChatResponseAsync()`.
 
 ### Environment Variables
 The following variables are required:
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_SIGNING_KEY`
 - `VITE_API_BASE_URL` - UI build argument
 - `API_HEALTH_URL` - API health URL for UI health checks
@@ -401,21 +342,19 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 
 **Main Templates:**
 - `main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
-- `main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
+- `main-apps.bicep` - Creates workload resources: API Container App, UI Container App
 
 **Modules:**
-- `modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
+- `modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas) + Ollama sidecar
 - `modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
-- `modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
 - `modules/container-apps-environment.bicep` - Container Apps Environment
-- `modules/storage.bicep` - Azure Storage Account
+- `modules/storage.bicep` - Azure Storage Account + Ollama model persistence (Azure Files)
 - `modules/container-registry.bicep` - Azure Container Registry
 
 ### Azure Services
 - **Azure Container Apps** - Hosts API and UI containers
 - **Azure Container Registry** - Stores Docker images
-- **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
-- **Azure Storage Account** - General purpose storage
+- **Azure Storage Account** - General purpose storage + Ollama model persistence
 
 ### CI/CD
 GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
@@ -428,7 +367,7 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 1. **build** - Compiles .NET API and builds React UI
 2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
 3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
+4. **deploy-apps** - Deploys container apps (API, UI) via Bicep
 
 **Environment:** Staging (Azure `uksouth` region, resource group `rg-raysoncv-staging`)
 
@@ -467,23 +406,21 @@ The repository has a nested structure:
 
 ### Local Development
 1. Configure `.env` in `Rayson.CV/` with your values
-2. Run `docker compose -f docker-compose.dev.db.yml up -d` for database
-3. For API (local debugging):
-   - Start database: `docker compose -f docker-compose.dev.db.yml up -d`
+2. For API (local debugging):
+   - Start Ollama: `docker compose -f docker-compose.dev.api.yml up -d`
    - Open `Rayson.CV/Api/Presentation` in VSCode
    - Run with ".NET Core Launch (web)" config
    - API runs at `http://localhost:5000`
-4. For API (Docker debugging):
-   - Start: `docker compose -f docker-compose.dev.db-ui.yml up -d`
+3. For API (Docker debugging):
+   - Start: `docker compose -f docker-compose.dev.api.yml up -d`
    - Use "Docker: .NET Core Debug" in VSCode
    - API at `http://localhost:13245`
-5. For UI: Run `npm install && npm run dev` in `Rayson.CV/UI/`
-6. Access UI at `http://localhost:3000`
+4. For UI: Run `npm install && npm run dev` in `Rayson.CV/UI/`
+5. Access UI at `http://localhost:3000`
 
 ### Debugging
 - **API**: Use VSCode .NET debugger with `.vscode/launch.json` (if configured)
 - **UI**: Use browser DevTools, React Developer Tools extension
-- **Database**: Connect via DBeaver or similar on port 5433
 
 ### Code Style
 - **C#**: Use implicit usings, nullable reference types enabled, primary constructors
@@ -535,12 +472,6 @@ Test/e2e/
   - `E2E_UI_URL` - UI base URL (defaults to `http://localhost:3000`)
 - **Cucumber config**: `cucumber.js` at project root (not Playwright config)
 
-### Test Data Strategy
-- **Static test user**: Seeded in database for login tests
-  - Email: `testuser@test.com`
-  - Password: `TestPassword123!`
-- **Dynamic users**: Created via API for registration tests (unique per test run)
-
 ### Running Tests
 
 **Local development:**
@@ -585,14 +516,13 @@ npm run e2e:staging
 ### Production Setup
 - Docker containers for API and UI
 - Azure Container Apps for orchestration
-- Azure PostgreSQL Flexible Server for database
+- Ollama runs as sidecar in API container app
 
 ### Environment Configuration
 - `ASPNETCORE_ENVIRONMENT=Production` in production
 - CORS origins must be explicitly configured
 - JWT signing key must be secure (minimum 16 characters)
 - Use HTTPS only in production (HSTS enabled)
-- Database connection should use SSL
 
 ### Monitoring
 - **Development**: Container console logs

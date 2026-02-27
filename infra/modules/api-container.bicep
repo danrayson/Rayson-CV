@@ -7,7 +7,6 @@ param acrName string
 param imageTag string = 'latest'
 param uiFqdn string
 param ollamaFqdn string
-param postgresServiceId string
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -41,12 +40,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
     template: {
-      serviceBinds: [
-        {
-          serviceId: postgresServiceId
-          name: 'postgres'
-        }
-      ]
       containers: [
         {
           name: 'api'

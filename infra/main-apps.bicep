@@ -11,21 +11,10 @@ param tags object = {
   Project: 'RaysonCV'
 }
 
-var postgresServiceName = 'ca-postgres-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
 var ollamaFqdn = 'http://localhost:11434'
-
-module postgresService 'modules/postgres-service.bicep' = {
-  name: 'postgres-service'
-  params: {
-    location: location
-    environmentId: environmentId
-    containerAppName: postgresServiceName
-    tags: tags
-  }
-}
 
 module api 'modules/api-container.bicep' = {
   name: 'api-container'
@@ -39,7 +28,6 @@ module api 'modules/api-container.bicep' = {
     imageTag: imageTag
     uiFqdn: uiFqdn
     ollamaFqdn: ollamaFqdn
-    postgresServiceId: postgresService.outputs.serviceId
     tags: tags
   }
 }

@@ -1,31 +1,12 @@
 # ===========================================
-# Docker Compose - Development: Database + API
+# Docker Compose - Development: API
 # ===========================================
-# Usage: docker compose -f docker-compose.dev.db-api.yml up -d
-# Purpose: Run PostgreSQL and API in Docker, debug UI locally
+# Usage: docker compose -f docker-compose.dev.api.yml up -d
+# Purpose: Run API + Ollama in Docker, debug UI locally
 # UI connects to API at http://localhost:13245
 # ===========================================
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: raysoncv-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   api:
     build:
       context: ./Api
@@ -33,11 +14,6 @@ services:
     container_name: raysoncv-api
     restart: unless-stopped
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
-      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
       Cors__AllowedOrigins__1: http://localhost:5173
@@ -46,8 +22,6 @@ services:
     ports:
       - "13245:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
       ollama:
         condition: service_healthy
     networks:
@@ -88,5 +62,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
   ollama-data:

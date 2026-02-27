@@ -1,6 +1,4 @@
 using Presentation.Extensions;
-using Database.SeedData;
-using Database.Extensions;
 using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
 using Presentation.Endpoints.Chatbot;
@@ -37,7 +35,6 @@ try
     });
 
     builder.Services.AddPresentationServices();
-    builder.Services.AddDatabaseServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
     var app = builder.Build();
@@ -60,7 +57,6 @@ try
     }
 
     app.UseHttpsRedirection();
-    await app.RunMigrations();
     if (!app.Environment.IsDevelopment())
     {
         app.UseHttpsRedirection();

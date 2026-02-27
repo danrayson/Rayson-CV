@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
     public static void AddInfrastructureServices(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.AddHttpContextAccessor();
+        services.AddHealthChecks();
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
 

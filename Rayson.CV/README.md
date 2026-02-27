@@ -6,7 +6,6 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 
 | Component | Technology | Port |
 |-----------|------------|------|
-| Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
 | Ollama | AI Chatbot | 11435 (host), 11434 (container) |
@@ -32,34 +31,24 @@ Configure `.env` with your values:
 
 Choose your development scenario:
 
-#### Database Only
-Run PostgreSQL for local debugging of both API and UI:
+#### UI Only
+Run UI + Ollama in Docker, debug API locally in VSCode:
 ```bash
 # Start
-docker compose -f docker-compose.dev.db.yml up -d
+docker compose -f docker-compose.dev.ui.yml up -d
 
 # Stop
-docker compose -f docker-compose.dev.db.yml down
+docker compose -f docker-compose.dev.ui.yml down
 ```
 
-#### Database + UI
-Run PostgreSQL and UI in Docker, debug API locally in VSCode:
+#### API Only
+Run API + Ollama in Docker, debug UI locally:
 ```bash
 # Start
-docker compose -f docker-compose.dev.db-ui.yml up -d
+docker compose -f docker-compose.dev.api.yml up -d
 
 # Stop
-docker compose -f docker-compose.dev.db-ui.yml down
-```
-
-#### Database + API
-Run PostgreSQL and API in Docker, debug UI locally:
-```bash
-# Start
-docker compose -f docker-compose.dev.db-api.yml up -d
-
-# Stop
-docker compose -f docker-compose.dev.db-api.yml down
+docker compose -f docker-compose.dev.api.yml down
 ```
 
 #### Full Stack
@@ -95,9 +84,9 @@ User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (TinyLlama)
 
 ### Usage
 
-1. Start the API (with database and Ollama):
+1. Start the API (with Ollama):
    ```bash
-   docker compose -f docker-compose.dev.db-api.yml up -d
+   docker compose -f docker-compose.dev.api.yml up -d
    ```
 
 2. Run the UI locally:
@@ -162,11 +151,9 @@ Ollama runs in its own container with:
 
 ### Debug API Locally
 
-1. Start the database:
+1. Start Ollama:
    ```bash
-   docker compose -f docker-compose.dev.db.yml up -d
-   # OR
-   docker compose -f docker-compose.dev.db-ui.yml up -d
+   docker compose -f docker-compose.dev.api.yml up -d
    ```
 
 2. In VSCode, select ".NET Core Launch (web)" from the debug dropdown
@@ -177,11 +164,9 @@ The API will be available at `http://localhost:5000` (configured in `launch.json
 
 ### Debug API in Docker Container
 
-1. Start the database:
+1. Start Ollama:
    ```bash
-   docker compose -f docker-compose.dev.db.yml up -d
-   # OR
-   docker compose -f docker-compose.dev.db-ui.yml up -d
+   docker compose -f docker-compose.dev.api.yml up -d
    ```
 
 2. In VSCode, select "Docker: .NET Core Debug" from the debug dropdown
@@ -192,9 +177,9 @@ The API will be available at `http://localhost:13245`
 
 ### Debug UI Locally
 
-1. Start database and API:
+1. Start API and Ollama:
    ```bash
-   docker compose -f docker-compose.dev.db-api.yml up -d
+   docker compose -f docker-compose.dev.api.yml up -d
    ```
 
 2. Navigate to UI folder and run:
@@ -215,7 +200,6 @@ docker ps
 ```bash
 docker logs raysoncv-api
 docker logs raysoncv-ui
-docker logs raysoncv-postgres
 docker logs raysoncv-ollama
 ```
 
@@ -224,7 +208,7 @@ docker logs raysoncv-ollama
 docker compose -f docker-compose.dev.full.yml down
 ```
 
-### Remove All Data (Including Database Volume)
+### Remove All Data (Including Ollama Volume)
 ```bash
 docker compose -f docker-compose.dev.full.yml down -v
 ```
@@ -246,15 +230,11 @@ The following environment variables are required:
 
 | Variable | Description |
 |----------|-------------|
-| `POSTGRES_DB` | Database name |
-| `POSTGRES_USER` | Database username |
-| `POSTGRES_PASSWORD` | Database password |
 | `JWT_ISSUER` | JWT token issuer |
 | `JWT_AUDIENCE` | JWT token audience |
 | `JWT_SIGNING_KEY` | JWT signing key (min 16 chars) |
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `API_HEALTH_URL` | API health URL for UI health checks |
-| `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 | `LOG_LEVEL` | Log level for UI health server |
 | `OLLAMA__BASEURL` | Ollama server URL (e.g., `http://ollama:11434` for Docker, `http://ca-ollama-staging.internal.<domain>:11434` for Azure) |
 
@@ -266,22 +246,16 @@ Both API and UI expose health check endpoints for Azure Container Apps probes an
 
 | Endpoint | Purpose | Checks |
 |----------|---------|--------|
-| `GET /health` | Full health status | Self + PostgreSQL connectivity |
+| `GET /health` | Full health status | Self only |
 | `GET /health/live` | Liveness probe | Self only (no dependency checks) |
-| `GET /health/ready` | Readiness probe | PostgreSQL connectivity |
+| `GET /health/ready` | Readiness probe | Self only |
 
 **Example Response (GET /health):**
 ```json
 {
   "status": "Healthy",
-  "checks": {
-    "postgresql": {
-      "status": "Healthy",
-      "description": null,
-      "duration": 42.5
-    }
-  },
-  "totalDuration": 45.2
+  "checks": {},
+  "totalDuration": 0.5
 }
 ```
 
@@ -402,35 +376,6 @@ Content-Type: application/json
 docker logs raysoncv-ui
 ```
 
-## Database
-
-### Technology Stack
-- PostgreSQL 16 (Alpine image for smaller footprint)
-- Entity Framework Core 8.0
-- Npgsql as database provider
-
-### Schema
-- Uses ASP.NET Core Identity schema (Users, Roles, RoleClaims, UserRoles, UserClaims, UserLogins, UserTokens)
-- Custom `ApplicationUser` and `ApplicationRole` extending Identity base classes
-- All entities inherit from `Domain.Entity` base class with `Id` and `DeletedAt` fields
-
-### Migrations
-- Located in `Api/Database/Migrations/`
-- Initial migration: `20260222125915_Init.cs`
-- Applied automatically on startup via `app.RunMigrations()` extension
-
-### Creating Migrations
-
-```bash
-cd Api
-dotnet ef migrations add MigrationName -p Database -s Presentation
-```
-
-### Conventions
-- Use **soft deletes** (set `DeletedAt` field) instead of hard deletes
-- Use **EF Core migrations** for schema changes
-- Use **repository pattern** for data access (via `Repository<T>`)
-
 ## Project Structure
 
 ```
@@ -440,19 +385,18 @@ Rayson.CV/                      # Root solution folder
 │   │   ├── Presentation/       # Minimal API endpoints, Program.cs
 │   │   ├── Application/        # Business logic, interfaces, DTOs
 │   │   ├── Domain/             # Entities, interfaces
-│   │   ├── Infrastructure/     # External services (Auth, Chatbot, Logging)
-│   │   └── Database/           # EF Core, migrations, seed data
+│   │   └── Infrastructure/     # External services (Chatbot, Logging)
 │   ├── UI/                     # React + Vite frontend
 │   ├── Test/
-│   │   └── e2e/                # End-to-end BDD tests (Playwright + Cucumber)
+│   │   └── e2e/               # End-to-end BDD tests (Playwright + Cucumber)
 │   ├── .env                    # Local environment variables (gitignored)
 │   └── docker-compose.*.yml   # Docker Compose configurations
 ├── infra/                      # Azure Bicep infrastructure templates
 │   ├── main-core.bicep         # Core resources (RG, ACR, Storage, Container Apps Env)
-│   ├── main-apps.bicep        # Workload resources (PostgreSQL, API, UI)
+│   ├── main-apps.bicep        # Workload resources (API, UI)
 │   └── modules/                # Reusable Bicep modules
 ├── .github/workflows/          # CI/CD workflows
-└── .vscode/                    # VSCode launch configs and tasks
+└── .vscode/                   # VSCode launch configs and tasks
 ```
 
 ## Testing
@@ -508,15 +452,6 @@ E2E_UI_URL=https://your-staging-ui.example.com \
 npm run e2e:staging
 ```
 
-#### Test User
-
-E2E tests use a static test user that must be seeded in the database:
-
-- **Email**: `testuser@test.com`
-- **Password**: `TestPassword123!`
-
-To seed this user, add it to the database seed data or manually create it.
-
 #### Writing New Tests
 
 1. Create a `.feature` file in `Test/e2e/features/`:
@@ -545,12 +480,11 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 
 ### Main Templates
 - `infra/main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
-- `infra/main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
+- `infra/main-apps.bicep` - Creates workload resources: API Container App, UI Container App
 
 ### Modules
 - `infra/modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
 - `infra/modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
-- `infra/modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
 - `infra/modules/container-apps-environment.bicep` - Container Apps Environment
 - `infra/modules/storage.bicep` - Azure Storage Account
 - `infra/modules/container-registry.bicep` - Azure Container Registry
@@ -558,8 +492,7 @@ Infrastructure is defined in Bicep and located at project root `/infra/`:
 ### Azure Services
 - **Azure Container Apps** - Hosts API and UI containers
 - **Azure Container Registry** - Stores Docker images
-- **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
-- **Azure Storage Account** - General purpose storage
+- **Azure Storage Account** - General purpose storage + Ollama model persistence
 
 ## CI/CD
 
@@ -573,7 +506,10 @@ GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
 1. **build** - Compiles .NET API and builds React UI
 2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
 3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
+4. **deploy-apps** - Deploys container apps (API, UI) via Bicep
+5. **build-electron-*** - Builds Electron apps for Linux, macOS, Windows
+6. **upload-electron** - Uploads Electron apps to Azure Blob Storage
+7. **e2e-tests** - Runs E2E tests against staging
 
 ### Environment
 - Staging (Azure `uksouth` region, resource group `rg-raysoncv-staging`)
@@ -593,14 +529,12 @@ Deployments are triggered via:
 ### Production Setup
 - Docker containers for API and UI
 - Azure Container Apps for orchestration
-- Azure PostgreSQL Flexible Server for database
 
 ### Environment Configuration
 - `ASPNETCORE_ENVIRONMENT=Production` in production
 - CORS origins must be explicitly configured
 - JWT signing key must be secure (minimum 16 characters)
 - Use HTTPS only in production (HSTS enabled)
-- Database connection should use SSL
 
 ### Monitoring
 - **Development**: Container console logs

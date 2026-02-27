@@ -13,7 +13,6 @@ COPY ["Presentation/Presentation.csproj", "Presentation/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
-COPY ["Database/Database.csproj", "Database/"]
 
 # Restore NuGet packages based on project references
 RUN dotnet restore "Presentation/Presentation.csproj"
@@ -57,11 +56,6 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV AuthOptions__Issuer=danrayson
 ENV AuthOptions__Audience=RaysonCVUsers
 ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_for_production
-ENV POSTGRES_HOST=host.docker.internal
-ENV POSTGRES_PORT=5433
-ENV POSTGRES_DATABASE=raysoncv
-ENV POSTGRES_USERNAME=raysoncv_user
-ENV POSTGRES_PASSWORD=development_password
 ENV Cors__AllowedOrigins__0=http://localhost:3000
 
 EXPOSE 8080
