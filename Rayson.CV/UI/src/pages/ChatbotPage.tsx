@@ -11,6 +11,7 @@ const ChatbotPage: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -19,7 +20,7 @@ const ChatbotPage: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,17 +34,29 @@ const ChatbotPage: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setStreamingContent('');
+
+    let finalContent = '';
 
     try {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
-      const response = await chatbotService.sendMessage(userMessage.content, history);
       
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: response.message
-      };
+      await chatbotService.sendMessageStreaming(
+        userMessage.content,
+        history,
+        (chunk) => {
+          setStreamingContent(prev => prev + chunk);
+          finalContent += chunk;
+        }
+      );
       
-      setMessages(prev => [...prev, assistantMessage]);
+      if (finalContent) {
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: finalContent
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      }
     } catch {
       const errorMessage: ChatMessage = {
         role: 'assistant',
@@ -52,6 +65,7 @@ const ChatbotPage: React.FC = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setStreamingContent('');
     }
   };
 
@@ -90,14 +104,21 @@ const ChatbotPage: React.FC = () => {
                 className={`chat-bubble ${
                   message.role === 'user' 
                     ? 'chat-bubble-primary rounded-2xl rounded-tr-sm' 
-                    : 'chat-bubble-secondary rounded-2xl rounded-tl-sm'
+                    : 'chat-bubble-secondary rounded-2xl rounded-tl-sm text-left'
                 }`}
               >
                 {message.content}
               </div>
             </div>
           ))}
-          {isLoading && (
+          {streamingContent && (
+            <div className="chat chat-start">
+              <div className="chat-bubble chat-bubble-secondary rounded-2xl rounded-tl-sm text-left">
+                {streamingContent}
+              </div>
+            </div>
+          )}
+          {isLoading && !streamingContent && (
             <div className="chat chat-start">
               <div className="chat-bubble bg-base-300 rounded-2xl rounded-tl-sm">
                 <div className="flex gap-1">

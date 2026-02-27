@@ -35,6 +35,17 @@ class ChatbotService {
     const response = await client.post<ChatbotResponse>('chatbot', request);
     return response.data;
   }
+
+  async sendMessageStreaming(message: string, history: ChatMessage[] = [], onChunk: (chunk: string) => void): Promise<void> {
+    const client = this.getHttpClient();
+    
+    const request: ChatbotRequest = {
+      message,
+      history: history.length > 0 ? history : undefined
+    };
+
+    await client.postStreaming('chatbot/stream', request, onChunk);
+  }
 }
 
 export const chatbotService = new ChatbotService();
