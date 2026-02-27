@@ -1,3 +1,4 @@
+using System.Net;
 using Application.Chatbot;
 using Application.Health;
 using Application.Logging;
@@ -23,6 +24,10 @@ public static class ServiceCollectionExtensions
 
         services.Configure<OllamaSettings>(configuration.GetSection("Ollama"));
         services.AddHttpClient("Ollama")
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                ConnectTimeout = TimeSpan.FromMinutes(5)
+            })
             .ConfigureHttpClient((serviceProvider, client) =>
             {
                 var settings = serviceProvider.GetRequiredService<IOptions<OllamaSettings>>().Value;
