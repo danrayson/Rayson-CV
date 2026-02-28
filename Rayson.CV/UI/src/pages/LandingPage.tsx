@@ -16,8 +16,21 @@ const getDownloadUrl = () => {
   return null;
 };
 
+const getCvDownloadUrl = () => {
+  const isElectron = navigator.userAgent.includes('Electron');
+
+  if (isElectron) {
+    return './CV-September-2024.pdf';
+  }
+
+  const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
+  const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
+  return `${blobBaseUrl}/CV-September-2024.pdf`;
+};
+
 const LandingPage: React.FC = () => {
   const downloadUrl = getDownloadUrl();
+  const cvDownloadUrl = getCvDownloadUrl();
 
   const handleAppClick = () => {
     if (!downloadUrl) {
@@ -32,7 +45,7 @@ const LandingPage: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
           <a
-            href="/CV September 2024.pdf"
+            href={cvDownloadUrl}
             download
             className="btn btn-primary text-2xl font-bold"
           >
