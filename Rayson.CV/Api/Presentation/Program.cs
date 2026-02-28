@@ -17,16 +17,14 @@ try
     builder.Services.AddControllers();
     builder.Services.AddCors(options =>
     {
-        options.AddDefaultPolicy(corsBuilder =>
+        options.AddPolicy("frontend", corsBuilder =>
         {
-            var originsConfig = builder.Configuration["Cors:AllowedOrigins"];
-            var allowedOrigins = string.IsNullOrEmpty(originsConfig)
-                ? builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>()
-                : originsConfig.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            corsBuilder.WithOrigins(allowedOrigins)
+            var originsConfig = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            if (originsConfig == null || originsConfig.Length == 0) throw new ArgumentException("Cors:AllowedOrigins not set.");
+            corsBuilder.WithOrigins(originsConfig)
                        .AllowAnyHeader()
-                       .AllowAnyMethod();
+                       .AllowAnyMethod()
+                       .AllowCredentials();
         });
     });
 
@@ -41,6 +39,13 @@ try
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
     var app = builder.Build();
+
+    app.UseHttpsRedirection();
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHsts();
+    }
+    app.UseCors("frontend");
 
     app.UseMiddleware<RequestLoggingMiddleware>();
 
@@ -59,15 +64,8 @@ try
         });
     }
 
-    app.UseHttpsRedirection();
     await app.RunMigrationsAsync();
     await app.InitializeRagAsync();
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseHttpsRedirection();
-        app.UseHsts();
-    }
-    app.UseCors();
     app.Run();
 }
 catch (Exception ex)

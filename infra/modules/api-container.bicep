@@ -64,7 +64,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'http://+:8080'
             }
             {
-              name: 'Cors__AllowedOrigins__0'
+              name: 'Cors__AllowedOrigins'
               value: 'https://${uiFqdn}'
             }
             {
