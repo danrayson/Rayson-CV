@@ -14,8 +14,6 @@ param tags object = {
   Project: 'RaysonCV'
 }
 
-var containerAppsEnvName = 'cae-raysoncv-${environmentName}'
-
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
   location: location
@@ -50,7 +48,7 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   scope: rg
   params: {
     location: location
-    environmentName: containerAppsEnvName
+    environmentName: environmentName
     tags: tags
     storageAccountName: storage.outputs.storageAccountName
     storageAccountKey: storage.outputs.storageAccountKey
@@ -72,7 +70,8 @@ module postgres 'modules/postgres-service.bicep' = {
 
 output acrLoginServer string = acr.outputs.acrLoginServer
 output acrName string = acr.outputs.acrName
-output environmentId string = containerAppsEnv.outputs.environmentId
+output containerAppEnvId string = containerAppsEnv.outputs.containerAppEnvId
+output containerAppEnvName string = containerAppsEnv.outputs.containerAppEnvName
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
 output blobBaseUrl string = storage.outputs.blobBaseUrl

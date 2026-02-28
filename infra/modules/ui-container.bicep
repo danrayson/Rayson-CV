@@ -1,5 +1,5 @@
 param location string = resourceGroup().location
-param environmentId string
+param caeId string
 param containerAppName string
 param acrLoginServer string
 param acrName string
@@ -8,14 +8,14 @@ param apiHealthUrl string
 param appDownloadUrl string
 param customDomainName string = ''
 param tags object = {}
-param environmentName string
+param caeName string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
 }
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' existing = {
-  name: environmentName
+  name: caeName
 }
 
 resource rootCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
@@ -42,7 +42,7 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
   location: location
   properties: {
-    managedEnvironmentId: environmentId
+    managedEnvironmentId: caeId
     configuration: {
       secrets: [
         {
