@@ -77,6 +77,7 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   tags: tags
 }
 
+//Only run the following if customDomainName is not blank (i.e. we're in production)
 resource rootHost 'Microsoft.App/containerApps/hostNameBindings@2023-05-01' = if (customDomainName != '') {
   name: customDomainName
   parent: uiContainer
