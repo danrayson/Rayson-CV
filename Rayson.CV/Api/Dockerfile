@@ -62,7 +62,7 @@ ENV POSTGRES_PORT=5433
 ENV POSTGRES_DATABASE=raysoncv
 ENV POSTGRES_USERNAME=postgres
 ENV POSTGRES_PASSWORD=postgres
-ENV Cors__AllowedOrigins__0=http://localhost:3000
+ENV Cors__AllowedOrigins=http://localhost:3000
 ENV OLLAMA__BASEURL=http://ollama:11434
 
 EXPOSE 8080

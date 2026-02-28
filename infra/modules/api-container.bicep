@@ -15,6 +15,11 @@ param postgresDatabase string
 param logLevel string = 'Debug'
 param tags object = {}
 
+var localCorsOrigins = 'null,http://localhost,http://localhost:3000,http://localhost:5173'
+var corsOrigins = environmentName == 'production' 
+  ? '${localCorsOrigins},https://${uiFqdn},https://rayson.dev,https://www.rayson.dev' 
+  : '${localCorsOrigins},https://${uiFqdn}'
+
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
 }
@@ -64,8 +69,8 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'http://+:8080'
             }
             {
-              name: 'Cors__AllowedOrigins__0'
-              value: 'https://${uiFqdn}'
+              name: 'Cors__AllowedOrigins'
+              value: corsOrigins
             }
             {
               name: 'LOG_LEVEL'

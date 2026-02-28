@@ -348,15 +348,10 @@ CORS is pre-configured in Docker Compose files and the Dockerfile:
 ### Azure Deployment
 
 Set the environment variable in Azure Container Apps:
+For multiple origins use comma-seperated values
 
 ```
 Cors:AllowedOrigins=https://your-ui.azurecontainerapps.io,https://yourcustomdomain.com
-```
-
-For multiple origins, use comma-separated values or array syntax:
-```
-Cors:AllowedOrigins__0=https://your-ui.azurecontainerapps.io
-Cors:AllowedOrigins__1=https://yourcustomdomain.com
 ```
 
 ## Logging
