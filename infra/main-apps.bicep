@@ -11,6 +11,7 @@ param postgresAdminUsername string
 @secure()
 param postgresAdminPassword string
 param logLevel string = 'Debug'
+param customDomainName string = ''
 param tags object = {
   Environment: environmentName
   Project: 'RaysonCV'
@@ -52,6 +53,7 @@ module ui 'modules/ui-container.bicep' = {
     imageTag: imageTag
     apiHealthUrl: 'http://${apiAppName}.internal.${defaultDomain}:8080/health'
     appDownloadUrl: blobBaseUrl
+    customDomainName: customDomainName
     tags: tags
   }
   dependsOn: [

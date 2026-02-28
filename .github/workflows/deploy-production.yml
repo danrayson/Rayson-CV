@@ -370,7 +370,8 @@ jobs:
                          postgresFqdn=${{ needs.deploy-core.outputs.postgresFqdn }} \
                          postgresAdminUsername=raysoncvadmin \
                          postgresAdminPassword="${{ secrets.PROD_POSTGRES_PASSWORD }}" \
-                         logLevel=Information
+                          logLevel=Information \
+                          customDomainName=rayson.dev
           
           API_FQDN=$(az deployment group show --name raysoncv-production-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysoncv-production-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)

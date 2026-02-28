@@ -6,6 +6,7 @@ param acrName string
 param imageTag string = 'latest'
 param apiHealthUrl string
 param appDownloadUrl string
+param customDomainName string = ''
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -29,6 +30,16 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 3000
         transport: 'auto'
+        customDomains: customDomainName != '' ? [
+          {
+            name: customDomainName
+            bindingType: 'AzureManaged'
+          }
+          {
+            name: 'www.${customDomainName}'
+            bindingType: 'AzureManaged'
+          }
+        ] : []
       }
       registries: [
         {
