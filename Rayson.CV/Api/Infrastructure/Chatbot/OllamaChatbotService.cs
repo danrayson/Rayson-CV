@@ -140,18 +140,12 @@ public class OllamaChatbotService(
 
     private async Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 4);
+        var relevantChunks = await ragService.SearchAsync(message, topK: 5);
         var chunksText = string.Join("\n---\n", relevantChunks);
 
         return $"""
             You are a helpful assistant answering questions about Daniel Rayson's CV.
-            
-            Only answer questions related to Daniel's professional background, skills, experience, and education.
-            Keep your answers brief and concise, preferably 1-2 sentences maximum.
-            If asked about something not in the CV, politely say you don't have that information.
-            
             ---
-            
             Relevant sections from Daniel's CV:
             ---
             {chunksText}

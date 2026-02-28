@@ -28,18 +28,18 @@ public class CvChunkRepository(RaysonCVDbContext context) : ICvChunkRepository
         return await _context.CvChunks.AnyAsync();
     }
 
-    public async Task<IEnumerable<Domain.CvChunk>> GetMostSimilarAsync(float[] embedding, int topK)
+    public async Task<IEnumerable<string>> GetMostSimilarAsync(float[] embedding, int topK)
     {
         var embeddingString = string.Join(",", embedding.Select(e => e.ToString("G10", System.Globalization.CultureInfo.InvariantCulture)));
         
         var sql = $@"
-            SELECT ""Id"", ""Content"", ""Section"", ""Embedding"", ""ChunkIndex"", ""CreatedAt"", ""DeletedAt""
+            SELECT ""Content""
             FROM ""CvChunks""
             ORDER BY ""Embedding"" <-> '[{embeddingString}]'::vector
             LIMIT {topK}";
 
-        var result = await _context.CvChunks
-            .FromSqlRaw(sql)
+        var result = await _context.Database
+            .SqlQueryRaw<string>(sql)
             .ToListAsync();
 
         return result;

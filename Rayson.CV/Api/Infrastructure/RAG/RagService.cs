@@ -56,7 +56,7 @@ public class RagService(
         var queryEmbedding = await embeddingService.GenerateEmbeddingAsync(query);
         var results = await cvChunkRepository.GetMostSimilarAsync(queryEmbedding, topK);
 
-        return results.Select(r => r.Content);
+        return results;
     }
 
     private static List<(string Content, string Section, int Index)> ChunkCvContent(string cvContent)
