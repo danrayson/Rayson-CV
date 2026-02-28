@@ -339,6 +339,16 @@ jobs:
             --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
             --overwrite
 
+      - name: Upload CV PDF
+        run: |
+          az storage blob upload \
+            --container-name '$web' \
+            --file "Rayson.CV/UI/public/CV-September-2024.pdf" \
+            --name "CV-September-2024.pdf" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
+            --overwrite
+
   deploy-apps:
     runs-on: ubuntu-latest
     needs: [build, deploy-core, push]

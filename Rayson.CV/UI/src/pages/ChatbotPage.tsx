@@ -2,6 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 
+const getCvDownloadUrl = () => {
+  const isElectron = navigator.userAgent.includes('Electron');
+
+  if (isElectron) {
+    return './CV-September-2024.pdf';
+  }
+
+  const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
+  const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
+  return `${blobBaseUrl}/CV-September-2024.pdf`;
+};
+
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -83,7 +95,7 @@ const ChatbotPage: React.FC = () => {
           <p className="text-sm">
             This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
             For accurate details, please{' '}
-            <a href="/CV September 2024.pdf" download className="underline font-bold">
+            <a href={getCvDownloadUrl()} download className="underline font-bold">
               download the real CV
             </a>.  This is due to cost limitations.
           </p>
