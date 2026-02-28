@@ -55,6 +55,7 @@ module ui 'modules/ui-container.bicep' = {
     appDownloadUrl: blobBaseUrl
     customDomainName: customDomainName
     tags: tags
+    environmentName: environmentName
   }
   dependsOn: [
     api

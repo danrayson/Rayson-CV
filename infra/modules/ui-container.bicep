@@ -8,9 +8,34 @@ param apiHealthUrl string
 param appDownloadUrl string
 param customDomainName string = ''
 param tags object = {}
+param environmentName string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' existing = {
+  name: environmentName
+}
+
+resource rootCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
+  name: 'cert-${customDomainName}'
+  parent: containerAppEnvironment
+  location: location
+  properties: {
+    subjectName: customDomainName
+    domainControlValidation: 'CNAME'
+  }
+}
+
+resource wwwCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
+  name: 'cert-www-${customDomainName}'
+  parent: containerAppEnvironment
+  location: location
+  properties: {
+    subjectName: 'www.${customDomainName}'
+    domainControlValidation: 'CNAME'
+  }
 }
 
 resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
@@ -33,11 +58,13 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
         customDomains: customDomainName != '' ? [
           {
             name: customDomainName
-            bindingType: 'AzureManaged'
+            bindingType: 'SniEnabled'
+            certificateId: rootCert.id
           }
           {
             name: 'www.${customDomainName}'
-            bindingType: 'AzureManaged'
+            bindingType: 'SniEnabled'
+            certificateId: wwwCert.id
           }
         ] : []
       }
