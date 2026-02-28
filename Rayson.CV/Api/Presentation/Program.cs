@@ -19,9 +19,11 @@ try
     {
         options.AddPolicy("frontend", corsBuilder =>
         {
-            var originsConfig = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-            if (originsConfig == null || originsConfig.Length == 0) throw new ArgumentException("Cors:AllowedOrigins not set.");
-            corsBuilder.WithOrigins(originsConfig)
+            var originsConfig = builder.Configuration["Cors:AllowedOrigins"];
+            if (string.IsNullOrEmpty(originsConfig))
+                throw new ArgumentException("Cors:AllowedOrigins not set.");
+            var allowedOrigins = originsConfig.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            corsBuilder.WithOrigins(allowedOrigins)
                        .AllowAnyHeader()
                        .AllowAnyMethod()
                        .AllowCredentials();
