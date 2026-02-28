@@ -1,5 +1,6 @@
 param location string = resourceGroup().location
-param environmentId string
+param caeId string
+param caeName string
 param defaultDomain string
 param acrLoginServer string
 param acrName string
@@ -25,7 +26,7 @@ module api 'modules/api-container.bicep' = {
   name: 'api-container-${environmentName}'
   params: {
     location: location
-    environmentId: environmentId
+    caeId: caeId
     environmentName: environmentName
     containerAppName: apiAppName
     acrLoginServer: acrLoginServer
@@ -46,7 +47,7 @@ module ui 'modules/ui-container.bicep' = {
   name: 'ui-container-${environmentName}'
   params: {
     location: location
-    environmentId: environmentId
+    caeId: caeId
     containerAppName: uiAppName
     acrLoginServer: acrLoginServer
     acrName: acrName
@@ -55,7 +56,7 @@ module ui 'modules/ui-container.bicep' = {
     appDownloadUrl: blobBaseUrl
     customDomainName: customDomainName
     tags: tags
-    environmentName: environmentName
+    caeName: caeName
   }
   dependsOn: [
     api
