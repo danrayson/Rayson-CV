@@ -39,8 +39,7 @@ services:
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: postgres
       ASPNETCORE_ENVIRONMENT: Development
-      Cors__AllowedOrigins__0: http://localhost:3000
-      Cors__AllowedOrigins__1: http://localhost:5173
+      Cors__AllowedOrigins: http://localhost:3000,http://localhost:5173
       LOG_LEVEL: Debug
       OLLAMA__BASEURL: http://ollama:11434
     ports:
