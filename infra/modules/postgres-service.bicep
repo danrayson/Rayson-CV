@@ -8,7 +8,7 @@ param tags object = {}
 var serverName = 'pg-${environmentName}-${uniqueString(resourceGroup().id)}'
 var databaseName = 'raysoncv'
 
-resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01' = {
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
   name: serverName
   location: location
   tags: tags
@@ -32,7 +32,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01' =
   }
 }
 
-resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01' = {
+resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2022-12-01' = {
   name: '${serverName}/${databaseName}'
   properties: {
     charset: 'utf8'
@@ -40,7 +40,7 @@ resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-0
   }
 }
 
-resource firewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01' = {
+resource firewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2022-12-01' = {
   name: '${serverName}/allow-container-apps'
   properties: {
     startIpAddress: '0.0.0.0'
