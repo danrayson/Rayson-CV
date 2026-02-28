@@ -12,6 +12,7 @@ param postgresUsername string
 @secure()
 param postgresPassword string
 param postgresDatabase string
+param logLevel string = 'Debug'
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -68,7 +69,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'LOG_LEVEL'
-              value: 'Debug'
+              value: logLevel
             }
             {
               name: 'OLLAMA__BASEURL'

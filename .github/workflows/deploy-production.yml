@@ -1,0 +1,221 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: 'Docker image tag to deploy'
+        required: false
+        default: 'latest'
+
+env:
+  AZURE_RESOURCE_GROUP: rg-raysoncv-production
+  LOCATION: uksouth
+  ACR_NAME: acrraysoncvproduction
+  API_IMAGE_NAME: raysoncv-api
+  UI_IMAGE_NAME: raysoncv-ui
+  OLLAMA_IMAGE_NAME: raysoncv-ollama
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      imageTag: ${{ steps.set-tag.outputs.imageTag }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
+
+      - name: Build API
+        run: dotnet build Rayson.CV/Api/Presentation/Presentation.csproj --configuration Release
+
+      - name: Install UI dependencies
+        run: cd Rayson.CV/UI && npm ci
+
+      - name: Build UI
+        run: cd Rayson.CV/UI && npm run build
+
+      - name: Set image tag
+        id: set-tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.imageTag }}" ]; then
+            echo "imageTag=${{ github.event.inputs.imageTag }}" >> $GITHUB_OUTPUT
+          else
+            echo "imageTag=${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+  deploy-core:
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      acrLoginServer: ${{ steps.deploy.outputs.acrLoginServer }}
+      acrName: ${{ steps.deploy.outputs.acrName }}
+      environmentId: ${{ steps.deploy.outputs.environmentId }}
+      defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
+      storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
+      storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
+      blobBaseUrl: ${{ steps.deploy.outputs.blobBaseUrl }}
+      postgresFqdn: ${{ steps.deploy.outputs.postgresFqdn }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
+
+      - name: Deploy core infrastructure
+        id: deploy
+        run: |
+          az deployment sub create \
+            --name raysoncv-production-core \
+            --location ${{ env.LOCATION }} \
+            --template-file infra/main-core.bicep \
+            --parameters location=${{ env.LOCATION }} \
+                         resourceGroupName=${{ env.AZURE_RESOURCE_GROUP }} \
+                         environmentName=production \
+                         acrName=${{ env.ACR_NAME }} \
+                         postgresAdminUsername=raysoncvadmin \
+                         postgresAdminPassword="${{ secrets.PROD_POSTGRES_PASSWORD }}"
+          
+          ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.acrLoginServer.value --output tsv)
+          ACR_NAME_OUT=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.acrName.value --output tsv)
+          ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.environmentId.value --output tsv)
+          DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.defaultDomain.value --output tsv)
+          STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.storageAccountName.value --output tsv)
+          STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.storageAccountKey.value --output tsv)
+          BLOB_BASE_URL=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.blobBaseUrl.value --output tsv)
+          POSTGRES_FQDN=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.postgresFqdn.value --output tsv)
+          
+          echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+          echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
+          echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
+          echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
+          echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "storageAccountKey=$STORAGE_ACCOUNT_KEY" >> $GITHUB_OUTPUT
+          echo "blobBaseUrl=$BLOB_BASE_URL" >> $GITHUB_OUTPUT
+          echo "postgresFqdn=$POSTGRES_FQDN" >> $GITHUB_OUTPUT
+
+  push:
+    runs-on: ubuntu-latest
+    needs: [build, deploy-core]
+    outputs:
+      apiFqdn: ${{ steps.set-fqdn.outputs.apiFqdn }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and push API image
+        run: |
+          docker build \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:latest \
+            ./Rayson.CV/Api
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.API_IMAGE_NAME }}:latest
+
+      - name: Build and push UI image
+        run: |
+          API_FQDN="ca-api-production.${{ needs.deploy-core.outputs.defaultDomain }}"
+          BLOB_URL="${{ needs.deploy-core.outputs.blobBaseUrl }}"
+          docker build \
+            --build-arg VITE_API_BASE_URL=https://$API_FQDN/ \
+            --build-arg VITE_APP_DOWNLOAD_URL=$BLOB_URL \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest \
+            ./Rayson.CV/UI
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.UI_IMAGE_NAME }}:latest
+          
+          echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
+
+      - name: Build and push Ollama image
+        run: |
+          docker build \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }} \
+            -t ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:latest \
+            -f Rayson.CV/ollama.Dockerfile \
+            Rayson.CV
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:${{ needs.build.outputs.imageTag }}
+          docker push ${{ needs.deploy-core.outputs.acrLoginServer }}/${{ env.OLLAMA_IMAGE_NAME }}:latest
+
+      - name: Set FQDN output
+        id: set-fqdn
+        run: |
+          echo "apiFqdn=ca-api-production.${{ needs.deploy-core.outputs.defaultDomain }}" >> $GITHUB_OUTPUT
+
+  deploy-apps:
+    runs-on: ubuntu-latest
+    needs: [build, deploy-core, push]
+    outputs:
+      apiFqdn: ${{ steps.deploy.outputs.apiFqdn }}
+      uiFqdn: ${{ steps.deploy.outputs.uiFqdn }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
+
+      - name: Deploy container apps
+        id: deploy
+        run: |
+          az deployment group create \
+            --name raysoncv-production-apps \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file infra/main-apps.bicep \
+            --parameters location=${{ env.LOCATION }} \
+                         environmentId=${{ needs.deploy-core.outputs.environmentId }} \
+                         defaultDomain=${{ needs.deploy-core.outputs.defaultDomain }} \
+                         acrLoginServer=${{ needs.deploy-core.outputs.acrLoginServer }} \
+                         acrName=${{ needs.deploy-core.outputs.acrName }} \
+                         imageTag=${{ needs.build.outputs.imageTag }} \
+                         environmentName=production \
+                         blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}" \
+                         postgresFqdn=${{ needs.deploy-core.outputs.postgresFqdn }} \
+                         postgresAdminUsername=raysoncvadmin \
+                         postgresAdminPassword="${{ secrets.PROD_POSTGRES_PASSWORD }}" \
+                         logLevel=Information
+          
+          API_FQDN=$(az deployment group show --name raysoncv-production-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
+          UI_FQDN=$(az deployment group show --name raysoncv-production-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
+          
+          echo "apiFqdn=$API_FQDN" >> $GITHUB_OUTPUT
+          echo "uiFqdn=$UI_FQDN" >> $GITHUB_OUTPUT
+
+      - name: Deployment Summary
+        run: |
+          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| API | https://${{ steps.deploy.outputs.apiFqdn }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| UI | https://${{ steps.deploy.outputs.uiFqdn }} |" >> $GITHUB_STEP_SUMMARY

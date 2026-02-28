@@ -10,6 +10,7 @@ param postgresFqdn string
 param postgresAdminUsername string
 @secure()
 param postgresAdminPassword string
+param logLevel string = 'Debug'
 param tags object = {
   Environment: environmentName
   Project: 'RaysonCV'
@@ -35,6 +36,7 @@ module api 'modules/api-container.bicep' = {
     postgresUsername: postgresAdminUsername
     postgresPassword: postgresAdminPassword
     postgresDatabase: 'raysoncv'
+    logLevel: logLevel
     tags: tags
   }
 }

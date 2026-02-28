@@ -78,7 +78,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
 
       - name: Deploy core infrastructure
         id: deploy
@@ -92,7 +92,7 @@ jobs:
                          environmentName=staging \
                          acrName=${{ env.ACR_NAME }} \
                          postgresAdminUsername=raysoncvadmin \
-                         postgresAdminPassword="${{ secrets.POSTGRES_PASSWORD }}"
+                         postgresAdminPassword="${{ secrets.STAGING_POSTGRES_PASSWORD }}"
           
           ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
           ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
@@ -125,7 +125,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
 
       - name: Login to Azure Container Registry
         run: az acr login --name ${{ env.ACR_NAME }}
@@ -261,7 +261,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
 
       - name: Wait for storage account
         run: |
@@ -340,7 +340,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
 
       - name: Deploy container apps
         id: deploy
@@ -359,7 +359,8 @@ jobs:
                          blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}" \
                          postgresFqdn=${{ needs.deploy-core.outputs.postgresFqdn }} \
                          postgresAdminUsername=raysoncvadmin \
-                         postgresAdminPassword="${{ secrets.POSTGRES_PASSWORD }}"
+                         postgresAdminPassword="${{ secrets.STAGING_POSTGRES_PASSWORD }}" \
+                         logLevel=Debug
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)
