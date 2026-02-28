@@ -1,6 +1,6 @@
 param environmentName string
 param location string = resourceGroup().location
-param environmentId string
+param caeId string
 param containerAppName string
 param acrLoginServer string
 param acrName string
@@ -28,7 +28,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
   location: location
   properties: {
-    managedEnvironmentId: environmentId
+    managedEnvironmentId: caeId
     configuration: {
       secrets: [
         {

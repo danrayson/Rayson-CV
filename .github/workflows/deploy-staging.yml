@@ -64,7 +64,8 @@ jobs:
     outputs:
       acrLoginServer: ${{ steps.deploy.outputs.acrLoginServer }}
       acrName: ${{ steps.deploy.outputs.acrName }}
-      environmentId: ${{ steps.deploy.outputs.environmentId }}
+      caeId: ${{ steps.deploy.outputs.caeId }}
+      caeName: ${{ steps.deploy.outputs.caeName }}
       defaultDomain: ${{ steps.deploy.outputs.defaultDomain }}
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
       storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
@@ -96,7 +97,8 @@ jobs:
           
           ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
           ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
-          ENVIRONMENT_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.environmentId.value --output tsv)
+          CAE_ID=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvId.value --output tsv)
+          CAE_NAME=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvName.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
           STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
@@ -105,7 +107,8 @@ jobs:
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
-          echo "environmentId=$ENVIRONMENT_ID" >> $GITHUB_OUTPUT
+          echo "caeId=$CAE_ID" >> $GITHUB_OUTPUT
+          echo "caeName=$CAE_NAME" >> $GITHUB_OUTPUT
           echo "defaultDomain=$DEFAULT_DOMAIN" >> $GITHUB_OUTPUT
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
           echo "storageAccountKey=$STORAGE_ACCOUNT_KEY" >> $GITHUB_OUTPUT
@@ -359,7 +362,8 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/main-apps.bicep \
             --parameters location=${{ env.LOCATION }} \
-                         environmentId=${{ needs.deploy-core.outputs.environmentId }} \
+                         caeId=${{ needs.deploy-core.outputs.caeId }} \
+                         caeName=${{ needs.deploy-core.outputs.caeName }} \
                          defaultDomain=${{ needs.deploy-core.outputs.defaultDomain }} \
                          acrLoginServer=${{ needs.deploy-core.outputs.acrLoginServer }} \
                          acrName=${{ needs.deploy-core.outputs.acrName }} \
