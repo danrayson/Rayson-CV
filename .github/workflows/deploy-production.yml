@@ -169,6 +169,164 @@ jobs:
         run: |
           echo "apiFqdn=ca-api-production.${{ needs.deploy-core.outputs.defaultDomain }}" >> $GITHUB_OUTPUT
 
+  build-electron-linux:
+    runs-on: ubuntu-latest
+    needs: [build, deploy-core]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
+
+      - name: Install dependencies
+        run: cd Rayson.CV/UI && npm ci
+
+      - name: Build Electron app
+        run: cd Rayson.CV/UI && npm run electron:build -- --linux
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-linux
+          path: Rayson.CV/UI/build/*.AppImage
+
+  build-electron-mac:
+    runs-on: macos-latest
+    needs: [build, deploy-core]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
+
+      - name: Install dependencies
+        run: cd Rayson.CV/UI && npm ci
+
+      - name: Build Electron app
+        run: cd Rayson.CV/UI && npm run electron:build -- --mac
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-mac
+          path: Rayson.CV/UI/build/*.dmg
+
+  build-electron-windows:
+    runs-on: windows-latest
+    needs: [build, deploy-core]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: Rayson.CV/UI/package-lock.json
+
+      - name: Install dependencies
+        run: cd Rayson.CV/UI && npm ci
+
+      - name: Build Electron app
+        run: cd Rayson.CV/UI && npm run electron:build -- --win
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-windows
+          path: Rayson.CV/UI/build/*.exe
+
+  upload-electron:
+    runs-on: ubuntu-latest
+    needs: [build-electron-linux, build-electron-mac, build-electron-windows, deploy-core]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
+
+      - name: Wait for storage account
+        run: |
+          echo "Waiting for storage account to be ready..."
+          STORAGE_ACCOUNT_NAME="${{ needs.deploy-core.outputs.storageAccountName }}"
+          until STORAGE_STATE=$(az storage account show \
+            --name "$STORAGE_ACCOUNT_NAME" \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "provisioningState" \
+            --output tsv 2>/dev/null) && [ "$STORAGE_STATE" = "Succeeded" ]; do
+            echo "Storage account status: $STORAGE_STATE. Waiting..."
+            sleep 5
+          done
+          echo "Storage account is ready!"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Linux ==="
+          find artifacts/electron-linux -type f -exec ls -lh {} \;
+          echo "=== macOS ==="
+          find artifacts/electron-mac -type f -exec ls -lh {} \;
+          echo "=== Windows ==="
+          find artifacts/electron-windows -type f -exec ls -lh {} \;
+
+      - name: Upload Linux app
+        run: |
+          FILE=$(ls artifacts/electron-linux/*.AppImage | head -1)
+          echo "Uploading Linux: $FILE"
+          az storage blob upload \
+            --container-name '$web' \
+            --file "$FILE" \
+            --name "RaysonCV.AppImage" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
+            --overwrite
+
+      - name: Upload macOS app
+        run: |
+          FILE=$(ls artifacts/electron-mac/*.dmg | head -1)
+          echo "Uploading macOS: $FILE"
+          az storage blob upload \
+            --container-name '$web' \
+            --file "$FILE" \
+            --name "RaysonCV.dmg" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
+            --overwrite
+
+      - name: Upload Windows app
+        run: |
+          FILE=$(ls artifacts/electron-windows/*.exe | head -1)
+          echo "Uploading Windows: $FILE"
+          az storage blob upload \
+            --container-name '$web' \
+            --file "$FILE" \
+            --name "RaysonCV-Setup.exe" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
+            --overwrite
+
   deploy-apps:
     runs-on: ubuntu-latest
     needs: [build, deploy-core, push]
