@@ -97,8 +97,8 @@ jobs:
           
           ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
           ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
-          CAE_ID=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvId.value --output tsv)
-          CAE_NAME=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvName.value --output tsv)
+          CAE_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.containerAppEnvId.value --output tsv)
+          CAE_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.containerAppEnvName.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
           STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
