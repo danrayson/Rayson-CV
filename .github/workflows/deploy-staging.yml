@@ -218,10 +218,9 @@ jobs:
 
       - name: Build Electron app
         run: |
-          $apiFqdn = "https://ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}/"
+          apiFqdn="https://ca-api-staging.${{ needs.deploy-core.outputs.defaultDomain }}/"
           cd Rayson.CV/UI
-          $env:VITE_API_BASE_URL=$apiFqdn
-          npm run electron:build -- --mac
+          VITE_API_BASE_URL=$apiFqdn npm run electron:build -- --mac
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
