@@ -35,6 +35,14 @@ npx tailwindcss -i ./src/index.css -o ./src/styles/tailwind.css --watch
 
 ### Development
 
+To run the UI locally, create a `.env` file in the `/Rayson.CV` directory:
+
+```
+VITE_API_BASE_URL=http://localhost:13245/
+```
+
+This sets the API base URL for the development server. The API must be running (e.g., via Docker) for the UI to function properly.
+
 ```bash
 npm install
 npm run dev

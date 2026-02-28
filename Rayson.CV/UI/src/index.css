@@ -1,6 +1,9 @@
-/* Import custom CSS */
-@import "./styles/customClasses.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base-200;
+  }
+}

@@ -15,16 +15,7 @@ function createWindow() {
     },
   });
   console.log(path.join(__dirname, '..', 'dist', 'index.html'));
-  //win.webContents.openDevTools();
-  //console.log(path.join(__dirname, '..', 'dist', 'index.html'));
   win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
-// win.setIcon(path.join(__dirname, '..', 'dist', 'src','assets', 'react.svg'));
-//  if(isDev){
-//    win.loadURL('http://localhost:3000'); // This should match the URL where Vite serves your app during development.
-//  }
-//  else{
-//    win.loadFile(path.join(__dirname, 'dist', 'index.html'));// This should match the local file path after packaging for production.
-//  } 
 }
 
 while(!app.isReady){
