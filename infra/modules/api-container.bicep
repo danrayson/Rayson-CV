@@ -7,7 +7,7 @@ param acrName string
 param imageTag string = 'latest'
 param uiFqdn string
 param ollamaFqdn string
-param postgresHost string
+param postgresFqdn string
 param postgresUsername string
 @secure()
 param postgresPassword string
@@ -76,7 +76,7 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'POSTGRES_HOST'
-              value: postgresHost
+              value: postgresFqdn
             }
             {
               name: 'POSTGRES_PORT'

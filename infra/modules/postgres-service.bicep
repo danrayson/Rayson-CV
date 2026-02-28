@@ -20,20 +20,28 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2026-01-01-pr
     version: '16'
     storage: {
       storageSizeGB: 32
+      autoGrow: 'Disabled'
     }
     administratorLogin: postgresAdminUsername
     administratorLoginPassword: postgresAdminPassword
     highAvailability: {
       mode: 'Disabled'
     }
-    azure: {
-      extensions: ['vector']
-    }
+  }
+}
+
+resource postgresExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2026-01-01-preview' = {
+  parent: postgresServer
+  name: 'azure.extensions'
+  properties: {
+    value: 'vector'
+    source: 'user-override'
   }
 }
 
 resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2026-01-01-preview' = {
-  name: '${serverName}/${databaseName}'
+  parent: postgresServer
+  name: databaseName
   properties: {
     charset: 'utf8'
     collation: 'en_US.utf8'
@@ -41,13 +49,13 @@ resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2026-01-0
 }
 
 resource firewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2026-01-01-preview' = {
-  name: '${serverName}/allow-container-apps'
+  parent: postgresServer
+  name: 'allow-container-apps'
   properties: {
     startIpAddress: '0.0.0.0'
-    endIpAddress: '255.255.255.255'
+    endIpAddress: '0.0.0.0'
   }
 }
 
 output postgresFqdn string = postgresServer.properties.fullyQualifiedDomainName
-output postgresHost string = serverName
 output databaseName string = databaseName
