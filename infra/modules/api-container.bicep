@@ -7,7 +7,11 @@ param acrName string
 param imageTag string = 'latest'
 param uiFqdn string
 param ollamaFqdn string
-param postgresServiceId string
+param postgresHost string
+param postgresUsername string
+@secure()
+param postgresPassword string
+param postgresDatabase string
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -25,6 +29,10 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
         }
+        {
+          name: 'postgres-password'
+          value: postgresPassword
+        }
       ]
       activeRevisionsMode: 'Single'
       ingress: {
@@ -41,12 +49,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
     template: {
-      serviceBinds: [
-        {
-          serviceId: postgresServiceId
-          name: 'postgres'
-        }
-      ]
       containers: [
         {
           name: 'api'
@@ -71,6 +73,26 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'OLLAMA__BASEURL'
               value: ollamaFqdn
+            }
+            {
+              name: 'POSTGRES_HOST'
+              value: postgresHost
+            }
+            {
+              name: 'POSTGRES_PORT'
+              value: '5432'
+            }
+            {
+              name: 'POSTGRES_USERNAME'
+              value: postgresUsername
+            }
+            {
+              name: 'POSTGRES_PASSWORD'
+              secretRef: 'postgres-password'
+            }
+            {
+              name: 'POSTGRES_DATABASE'
+              value: postgresDatabase
             }
           ]
           resources: {

@@ -1,21 +1,53 @@
+param environmentName string
 param location string = resourceGroup().location
-param containerAppName string
-param environmentId string
+param postgresAdminUsername string
+@secure()
+param postgresAdminPassword string
 param tags object = {}
 
-resource postgresService 'Microsoft.App/containerApps@2023-05-01' = {
-  name: containerAppName
+var serverName = 'pg-${environmentName}-${uniqueString(resourceGroup().id)}'
+var databaseName = 'raysoncv'
+
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01' = {
+  name: serverName
   location: location
   tags: tags
+  sku: {
+    name: 'Standard_B1ms'
+    tier: 'Burstable'
+  }
   properties: {
-    managedEnvironmentId: environmentId
-    configuration: {
-      service: {
-        type: 'postgres'
-      }
+    version: '16'
+    storage: {
+      storageSizeGB: 32
+    }
+    administratorLogin: postgresAdminUsername
+    administratorLoginPassword: postgresAdminPassword
+    highAvailability: {
+      mode: 'Disabled'
+    }
+    azure: {
+      extensions: ['vector']
     }
   }
 }
 
-output serviceId string = postgresService.id
-output containerAppName string = postgresService.name
+resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01' = {
+  name: '${serverName}/${databaseName}'
+  properties: {
+    charset: 'utf8'
+    collation: 'en_US.utf8'
+  }
+}
+
+resource firewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01' = {
+  name: '${serverName}/allow-container-apps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '255.255.255.255'
+  }
+}
+
+output postgresFqdn string = postgresServer.properties.fullyQualifiedDomainName
+output postgresHost string = serverName
+output databaseName string = databaseName
