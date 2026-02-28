@@ -26,51 +26,54 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <h1 className="text-7xl font-bold mb-12 text-center">Design, Develop, Deploy</h1>
-      
-      <div className="flex flex-row gap-4 w-full max-w-6xl">
-        <a
-          href="/CV September 2024.pdf"
-          download
-          className="btn btn-primary aspect-square flex-1 text-2xl font-bold"
-        >
-          Download CV
-        </a>
-
-        {downloadUrl ? (
+    <div className="flex flex-col min-h-screen bg-base-200 p-4">
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <h1 className="text-7xl font-bold mb-12 text-center">{"Design Develop Deploy"}</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
           <a
-            href={downloadUrl}
+            href="/CV September 2024.pdf"
             download
-            className="btn btn-info aspect-square flex-1 text-2xl font-bold"
+            className="btn btn-primary text-2xl font-bold"
           >
-            Download App
+            Download CV
           </a>
-        ) : (
-          <button
-            onClick={handleAppClick}
-            className="btn btn-info aspect-square flex-1 text-2xl font-bold"
+
+          {downloadUrl ? (
+            <a
+              href={downloadUrl}
+              download
+              className="btn btn-primary text-2xl font-bold"
+            >
+              Download App
+            </a>
+          ) : (
+            <button
+              onClick={handleAppClick}
+              className="btn btn-disabled text-2xl font-bold"
+            >
+              Download Unavailable
+            </button>
+          )}
+          
+          <a
+            href="#/chatbot"
+            className="btn btn-primary text-2xl font-bold"
           >
-            Download App
-          </button>
-        )}
-        
-        <a
-          href="#/chatbot"
-          className="btn btn-secondary aspect-square flex-1 text-2xl font-bold"
-        >
-          Chat with AI
-        </a>
-        
-        <a
-          href="https://github.com/danrayson/Rayson-CV"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-accent aspect-square flex-1 text-2xl font-bold"
-        >
-          View GitHub
-        </a>
+            Chat with AI
+          </a>
+          
+          <a
+            href="https://github.com/danrayson/Rayson-CV"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary text-2xl font-bold"
+          >
+            View GitHub
+          </a>
+        </div>
       </div>
+      <p className="text-sm opacity-30">Dan Rayson's CV Website</p>
     </div>
   );
 };
