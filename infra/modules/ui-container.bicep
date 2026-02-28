@@ -1,5 +1,4 @@
 param location string = resourceGroup().location
-param caeId string
 param containerAppName string
 param acrLoginServer string
 param acrName string
@@ -18,31 +17,11 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' 
   name: caeName
 }
 
-resource rootCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
-  name: 'cert-${customDomainName}'
-  parent: containerAppEnvironment
-  location: location
-  properties: {
-    subjectName: customDomainName
-    domainControlValidation: 'CNAME'
-  }
-}
-
-resource wwwCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
-  name: 'cert-www-${customDomainName}'
-  parent: containerAppEnvironment
-  location: location
-  properties: {
-    subjectName: 'www.${customDomainName}'
-    domainControlValidation: 'CNAME'
-  }
-}
-
 resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
   location: location
   properties: {
-    managedEnvironmentId: caeId
+    managedEnvironmentId: containerAppEnvironment.id
     configuration: {
       secrets: [
         {
@@ -55,18 +34,6 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 3000
         transport: 'auto'
-        customDomains: customDomainName != '' ? [
-          {
-            name: customDomainName
-            bindingType: 'SniEnabled'
-            certificateId: rootCert.id
-          }
-          {
-            name: 'www.${customDomainName}'
-            bindingType: 'SniEnabled'
-            certificateId: wwwCert.id
-          }
-        ] : []
       }
       registries: [
         {
@@ -108,6 +75,48 @@ resource uiContainer 'Microsoft.App/containerApps@2023-05-01' = {
     }
   }
   tags: tags
+}
+
+resource rootHost 'Microsoft.App/containerApps/hostNameBindings@2023-05-01' = if (customDomainName != '') {
+  name: customDomainName
+  parent: uiContainer
+  properties: {
+    hostname: customDomainName
+  }
+}
+
+resource wwwHost 'Microsoft.App/containerApps/hostNameBindings@2023-05-01' = if (customDomainName != '') {
+  name: 'www.${customDomainName}'
+  parent: uiContainer
+  properties: {
+    hostname: 'www.${customDomainName}'
+  }
+}
+
+resource rootCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
+  name: 'cert-${customDomainName}'
+  parent: containerAppEnvironment
+  location: location
+  properties: {
+    subjectName: customDomainName
+    domainControlValidation: 'TXT'
+  }
+  dependsOn: [
+    rootHost
+  ]
+}
+
+resource wwwCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (customDomainName != '') {
+  name: 'cert-www-${customDomainName}'
+  parent: containerAppEnvironment
+  location: location
+  properties: {
+    subjectName: 'www.${customDomainName}'
+    domainControlValidation: 'CNAME'
+  }
+  dependsOn: [
+    wwwHost
+  ]
 }
 
 output containerAppName string = uiContainer.name

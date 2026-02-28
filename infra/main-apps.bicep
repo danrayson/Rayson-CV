@@ -47,7 +47,6 @@ module ui 'modules/ui-container.bicep' = {
   name: 'ui-container-${environmentName}'
   params: {
     location: location
-    caeId: caeId
     containerAppName: uiAppName
     acrLoginServer: acrLoginServer
     acrName: acrName
