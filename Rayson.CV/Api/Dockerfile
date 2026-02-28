@@ -60,9 +60,10 @@ ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_f
 ENV POSTGRES_HOST=host.docker.internal
 ENV POSTGRES_PORT=5433
 ENV POSTGRES_DATABASE=raysoncv
-ENV POSTGRES_USERNAME=raysoncv_user
-ENV POSTGRES_PASSWORD=development_password
+ENV POSTGRES_USERNAME=postgres
+ENV POSTGRES_PASSWORD=postgres
 ENV Cors__AllowedOrigins__0=http://localhost:3000
+ENV OLLAMA__BASEURL=http://ollama:11434
 
 EXPOSE 8080
 

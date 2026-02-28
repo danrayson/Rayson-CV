@@ -9,6 +9,7 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 | Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
+| Ollama | AI Chatbot | 11435 (host), 11434 (container) |
 
 ## Prerequisites
 
@@ -21,10 +22,9 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 
 ### 1. Environment Setup
 
-Copy the example environment file and configure:
+Configure `.env` with your values:
 
 ```bash
-cp .env.example .env
 # Edit .env with your values
 ```
 
@@ -72,7 +72,108 @@ docker compose -f docker-compose.dev.full.yml up -d
 docker compose -f docker-compose.dev.full.yml down
 ```
 
+## Chatbot
+
+The chatbot feature uses Ollama with the smollm2:135m model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
+
+### Architecture
+
+```
+User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (smollm2:135m)
+```
+
+### Components
+
+| Layer | Component | Description |
+|-------|-----------|-------------|
+| UI | `UI/src/pages/ChatbotPage.tsx` | WhatsApp-style chat interface |
+| UI | `UI/src/services/chatbotService.ts` | Calls API `/chatbot` endpoint |
+| API | `Api/Presentation/Endpoints/Chatbot/ChatbotEndpoints.cs` | Minimal API endpoint |
+| API | `Api/Application/Chatbot/` | Request/Response DTOs, service interface |
+| API | `Api/Infrastructure/Chatbot/OllamaChatbotService.cs` | Ollama API integration |
+| Domain | `Api/Domain/Resources/cv.md` | Embedded CV content |
+
+### Usage
+
+1. Start the API (with database and Ollama):
+   ```bash
+   docker compose -f docker-compose.dev.db-api.yml up -d
+   ```
+
+2. Run the UI locally:
+   ```bash
+   cd Rayson.CV/UI
+   npm run dev
+   ```
+
+3. Navigate to the chatbot page and ask questions about the CV.
+
+### API Endpoint
+
+- **URL**: `POST /chatbot`
+- **Auth**: Anonymous (`.AllowAnonymous()`)
+- **Request**:
+  ```json
+  {
+    "message": "What is Rayson's primary skill?",
+    "history": [
+      { "role": "user", "content": "Hi" },
+      { "role": "assistant", "content": "Hello! How can I help?" }
+    ]
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Daniel's primary skill is..."
+  }
+  ```
+
+### Configuration
+
+The chatbot service is configured via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OLLAMA__BASEURL` | Ollama server URL | `http://ollama:11434` |
+
+The following are hardcoded in the service:
+- **Model**: `smollm2:135m` (not configurable)
+- **Max tokens**: 128 (limits response length)
+
+### System Prompt
+
+The chatbot uses a system prompt that includes:
+- Instructions to answer only CV-related questions
+- Instructions to keep answers brief (1-2 sentences)
+- Instructions to politely decline off-topic questions
+- The CV content from `Api/Domain/Resources/cv.md`
+
+### Docker Setup
+
+Ollama runs in its own container with:
+- Custom Dockerfile (`ollama.Dockerfile`) based on `ollama/ollama:latest`
+- Startup script (`ollama-startup.sh`) that pulls smollm2:135m model on first run
+- Health check confirms smollm2:135m model is available
+
+**Ports**: 11434 (container), 11435 (host)
+
 ## VSCode Debugging
+
+### Debug API Locally
+
+1. Start the database:
+   ```bash
+   docker compose -f docker-compose.dev.db.yml up -d
+   # OR
+   docker compose -f docker-compose.dev.db-ui.yml up -d
+   ```
+
+2. In VSCode, select ".NET Core Launch (web)" from the debug dropdown
+
+3. Press F5 to start debugging
+
+The API will be available at `http://localhost:5000` (configured in `launch.json`)
 
 ### Debug API in Docker Container
 
@@ -98,7 +199,7 @@ The API will be available at `http://localhost:13245`
 
 2. Navigate to UI folder and run:
    ```bash
-   cd UI
+   cd Rayson.CV/UI
    npm install
    npm run dev
    ```
@@ -115,6 +216,7 @@ docker ps
 docker logs raysoncv-api
 docker logs raysoncv-ui
 docker logs raysoncv-postgres
+docker logs raysoncv-ollama
 ```
 
 ### Stop All Containers
@@ -140,7 +242,7 @@ docker compose -f docker-compose.dev.full.yml up -d
 
 ## Environment Variables
 
-See `.env.example` for all required variables:
+The following environment variables are required:
 
 | Variable | Description |
 |----------|-------------|
@@ -154,6 +256,7 @@ See `.env.example` for all required variables:
 | `API_HEALTH_URL` | API health URL for UI health checks |
 | `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 | `LOG_LEVEL` | Log level for UI health server |
+| `OLLAMA__BASEURL` | Ollama server URL (e.g., `http://ollama:11434` for Docker, `http://ca-ollama-staging.internal.<domain>:11434` for Azure) |
 
 ## Health Check Endpoints
 
@@ -299,31 +402,57 @@ Content-Type: application/json
 docker logs raysoncv-ui
 ```
 
-## Database Migrations
+## Database
 
-Migrations are applied automatically on API startup. To create a new migration:
+### Technology Stack
+- PostgreSQL 16 (Alpine image for smaller footprint)
+- Entity Framework Core 8.0
+- Npgsql as database provider
+
+### Schema
+- Uses ASP.NET Core Identity schema (Users, Roles, RoleClaims, UserRoles, UserClaims, UserLogins, UserTokens)
+- Custom `ApplicationUser` and `ApplicationRole` extending Identity base classes
+- All entities inherit from `Domain.Entity` base class with `Id` and `DeletedAt` fields
+
+### Migrations
+- Located in `Api/Database/Migrations/`
+- Initial migration: `20260222125915_Init.cs`
+- Applied automatically on startup via `app.RunMigrations()` extension
+
+### Creating Migrations
 
 ```bash
 cd Api
 dotnet ef migrations add MigrationName -p Database -s Presentation
 ```
 
+### Conventions
+- Use **soft deletes** (set `DeletedAt` field) instead of hard deletes
+- Use **EF Core migrations** for schema changes
+- Use **repository pattern** for data access (via `Repository<T>`)
+
 ## Project Structure
 
 ```
-Rayson.Dev/
-├── Api/                    # .NET API backend
-│   ├── Presentation/       # API endpoints, Program.cs
-│   ├── Application/        # Business logic
-│   ├── Domain/             # Entities, interfaces
-│   ├── Infrastructure/     # External services
-│   └── Database/           # EF Core, migrations, seed data
-├── UI/                     # React + Vite frontend
-├── Test/
-│   └── e2e/               # End-to-end BDD tests
-├── .env                    # Local environment variables (gitignored)
-├── .env.example            # Environment template
-└── docker-compose.*.yml    # Docker Compose configurations
+Rayson.CV/                      # Root solution folder
+├── Rayson.CV/                  # Main project folder
+│   ├── Api/                    # .NET API backend
+│   │   ├── Presentation/       # Minimal API endpoints, Program.cs
+│   │   ├── Application/        # Business logic, interfaces, DTOs
+│   │   ├── Domain/             # Entities, interfaces
+│   │   ├── Infrastructure/     # External services (Auth, Chatbot, Logging)
+│   │   └── Database/           # EF Core, migrations, seed data
+│   ├── UI/                     # React + Vite frontend
+│   ├── Test/
+│   │   └── e2e/                # End-to-end BDD tests (Playwright + Cucumber)
+│   ├── .env                    # Local environment variables (gitignored)
+│   └── docker-compose.*.yml   # Docker Compose configurations
+├── infra/                      # Azure Bicep infrastructure templates
+│   ├── main-core.bicep         # Core resources (RG, ACR, Storage, Container Apps Env)
+│   ├── main-apps.bicep        # Workload resources (PostgreSQL, API, UI)
+│   └── modules/                # Reusable Bicep modules
+├── .github/workflows/          # CI/CD workflows
+└── .vscode/                    # VSCode launch configs and tasks
 ```
 
 ## Testing
@@ -410,6 +539,79 @@ To seed this user, add it to the database seed data or manually create it.
 
 HTML reports are generated in `Test/e2e/reports/cucumber.html` after each test run. Screenshots are captured on failure and saved to `Test/e2e/reports/screenshots/`.
 
+## Azure Infrastructure
+
+Infrastructure is defined in Bicep and located at project root `/infra/`:
+
+### Main Templates
+- `infra/main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
+- `infra/main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
+
+### Modules
+- `infra/modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
+- `infra/modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
+- `infra/modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
+- `infra/modules/container-apps-environment.bicep` - Container Apps Environment
+- `infra/modules/storage.bicep` - Azure Storage Account
+- `infra/modules/container-registry.bicep` - Azure Container Registry
+
+### Azure Services
+- **Azure Container Apps** - Hosts API and UI containers
+- **Azure Container Registry** - Stores Docker images
+- **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
+- **Azure Storage Account** - General purpose storage
+
+## CI/CD
+
+GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
+
+### Trigger
+- Push to `develop` branch
+- Manual workflow dispatch (with optional imageTag input)
+
+### Jobs
+1. **build** - Compiles .NET API and builds React UI
+2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
+3. **push** - Builds and pushes Docker images to Azure Container Registry
+4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
+
+### Environment
+- Staging (Azure `uksouth` region, resource group `rg-raysoncv-staging`)
+
+### Secrets Required
+- `AZURE_CREDENTIALS` - Azure service principal credentials
+- `JWT_SIGNING_KEY` - JWT token signing key
+
+### Deploying
+
+Deployments are triggered via:
+- **Pull Request**: Merge to `develop` branch via GitHub PR
+- **Manual Trigger**: Run workflow from GitHub Actions UI with optional imageTag
+
 ## Deployment
 
-Staging and production deployments use GitHub Actions to deploy containers to Azure Container Apps. Secrets are managed via Azure Key Vault.
+### Production Setup
+- Docker containers for API and UI
+- Azure Container Apps for orchestration
+- Azure PostgreSQL Flexible Server for database
+
+### Environment Configuration
+- `ASPNETCORE_ENVIRONMENT=Production` in production
+- CORS origins must be explicitly configured
+- JWT signing key must be secure (minimum 16 characters)
+- Use HTTPS only in production (HSTS enabled)
+- Database connection should use SSL
+
+### Monitoring
+- **Development**: Container console logs
+- Health endpoints (`/health/live`, `/health/ready`) for container orchestrator
+- Serilog with enrichment: correlation ID, environment, thread info
+
+### Conventions
+- Use **HTTPS only** in production
+- Use **environment-specific** configuration
+- Enable **HSTS** in production
+- Use **secure JWT keys** (minimum 256-bit)
+- Configure **CORS** explicitly (not allow all)
+- Use **health checks** for container orchestration
+- Set **LOG_LEVEL=Information** or lower in production

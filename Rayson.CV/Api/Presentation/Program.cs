@@ -1,11 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Presentation.Extensions;
 using Database.SeedData;
 using Database.Extensions;
-using Presentation.Endpoints.Auth;
 using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
-using Infrastructure.Auth;
+using Presentation.Endpoints.Chatbot;
 using Infrastructure.Extensions;
 using Infrastructure.Logging;
 using Serilog;
@@ -15,9 +13,6 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.AddLoggingConfiguration();
-
-    var authOptionsSectionName = "AuthOptions";
-    builder.Services.AddOptions<AuthOptions>().Bind(builder.Configuration.GetSection(authOptionsSectionName));
 
     builder.Services.AddControllers();
     builder.Services.AddCors(options =>
@@ -31,8 +26,7 @@ try
 
             corsBuilder.WithOrigins(allowedOrigins)
                        .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .WithExposedHeaders("X-Auth-Token");
+                       .AllowAnyMethod();
         });
     });
 
@@ -44,15 +38,15 @@ try
 
     builder.Services.AddPresentationServices();
     builder.Services.AddDatabaseServices(builder.Configuration);
-    builder.Services.AddInfrastructureServices();
+    builder.Services.AddInfrastructureServices(builder.Configuration);
 
     var app = builder.Build();
 
     app.UseMiddleware<RequestLoggingMiddleware>();
 
-    app.MapAuthEndpoints();
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();
+    app.MapChatbotEndpoints();
 
     if (app.Environment.IsDevelopment())
     {
@@ -66,9 +60,8 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseAuthorization();
-    app.UseAuthentication();
-    await app.RunMigrations();
+    await app.RunMigrationsAsync();
+    await app.InitializeRagAsync();
     if (!app.Environment.IsDevelopment())
     {
         app.UseHttpsRedirection();

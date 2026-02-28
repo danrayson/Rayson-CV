@@ -7,6 +7,7 @@ FROM node:20-alpine AS build
 # Declare build argument for API URL (passed from docker-compose)
 # This is required for Docker to accept the --build-arg
 ARG VITE_API_BASE_URL
+ARG VITE_APP_DOWNLOAD_URL
 
 # Set working directory for build operations
 WORKDIR /app
@@ -21,6 +22,9 @@ RUN npm install
 
 # Copy the rest of the application source code
 COPY . .
+
+# Generate Tailwind CSS
+RUN npx tailwindcss -i ./src/index.css -o ./src/styles/tailwind.css
 
 # Build the application with Vite
 # VITE_API_BASE_URL is injected at build time and embedded into the JS bundle

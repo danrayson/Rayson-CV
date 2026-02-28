@@ -4,34 +4,24 @@ param defaultDomain string
 param acrLoginServer string
 param acrName string
 param imageTag string
-param jwtIssuer string
-param jwtAudience string
-@secure()
-param jwtSigningKey string
-param storageAccountName string
+param blobBaseUrl string
 param environmentName string
+param postgresFqdn string
+param postgresAdminUsername string
+@secure()
+param postgresAdminPassword string
+param logLevel string = 'Debug'
 param tags object = {
   Environment: environmentName
   Project: 'RaysonCV'
 }
 
-var postgresServiceName = 'ca-postgres-${environmentName}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
 
-module postgresService 'modules/postgres-service.bicep' = {
-  name: 'postgres-service'
-  params: {
-    location: location
-    environmentId: environmentId
-    containerAppName: postgresServiceName
-    tags: tags
-  }
-}
-
 module api 'modules/api-container.bicep' = {
-  name: 'api-container'
+  name: 'api-container-${environmentName}'
   params: {
     location: location
     environmentId: environmentId
@@ -40,17 +30,19 @@ module api 'modules/api-container.bicep' = {
     acrLoginServer: acrLoginServer
     acrName: acrName
     imageTag: imageTag
-    jwtIssuer: jwtIssuer
-    jwtAudience: jwtAudience
-    jwtSigningKey: jwtSigningKey
     uiFqdn: uiFqdn
-    postgresServiceId: postgresService.outputs.serviceId
+    ollamaFqdn: 'http://localhost:11434'
+    postgresFqdn: postgresFqdn
+    postgresUsername: postgresAdminUsername
+    postgresPassword: postgresAdminPassword
+    postgresDatabase: 'raysoncv'
+    logLevel: logLevel
     tags: tags
   }
 }
 
 module ui 'modules/ui-container.bicep' = {
-  name: 'ui-container'
+  name: 'ui-container-${environmentName}'
   params: {
     location: location
     environmentId: environmentId
@@ -59,6 +51,7 @@ module ui 'modules/ui-container.bicep' = {
     acrName: acrName
     imageTag: imageTag
     apiHealthUrl: 'http://${apiAppName}.internal.${defaultDomain}:8080/health'
+    appDownloadUrl: blobBaseUrl
     tags: tags
   }
   dependsOn: [

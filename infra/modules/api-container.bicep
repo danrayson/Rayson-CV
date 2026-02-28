@@ -5,12 +5,14 @@ param containerAppName string
 param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
-param jwtIssuer string
-param jwtAudience string
-@secure()
-param jwtSigningKey string
 param uiFqdn string
-param postgresServiceId string
+param ollamaFqdn string
+param postgresFqdn string
+param postgresUsername string
+@secure()
+param postgresPassword string
+param postgresDatabase string
+param logLevel string = 'Debug'
 param tags object = {}
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -29,8 +31,8 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
           value: acr.listCredentials().passwords[0].value
         }
         {
-          name: 'jwt-signing-key'
-          value: jwtSigningKey
+          name: 'postgres-password'
+          value: postgresPassword
         }
       ]
       activeRevisionsMode: 'Single'
@@ -48,12 +50,6 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
     template: {
-      serviceBinds: [
-        {
-          serviceId: postgresServiceId
-          name: 'postgres'
-        }
-      ]
       containers: [
         {
           name: 'api'
@@ -68,30 +64,64 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'http://+:8080'
             }
             {
-              name: 'AuthOptions__Issuer'
-              value: jwtIssuer
-            }
-            {
-              name: 'AuthOptions__Audience'
-              value: jwtAudience
-            }
-            {
-              name: 'AuthOptions__IssuerSigningKey'
-              secretRef: 'jwt-signing-key'
-            }
-            {
               name: 'Cors__AllowedOrigins__0'
               value: 'https://${uiFqdn}'
             }
             {
               name: 'LOG_LEVEL'
-              value: 'Debug'
+              value: logLevel
+            }
+            {
+              name: 'OLLAMA__BASEURL'
+              value: ollamaFqdn
+            }
+            {
+              name: 'POSTGRES_HOST'
+              value: postgresFqdn
+            }
+            {
+              name: 'POSTGRES_PORT'
+              value: '5432'
+            }
+            {
+              name: 'POSTGRES_USERNAME'
+              value: postgresUsername
+            }
+            {
+              name: 'POSTGRES_PASSWORD'
+              secretRef: 'postgres-password'
+            }
+            {
+              name: 'POSTGRES_DATABASE'
+              value: postgresDatabase
             }
           ]
           resources: {
             cpu: json('0.5')
             memory: '1.0Gi'
           }
+        }
+        {
+          name: 'ollama'
+          image: '${acrLoginServer}/raysoncv-ollama:${imageTag}'
+          command: ['/bin/sh', '/ollama-startup.sh']
+          resources: {
+            cpu: json('1.5')
+            memory: '3.0Gi'
+          }
+          volumeMounts: [
+            {
+              volumeName: 'ollama-models'
+              mountPath: '/root/.ollama'
+            }
+          ]
+        }
+      ]
+      volumes: [
+        {
+          name: 'ollama-models'
+          storageType: 'AzureFile'
+          storageName: 'ollama-models'
         }
       ]
       scale: {

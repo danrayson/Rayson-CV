@@ -8,19 +8,19 @@
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: raysoncv-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: raysoncv
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d raysoncv"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,19 +35,20 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
-      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      AuthOptions__Issuer: ${JWT_ISSUER}
-      AuthOptions__Audience: ${JWT_AUDIENCE}
-      AuthOptions__IssuerSigningKey: ${JWT_SIGNING_KEY}
+      POSTGRES_DATABASE: raysoncv
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: postgres
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins__0: http://localhost:3000
+      Cors__AllowedOrigins__1: http://localhost:5173
       LOG_LEVEL: Debug
+      OLLAMA__BASEURL: http://ollama:11434
     ports:
       - "13245:8080"
     depends_on:
       postgres:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     networks:
       - internal
@@ -58,9 +59,34 @@ services:
       retries: 3
       start_period: 30s
 
+  # ===========================================
+  # Ollama (AI Chatbot)
+  # ===========================================
+  ollama:
+    build:
+      context: .
+      dockerfile: ollama.Dockerfile
+    container_name: raysoncv-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11435:11434"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:11434/api/tags | grep -q smollm2 && curl -s http://localhost:11434/api/tags | grep -q nomic-embed-text"]
+      interval: 5s
+      timeout: 10s
+      retries: 180
+      start_period: 0s
+
 networks:
   internal:
     driver: bridge
 
 volumes:
   postgres-data:
+  ollama-data:

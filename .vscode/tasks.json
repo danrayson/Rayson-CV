@@ -88,7 +88,10 @@
                         "hostname": "host.docker.internal",
                         "ip": "host-gateway"
                     }
-                ]
+                ],
+                "env": {
+                    "OLLAMA__BASEURL": "http://host.docker.internal:11435"
+                }
             },
             "netCore": {
                 "appProject": "${workspaceFolder}/Rayson.CV/Api/Presentation/Presentation.csproj",

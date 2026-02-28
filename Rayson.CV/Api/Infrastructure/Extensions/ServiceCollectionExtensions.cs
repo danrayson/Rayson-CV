@@ -1,31 +1,38 @@
-using Application.Auth;
+using Application.Chatbot;
 using Application.Health;
 using Application.Logging;
-using Database;
-using Infrastructure.Auth;
+using Infrastructure.Chatbot;
 using Infrastructure.Health;
 using Infrastructure.Logging;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.DataProtection;
+using Infrastructure.RAG;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Database.Auth;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddInfrastructureServices(this IServiceCollection services)
+    public static void AddInfrastructureServices(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.AddHttpContextAccessor();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
-        services.AddDataProtection().PersistKeysToDbContext<RaysonCVDbContext>();
-        services.AddIdentityCore<ApplicationUser>()
-            .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<RaysonCVDbContext>()
-            .AddDefaultTokenProviders();
+
+        services.AddScoped<ICvProvider, CvProvider>();
+
+        services.Configure<OllamaSettings>(configuration.GetSection("Ollama"));
+        services.AddHttpClient("Ollama")
+            .ConfigureHttpClient((serviceProvider, client) =>
+            {
+                var settings = serviceProvider.GetRequiredService<IOptions<OllamaSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl);
+                client.Timeout = TimeSpan.FromMinutes(5);
+            });
+        services.AddScoped<IChatbotService, OllamaChatbotService>();
+
+        services.AddScoped<ICvChunkRepository, CvChunkRepository>();
+        services.AddScoped<IEmbeddingService, OllamaEmbeddingService>();
+        services.AddScoped<IRagService, RagService>();
     }
 }

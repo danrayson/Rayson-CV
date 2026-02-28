@@ -1,30 +1,36 @@
-using Database.Auth;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using Domain;
 
 namespace Database;
 
-public class RaysonCVDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>, IDataProtectionKeyContext
+public class RaysonCVDbContext : DbContext
 {
-    //Need twin constructurs because IdentityDbContext won't work in migrations without a zero parameter contructor.
     public RaysonCVDbContext()
         : base() { }
-    //Need to keep this one because it's the one we actually use during runtime.
+
     public RaysonCVDbContext(DbContextOptions<RaysonCVDbContext> options)
         : base(options) { }
 
-    //Used in the identity stuff for generating tokens or something
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<CvChunk> CvChunks { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql();
-        base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<CvChunk>(entity =>
+        {
+            entity.Property(e => e.Embedding)
+                .HasColumnType("vector(768)")
+                .HasConversion(
+                    v => "[" + string.Join(",", v.Select(e => e.ToString("G10", CultureInfo.InvariantCulture))) + "]",
+                    v => v.Trim('[', ']').Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(double.Parse)
+                          .ToArray()
+                );
+        });
     }
 }
