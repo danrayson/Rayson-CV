@@ -39,11 +39,8 @@ const ChatbotPage: React.FC = () => {
     let finalContent = '';
 
     try {
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
-      
       await chatbotService.sendMessageStreaming(
         userMessage.content,
-        history,
         (chunk) => {
           setStreamingContent(prev => prev + chunk);
           finalContent += chunk;

@@ -124,15 +124,6 @@ public class OllamaChatbotService(
             new() { Role = "system", Content = systemPrompt }
         };
 
-        if (request.History != null)
-        {
-            messages.AddRange(request.History.Select(h => new OllamaMessage
-            {
-                Role = h.Role,
-                Content = h.Content
-            }));
-        }
-
         messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
 
         return messages;

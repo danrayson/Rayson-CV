@@ -7,7 +7,6 @@ export interface ChatMessage {
 
 interface ChatbotRequest {
   message: string;
-  history?: ChatMessage[];
 }
 
 interface ChatbotResponse {
@@ -24,24 +23,22 @@ class ChatbotService {
     return this.httpClient;
   }
 
-  async sendMessage(message: string, history: ChatMessage[] = []): Promise<ChatbotResponse> {
+  async sendMessage(message: string): Promise<ChatbotResponse> {
     const client = this.getHttpClient();
     
     const request: ChatbotRequest = {
-      message,
-      history: history.length > 0 ? history : undefined
+      message
     };
 
     const response = await client.post<ChatbotResponse>('chatbot', request);
     return response.data;
   }
 
-  async sendMessageStreaming(message: string, history: ChatMessage[] = [], onChunk: (chunk: string) => void): Promise<void> {
+  async sendMessageStreaming(message: string, onChunk: (chunk: string) => void): Promise<void> {
     const client = this.getHttpClient();
     
     const request: ChatbotRequest = {
-      message,
-      history: history.length > 0 ? history : undefined
+      message
     };
 
     await client.postStreaming('chatbot/stream', request, onChunk);
