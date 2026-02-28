@@ -362,5 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Environment files
+.env
+.env.*
+
 # E2E test reports
 Rayson.Dev/Test/e2e/reports/
