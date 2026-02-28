@@ -60,7 +60,8 @@ try
     }
 
     app.UseHttpsRedirection();
-    await app.RunMigrations();
+    await app.RunMigrationsAsync();
+    await app.InitializeRagAsync();
     if (!app.Environment.IsDevelopment())
     {
         app.UseHttpsRedirection();

@@ -69,6 +69,7 @@ jobs:
       storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
       storageAccountKey: ${{ steps.deploy.outputs.storageAccountKey }}
       blobBaseUrl: ${{ steps.deploy.outputs.blobBaseUrl }}
+      postgresFqdn: ${{ steps.deploy.outputs.postgresFqdn }}
     
     steps:
       - name: Checkout code
@@ -89,7 +90,9 @@ jobs:
             --parameters location=${{ env.LOCATION }} \
                          resourceGroupName=${{ env.AZURE_RESOURCE_GROUP }} \
                          environmentName=staging \
-                         acrName=${{ env.ACR_NAME }}
+                         acrName=${{ env.ACR_NAME }} \
+                         postgresAdminUsername=raysoncvadmin \
+                         postgresAdminPassword="${{ secrets.POSTGRES_PASSWORD }}"
           
           ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
           ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
@@ -98,6 +101,7 @@ jobs:
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
           STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
           BLOB_BASE_URL=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.blobBaseUrl.value --output tsv)
+          POSTGRES_FQDN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.postgresFqdn.value --output tsv)
           
           echo "acrLoginServer=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
           echo "acrName=$ACR_NAME_OUT" >> $GITHUB_OUTPUT
@@ -106,6 +110,7 @@ jobs:
           echo "storageAccountName=$STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
           echo "storageAccountKey=$STORAGE_ACCOUNT_KEY" >> $GITHUB_OUTPUT
           echo "blobBaseUrl=$BLOB_BASE_URL" >> $GITHUB_OUTPUT
+          echo "postgresFqdn=$POSTGRES_FQDN" >> $GITHUB_OUTPUT
 
   push:
     runs-on: ubuntu-latest
@@ -351,7 +356,10 @@ jobs:
                          acrName=${{ needs.deploy-core.outputs.acrName }} \
                          imageTag=${{ needs.build.outputs.imageTag }} \
                          environmentName=staging \
-                         blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}"
+                         blobBaseUrl="${{ needs.deploy-core.outputs.blobBaseUrl }}" \
+                         postgresFqdn=${{ needs.deploy-core.outputs.postgresFqdn }} \
+                         postgresAdminUsername=raysoncvadmin \
+                         postgresAdminPassword="${{ secrets.POSTGRES_PASSWORD }}"
           
           API_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.apiFqdn.value --output tsv)
           UI_FQDN=$(az deployment group show --name raysoncv-staging-apps --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs.uiFqdn.value --output tsv)

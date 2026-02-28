@@ -39,11 +39,8 @@ const ChatbotPage: React.FC = () => {
     let finalContent = '';
 
     try {
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
-      
       await chatbotService.sendMessageStreaming(
         userMessage.content,
-        history,
         (chunk) => {
           setStreamingContent(prev => prev + chunk);
           finalContent += chunk;
@@ -84,7 +81,7 @@ const ChatbotPage: React.FC = () => {
         <div>
           <p className="font-bold">AI Limitation Warning</p>
           <p className="text-sm">
-            This chatbot uses smollm2:135m, RAG, CPU inference, and halucinates. 
+            This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
             For accurate details, please{' '}
             <a href="/CV September 2024.pdf" download className="underline font-bold">
               download the real CV

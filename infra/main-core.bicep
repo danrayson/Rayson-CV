@@ -2,8 +2,12 @@ targetScope = 'subscription'
 
 param location string
 param resourceGroupName string
+@allowed(['staging', 'production'])
 param environmentName string
 param acrName string
+param postgresAdminUsername string
+@secure()
+param postgresAdminPassword string
 
 param tags object = {
   Environment: environmentName
@@ -19,7 +23,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 }
 
 module acr 'modules/container-registry.bicep' = {
-  name: 'container-registry'
+  name: 'container-registry-${environmentName}'
   scope: rg
   params: {
     location: location
@@ -29,7 +33,7 @@ module acr 'modules/container-registry.bicep' = {
 }
 
 module storage 'modules/storage.bicep' = {
-  name: 'storage'
+  name: 'storage-${environmentName}'
   scope: rg
   params: {
     location: location
@@ -39,7 +43,10 @@ module storage 'modules/storage.bicep' = {
 }
 
 module containerAppsEnv 'modules/container-apps-environment.bicep' = {
-  name: 'container-apps-environment'
+  name: 'container-apps-environment-${environmentName}'
+  dependsOn:[
+    storage
+  ]
   scope: rg
   params: {
     location: location
@@ -51,6 +58,18 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   }
 }
 
+module postgres 'modules/postgres-service.bicep' = {
+  name: 'postgres-service-${environmentName}'
+  scope: rg
+  params: {
+    environmentName: environmentName
+    location: location
+    postgresAdminUsername: postgresAdminUsername
+    postgresAdminPassword: postgresAdminPassword
+    tags: tags
+  }
+}
+
 output acrLoginServer string = acr.outputs.acrLoginServer
 output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
@@ -58,3 +77,4 @@ output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
 output blobBaseUrl string = storage.outputs.blobBaseUrl
 output storageAccountKey string = storage.outputs.storageAccountKey
+output postgresFqdn string = postgres.outputs.postgresFqdn

@@ -19,7 +19,15 @@ else
     echo "smollm2:135m model already present, skipping pull"
 fi
 
-echo "Ollama is ready with smollm2:135m!"
+# Pull nomic-embed-text:latest model if not already present
+if ! ollama list | grep -q "^nomic-embed-text"; then
+    echo "Pulling nomic-embed-text:latest model..."
+    ollama pull nomic-embed-text:latest
+else
+    echo "nomic-embed-text:latest model already present, skipping pull"
+fi
+
+echo "Ollama is ready with smollm2:135m and nomic-embed-text:latest!"
 
 # Keep container running
 wait

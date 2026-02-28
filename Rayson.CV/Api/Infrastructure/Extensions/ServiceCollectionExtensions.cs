@@ -4,6 +4,7 @@ using Application.Logging;
 using Infrastructure.Chatbot;
 using Infrastructure.Health;
 using Infrastructure.Logging;
+using Infrastructure.RAG;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -29,5 +30,9 @@ public static class ServiceCollectionExtensions
                 client.Timeout = TimeSpan.FromMinutes(5);
             });
         services.AddScoped<IChatbotService, OllamaChatbotService>();
+
+        services.AddScoped<ICvChunkRepository, CvChunkRepository>();
+        services.AddScoped<IEmbeddingService, OllamaEmbeddingService>();
+        services.AddScoped<IRagService, RagService>();
     }
 }
