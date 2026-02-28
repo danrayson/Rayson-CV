@@ -10,8 +10,17 @@ public class CvChunkRepository(RaysonCVDbContext context) : ICvChunkRepository
 
     public async Task AddRangeAsync(IEnumerable<Domain.CvChunk> chunks)
     {
-        await _context.CvChunks.AddRangeAsync(chunks);
-        await _context.SaveChangesAsync();
+        foreach (var chunk in chunks)
+        {
+            var embeddingStr = string.Join(",", chunk.Embedding.Select(e => e.ToString("G10", System.Globalization.CultureInfo.InvariantCulture)));
+            var deletedAtStr = chunk.DeletedAt.HasValue 
+                ? $"'{chunk.DeletedAt.Value:u}'" 
+                : "NULL";
+            
+            await _context.Database.ExecuteSqlRawAsync($@"
+                INSERT INTO ""CvChunks"" (""Content"", ""Section"", ""Embedding"", ""ChunkIndex"", ""CreatedAt"", ""DeletedAt"")
+                VALUES ('{chunk.Content.Replace("'", "''")}', '{chunk.Section.Replace("'", "''")}', '[{embeddingStr}]'::vector, {chunk.ChunkIndex}, '{chunk.CreatedAt:u}', {deletedAtStr})");
+        }
     }
 
     public async Task<bool> ExistsAsync()
