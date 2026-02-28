@@ -6,6 +6,7 @@ param acrName string
 param imageTag string
 param blobBaseUrl string
 param environmentName string
+param postgresHost string
 param postgresAdminUsername string
 @secure()
 param postgresAdminPassword string
@@ -14,23 +15,10 @@ param tags object = {
   Project: 'RaysonCV'
 }
 
-var postgresServerName = 'pg-${environmentName}-${uniqueString(resourceGroup().id)}'
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
 var ollamaFqdn = 'http://localhost:11434'
-var postgresFqdn = '${postgresServerName}.postgres.database.azure.com'
-
-module postgresService 'modules/postgres-service.bicep' = {
-  name: 'postgres-service'
-  params: {
-    environmentName: environmentName
-    location: location
-    postgresAdminUsername: postgresAdminUsername
-    postgresAdminPassword: postgresAdminPassword
-    tags: tags
-  }
-}
 
 module api 'modules/api-container.bicep' = {
   name: 'api-container'
@@ -44,7 +32,7 @@ module api 'modules/api-container.bicep' = {
     imageTag: imageTag
     uiFqdn: uiFqdn
     ollamaFqdn: ollamaFqdn
-    postgresHost: postgresFqdn
+    postgresHost: postgresHost
     postgresUsername: postgresAdminUsername
     postgresPassword: postgresAdminPassword
     postgresDatabase: 'raysoncv'

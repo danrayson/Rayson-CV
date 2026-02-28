@@ -4,6 +4,9 @@ param location string
 param resourceGroupName string
 param environmentName string
 param acrName string
+param postgresAdminUsername string
+@secure()
+param postgresAdminPassword string
 
 param tags object = {
   Environment: environmentName
@@ -51,6 +54,18 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   }
 }
 
+module postgres 'modules/postgres-service.bicep' = {
+  name: 'postgres-service'
+  scope: rg
+  params: {
+    environmentName: environmentName
+    location: location
+    postgresAdminUsername: postgresAdminUsername
+    postgresAdminPassword: postgresAdminPassword
+    tags: tags
+  }
+}
+
 output acrLoginServer string = acr.outputs.acrLoginServer
 output acrName string = acr.outputs.acrName
 output environmentId string = containerAppsEnv.outputs.environmentId
@@ -58,3 +73,4 @@ output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
 output blobBaseUrl string = storage.outputs.blobBaseUrl
 output storageAccountKey string = storage.outputs.storageAccountKey
+output postgresHost string = postgres.outputs.postgresFqdn
