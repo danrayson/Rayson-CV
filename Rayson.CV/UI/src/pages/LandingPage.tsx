@@ -28,9 +28,24 @@ const getCvDownloadUrl = () => {
   return `${blobBaseUrl}/CV-September-2024.pdf`;
 };
 
+const handleCvDownload = async () => {
+  const url = getCvDownloadUrl();
+  if (!url) return;
+
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = 'CV-September-2024.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(blobUrl);
+};
+
 const LandingPage: React.FC = () => {
   const downloadUrl = getDownloadUrl();
-  const cvDownloadUrl = getCvDownloadUrl();
 
   const handleAppClick = () => {
     if (!downloadUrl) {
@@ -44,13 +59,12 @@ const LandingPage: React.FC = () => {
         <h1 className="text-7xl font-bold mb-12 text-center">{"Design Develop Deploy"}</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
-          <a
-            href={cvDownloadUrl}
-            download
+          <button
+            onClick={handleCvDownload}
             className="btn btn-primary text-2xl font-bold"
           >
             Download CV
-          </a>
+          </button>
 
           {downloadUrl ? (
             <a
