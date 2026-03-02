@@ -13,6 +13,7 @@ param postgresUsername string
 param postgresPassword string
 param postgresDatabase string
 param logLevel string = 'Debug'
+param blobDownloadUrl string
 param tags object = {}
 
 var localCorsOrigins = 'null,http://localhost,http://localhost:3000,http://localhost:5173'
@@ -99,6 +100,10 @@ resource apiContainer 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'POSTGRES_DATABASE'
               value: postgresDatabase
+            }
+            {
+              name: 'BlobStorage__DownloadUrl'
+              value: blobDownloadUrl
             }
           ]
           resources: {

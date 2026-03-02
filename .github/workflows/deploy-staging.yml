@@ -97,8 +97,8 @@ jobs:
           
           ACR_LOGIN_SERVER=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrLoginServer.value --output tsv)
           ACR_NAME_OUT=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.acrName.value --output tsv)
-          CAE_ID=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvId.value --output tsv)
-          CAE_NAME=$(az deployment sub show --name raysoncv-production-core --query properties.outputs.containerAppEnvName.value --output tsv)
+          CAE_ID=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.containerAppEnvId.value --output tsv)
+          CAE_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.containerAppEnvName.value --output tsv)
           DEFAULT_DOMAIN=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.defaultDomain.value --output tsv)
           STORAGE_ACCOUNT_NAME=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountName.value --output tsv)
           STORAGE_ACCOUNT_KEY=$(az deployment sub show --name raysoncv-staging-core --query properties.outputs.storageAccountKey.value --output tsv)
@@ -334,6 +334,16 @@ jobs:
             --container-name '$web' \
             --file "$FILE" \
             --name "RaysonCV-Setup.exe" \
+            --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
+            --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
+            --overwrite
+
+      - name: Upload CV PDF
+        run: |
+          az storage blob upload \
+            --container-name '$web' \
+            --file "Rayson.CV/UI/public/CV-September-2024.pdf" \
+            --name "CV-September-2024.pdf" \
             --account-name ${{ needs.deploy-core.outputs.storageAccountName }} \
             --account-key "${{ needs.deploy-core.outputs.storageAccountKey }}" \
             --overwrite

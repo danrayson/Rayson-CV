@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import PdfViewerModal from '../components/PdfViewerModal';
+
 const getDownloadUrl = () => {
   const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
   const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
@@ -16,8 +19,23 @@ const getDownloadUrl = () => {
   return null;
 };
 
+const getCvDownloadUrl = () => {
+  const isElectron = navigator.userAgent.includes('Electron');
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+
+  if (isElectron || isLocalhost) {
+    return './CV-September-2024.pdf';
+  }
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  return `${baseUrl}/files/cv`;
+};
+
 const LandingPage: React.FC = () => {
   const downloadUrl = getDownloadUrl();
+  const cvDownloadUrl = getCvDownloadUrl();
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const handleAppClick = () => {
     if (!downloadUrl) {
@@ -31,13 +49,12 @@ const LandingPage: React.FC = () => {
         <h1 className="text-7xl font-bold mb-12 text-center">{"Design Develop Deploy"}</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
-          <a
-            href="/CV September 2024.pdf"
-            download
+          <button
+            onClick={() => setIsPdfModalOpen(true)}
             className="btn btn-primary text-2xl font-bold"
           >
-            Download CV
-          </a>
+            View CV
+          </button>
 
           {downloadUrl ? (
             <a
@@ -74,6 +91,12 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       <p className="text-sm opacity-30">Dan Rayson's CV Website</p>
+
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={cvDownloadUrl}
+      />
     </div>
   );
 };

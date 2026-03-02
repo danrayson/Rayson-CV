@@ -1,6 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
+import PdfViewerModal from '../components/PdfViewerModal';
+
+const getCvDownloadUrl = () => {
+  const isElectron = navigator.userAgent.includes('Electron');
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+
+  if (isElectron || isLocalhost) {
+    return './CV-September-2024.pdf';
+  }
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  return `${baseUrl}files/cv`;
+};
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -12,6 +26,7 @@ const ChatbotPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -83,9 +98,9 @@ const ChatbotPage: React.FC = () => {
           <p className="text-sm">
             This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
             For accurate details, please{' '}
-            <a href="/CV September 2024.pdf" download className="underline font-bold">
-              download the real CV
-            </a>.  This is due to cost limitations.
+            <button onClick={() => setIsPdfModalOpen(true)} className="underline font-bold">
+              view the real CV
+            </button>.  This is due to cost limitations.
           </p>
         </div>
       </div>
@@ -153,6 +168,12 @@ const ChatbotPage: React.FC = () => {
           </button>
         </form>
       </div>
+
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={getCvDownloadUrl()}
+      />
     </div>
   );
 };

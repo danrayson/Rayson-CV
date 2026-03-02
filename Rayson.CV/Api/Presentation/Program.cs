@@ -4,6 +4,7 @@ using Database.Extensions;
 using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
 using Presentation.Endpoints.Chatbot;
+using Presentation.Endpoints.Files;
 using Infrastructure.Extensions;
 using Infrastructure.Logging;
 using Serilog;
@@ -54,6 +55,7 @@ try
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();
     app.MapChatbotEndpoints();
+    app.MapCvEndpoints();
 
     if (app.Environment.IsDevelopment())
     {
