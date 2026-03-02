@@ -21,14 +21,15 @@ const getDownloadUrl = () => {
 
 const getCvDownloadUrl = () => {
   const isElectron = navigator.userAgent.includes('Electron');
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
 
-  if (isElectron) {
+  if (isElectron || isLocalhost) {
     return './CV-September-2024.pdf';
   }
 
-  const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
-  const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
-  return `${blobBaseUrl}/CV-September-2024.pdf`;
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  return `${baseUrl}/files/cv`;
 };
 
 const LandingPage: React.FC = () => {
