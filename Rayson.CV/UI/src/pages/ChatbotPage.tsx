@@ -14,22 +14,6 @@ const getCvDownloadUrl = () => {
   return `${blobBaseUrl}/CV-September-2024.pdf`;
 };
 
-const handleCvDownload = async () => {
-  const url = getCvDownloadUrl();
-  if (!url) return;
-
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const blobUrl = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = 'CV-September-2024.pdf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(blobUrl);
-};
-
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -111,9 +95,9 @@ const ChatbotPage: React.FC = () => {
           <p className="text-sm">
             This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
             For accurate details, please{' '}
-            <button onClick={handleCvDownload} className="underline font-bold">
+            <a href={getCvDownloadUrl()} download className="underline font-bold">
               download the real CV
-            </button>.  This is due to cost limitations.
+            </a>.  This is due to cost limitations.
           </p>
         </div>
       </div>
