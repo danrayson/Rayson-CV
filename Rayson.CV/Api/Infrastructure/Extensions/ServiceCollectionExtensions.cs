@@ -5,6 +5,7 @@ using Infrastructure.Chatbot;
 using Infrastructure.Health;
 using Infrastructure.Logging;
 using Infrastructure.RAG;
+using Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -18,6 +19,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
+
+        services.Configure<BlobSettings>(configuration.GetSection("BlobStorage"));
+        services.AddHttpClient("BlobStorage");
 
         services.AddScoped<ICvProvider, CvProvider>();
 

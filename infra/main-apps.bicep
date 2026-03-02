@@ -39,6 +39,7 @@ module api 'modules/api-container.bicep' = {
     postgresPassword: postgresAdminPassword
     postgresDatabase: 'raysoncv'
     logLevel: logLevel
+    blobDownloadUrl: blobBaseUrl
     tags: tags
   }
 }
