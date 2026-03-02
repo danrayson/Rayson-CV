@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
+import PdfViewerModal from '../components/PdfViewerModal';
 
 const getCvDownloadUrl = () => {
   const isElectron = navigator.userAgent.includes('Electron');
@@ -24,6 +25,7 @@ const ChatbotPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -95,9 +97,9 @@ const ChatbotPage: React.FC = () => {
           <p className="text-sm">
             This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
             For accurate details, please{' '}
-            <a href={getCvDownloadUrl()} download className="underline font-bold">
-              download the real CV
-            </a>.  This is due to cost limitations.
+            <button onClick={() => setIsPdfModalOpen(true)} className="underline font-bold">
+              view the real CV
+            </button>.  This is due to cost limitations.
           </p>
         </div>
       </div>
@@ -165,6 +167,12 @@ const ChatbotPage: React.FC = () => {
           </button>
         </form>
       </div>
+
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={getCvDownloadUrl()}
+      />
     </div>
   );
 };

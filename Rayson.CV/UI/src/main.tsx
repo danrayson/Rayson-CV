@@ -7,7 +7,7 @@ import './index.css'
 
 initializeErrorHandlers();
 
-var element = document.getElementById('root')
+let element = document.getElementById('root')
 if(element){
   element.className = "yummyroot"
 }
