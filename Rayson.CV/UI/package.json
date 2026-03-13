@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "Rayson CV is a versatile application framework.",
+  "description": "Rayson CV",
   "author": "daniel william frederick rayson (danrayson@hotmail.co.uk)",
   "scripts": {
     "dev": "vite",
@@ -67,7 +67,7 @@
       "target": "dmg"
     },
     "linux": {
-      "icon": "src/assets/react.svg",
+      "icon": "public/rayson.dev.svg",
       "target": "AppImage"
     }
   }
