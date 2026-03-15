@@ -52,7 +52,7 @@
   "main": "electron/main.cjs",
   "build": {
     "appId": "com.raysoncv",
-    "productName": "RaysonCV",
+    "productName": "Dan Rayson CV",
     "directories": {
       "output": "build"
     },
@@ -61,14 +61,19 @@
       "electron/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/icon.ico",
+      "artifactName": "${productName}.${ext}"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "public/icon.png",
+      "artifactName": "${productName}.${ext}"
     },
     "linux": {
+      "target": "AppImage",
       "icon": "public/rayson.dev.svg",
-      "target": "AppImage"
+      "artifactName": "${productName}.${ext}"
     }
   }
 }
