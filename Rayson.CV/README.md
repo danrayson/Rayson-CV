@@ -597,6 +597,32 @@ Deployments are triggered via:
 - Use HTTPS only in production (HSTS enabled)
 - Database connection should use SSL
 
+### Docker Production
+
+To deploy using Docker Compose:
+
+1. Edit `.env.production` with your secure values:
+   ```bash
+   # Update POSTGRES_PASSWORD and JWT_SIGNING_KEY with secure values
+   ```
+
+2. Build and start:
+   ```bash
+   docker compose -f docker-compose.prod.full.yml --env-file .env.production up --build
+   ```
+
+3. View logs:
+   ```bash
+   docker compose -f docker-compose.prod.full.yml logs -f
+   ```
+
+4. Stop:
+   ```bash
+   docker compose -f docker-compose.prod.full.yml --env-file .env.production down
+   ```
+
+**Note:** Once `.env.production` contains real sensitive values it should not be committed to version control.  The file in version control contains placeholder values only for guidance.
+
 ### Monitoring
 - **Development**: Container console logs
 - Health endpoints (`/health/live`, `/health/ready`) for container orchestrator
