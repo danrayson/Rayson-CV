@@ -64,7 +64,7 @@ const LandingPage: React.FC = () => {
               onClick={handleAppClick}
               className="btn btn-disabled text-2xl font-bold"
             >
-              Download Unavailable
+              Unsupported OS
             </button>
           )}
           
