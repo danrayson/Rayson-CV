@@ -4,9 +4,9 @@ public static class StaticFilesEndpoints
 {
     private static readonly Dictionary<string, (string Filename, string ContentType)> AppFiles = new()
     {
-        ["win"] = ("RaysonCV-Setup.exe", "application/x-msdownload"),
-        ["linux"] = ("RaysonCV.AppImage", "application/x-iso9660-image"),
-        ["mac"] = ("RaysonCV.dmg", "application/x-apple-diskimage")
+        ["win"] = ("Dan Rayson CV.exe", "application/x-msdownload"),
+        ["linux"] = ("Dan Rayson CV.AppImage", "application/x-iso9660-image"),
+        ["mac"] = ("Dan Rayson CV.dmg", "application/x-apple-diskimage")
     };
 
     public static void MapStaticFilesEndpoints(this WebApplication webApplication)
