@@ -2,17 +2,21 @@ import { useState } from 'react';
 import PdfViewerModal from '../components/PdfViewerModal';
 
 const getAppDownloadUrl = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  const platform = navigator.platform.toLowerCase();
   const userAgent = navigator.userAgent.toLowerCase();
   
-  if (platform.includes('mac') || userAgent.includes('mac')) {
+  // Detect mobile/tablet
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  if (isMobile) return null;
+  
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  
+  if (userAgent.includes('mac')) {
     return `${baseUrl}files/app/mac`;
   }
-  if (platform.includes('win') || userAgent.includes('win')) {
+  if (userAgent.includes('win')) {
     return `${baseUrl}files/app/win`;
   }
-  if (platform.includes('linux')) {
+  if (userAgent.includes('linux')) {
     return `${baseUrl}files/app/linux`;
   }
   return null;
