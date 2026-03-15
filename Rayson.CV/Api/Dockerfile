@@ -50,6 +50,9 @@ WORKDIR /app
 # --from=build: Source from the build stage defined above
 COPY --from=build /app/publish .
 
+# Copy wwwroot for static files (PDF CV, desktop apps)
+COPY --from=build /src/wwwroot ./wwwroot
+
 # Set environment variable for ASP.NET Core to listen on port 8080
 # This overrides the default URL configuration
 ENV ASPNETCORE_URLS=http://+:8080

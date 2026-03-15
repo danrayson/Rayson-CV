@@ -5,7 +5,6 @@ param defaultDomain string
 param acrLoginServer string
 param acrName string
 param imageTag string
-param blobBaseUrl string
 param environmentName string
 param postgresFqdn string
 param postgresAdminUsername string
@@ -21,6 +20,7 @@ param tags object = {
 var apiAppName = 'ca-api-${environmentName}'
 var uiAppName = 'ca-ui-${environmentName}'
 var uiFqdn = '${uiAppName}.${defaultDomain}'
+var apiBaseUrl = 'https://${apiAppName}.${defaultDomain}'
 
 module api 'modules/api-container.bicep' = {
   name: 'api-container-${environmentName}'
@@ -39,7 +39,6 @@ module api 'modules/api-container.bicep' = {
     postgresPassword: postgresAdminPassword
     postgresDatabase: 'raysoncv'
     logLevel: logLevel
-    blobDownloadUrl: blobBaseUrl
     tags: tags
   }
 }
@@ -53,7 +52,7 @@ module ui 'modules/ui-container.bicep' = {
     acrName: acrName
     imageTag: imageTag
     apiHealthUrl: 'http://${apiAppName}.internal.${defaultDomain}:8080/health'
-    appDownloadUrl: blobBaseUrl
+    apiBaseUrl: apiBaseUrl
     customDomainName: customDomainName
     tags: tags
     caeName: caeName

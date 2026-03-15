@@ -4,7 +4,7 @@ param acrLoginServer string
 param acrName string
 param imageTag string = 'latest'
 param apiHealthUrl string
-param appDownloadUrl string
+param apiBaseUrl string
 param customDomainName string = ''
 param tags object = {}
 param caeName string
@@ -73,8 +73,8 @@ resource uiContainer 'Microsoft.App/containerApps@2025-07-01' = {
               value: apiHealthUrl
             }
             {
-              name: 'VITE_APP_DOWNLOAD_URL'
-              value: appDownloadUrl
+              name: 'VITE_API_BASE_URL'
+              value: apiBaseUrl
             }
             {
               name: 'LOG_LEVEL'
