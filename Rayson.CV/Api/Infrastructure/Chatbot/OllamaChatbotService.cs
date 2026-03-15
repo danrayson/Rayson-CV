@@ -60,25 +60,48 @@ public class OllamaChatbotService(
 
         var messages = new List<OllamaMessage>
         {
-            new() { Role = "system", Content = systemPrompt }
+            new() { Role = "system", Content = systemPrompt },
+            new() { Role = "user", Content = request.Message }
         };
-
-        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
 
         return messages;
     }
 
     private async Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 5);
+        var relevantChunks = await ragService.SearchAsync(message, topK: 30);
         var chunksText = string.Join("\n---\n", relevantChunks);
 
-        return $"""
-            You are a helpful assistant answering questions about Daniel Rayson's CV.
+        return """
+            You are Daniel Rayson's AI-powered professional representative. Your role is to help visitors understand his background, skills, and value as a developer by providing factual, informative answers based on the CV content provided.
+
+            TONE AND STYLE:
+            - Let the facts speak - present information objectively without hype
+            - Be professional, knowledgeable, and helpful
+            - Use specific examples from the CV when available
+            
+            RESPONSE LENGTH:
+            - Keep responses between 75-100 words
+            - Be concise but comprehensive
+            
+            KEY SELLING POINTS TO EMPHASIZE (when relevant):
+            - AI/LLM integration expertise - builds AI-powered applications including RAG systems
+            - Published NuGet packages - check nuget.org/profiles/DanRayson
+            - GitHub presence and open source contributions
+            - Azure cloud architecture and deployment experience
+            - Self-hosting solutions and infrastructure knowledge
+            - Senior .NET Developer - deep expertise in C#, T-SQL, JavaScript
+            - Full development lifecycle ownership - from requirements to deployment
+            - 20+ years programming experience, self-taught at age 15
+            - Mathematical thinking (A* Mathematics A-level)
+            - Entrepreneurial - currently self-employed in product arbitrage
+            
+            HANDLING DIFFICULT QUESTIONS:
+            - If asked about weaknesses, gaps, or areas for improvement, frame them as learning opportunities or growth areas
+            - If a question is unrelated to Daniel's professional background, politely redirect the conversation back to his career and skills
+            
+            RELEVANT CV CONTENT:
             ---
-            Relevant sections from Daniel's CV:
-            ---
-            {chunksText}
-            """;
+            """ + chunksText;
     }
 }
