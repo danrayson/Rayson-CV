@@ -1,44 +1,35 @@
 import { useState } from 'react';
 import PdfViewerModal from '../components/PdfViewerModal';
 
-const getDownloadUrl = () => {
-  const baseUrl = import.meta.env.VITE_APP_DOWNLOAD_URL || '';
-  const blobBaseUrl = baseUrl ? `${baseUrl}/$web` : '';
+const getAppDownloadUrl = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
   const platform = navigator.platform.toLowerCase();
   const userAgent = navigator.userAgent.toLowerCase();
   
   if (platform.includes('mac') || userAgent.includes('mac')) {
-    return `${blobBaseUrl}/RaysonCV.dmg`;
+    return `${baseUrl}files/app/mac`;
   }
   if (platform.includes('win') || userAgent.includes('win')) {
-    return `${blobBaseUrl}/RaysonCV-Setup.exe`;
+    return `${baseUrl}files/app/win`;
   }
   if (platform.includes('linux')) {
-    return `${blobBaseUrl}/RaysonCV.AppImage`;
+    return `${baseUrl}files/app/linux`;
   }
   return null;
 };
 
 const getCvDownloadUrl = () => {
-  const isElectron = navigator.userAgent.includes('Electron');
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1';
-
-  if (isElectron || isLocalhost) {
-    return './CV-September-2024.pdf';
-  }
-
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  return `${baseUrl}/files/cv`;
+  return `${baseUrl}files/cv`;
 };
 
 const LandingPage: React.FC = () => {
-  const downloadUrl = getDownloadUrl();
+  const appDownloadUrl = getAppDownloadUrl();
   const cvDownloadUrl = getCvDownloadUrl();
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const handleAppClick = () => {
-    if (!downloadUrl) {
+    if (!appDownloadUrl) {
       alert('Desktop app is not available for your operating system. Supported platforms: Windows, macOS, and Linux.');
     }
   };
@@ -56,9 +47,9 @@ const LandingPage: React.FC = () => {
             View CV
           </button>
 
-          {downloadUrl ? (
+          {appDownloadUrl ? (
             <a
-              href={downloadUrl}
+              href={appDownloadUrl}
               download
               className="btn btn-primary text-2xl font-bold"
             >

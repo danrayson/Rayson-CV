@@ -74,6 +74,5 @@ output containerAppEnvId string = containerAppsEnv.outputs.containerAppEnvId
 output containerAppEnvName string = containerAppsEnv.outputs.containerAppEnvName
 output defaultDomain string = containerAppsEnv.outputs.defaultDomain
 output storageAccountName string = storage.outputs.storageAccountName
-output blobBaseUrl string = storage.outputs.blobBaseUrl
 output storageAccountKey string = storage.outputs.storageAccountKey
 output postgresFqdn string = postgres.outputs.postgresFqdn

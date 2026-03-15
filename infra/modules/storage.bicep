@@ -13,20 +13,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   kind: 'StorageV2'
   properties: {
     accessTier: 'Hot'
-    allowBlobPublicAccess: true
-    networkAcls: {
-      defaultAction: 'Allow'
-    }
+    allowBlobPublicAccess: false
   }
   tags: tags
-}
-
-resource webContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  name: '${storageAccountName}/default/$web'
-  dependsOn: [storageAccount]
-  properties: {
-    publicAccess: 'Blob'
-  }
 }
 
 resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
@@ -43,5 +32,4 @@ resource ollamaModels 'Microsoft.Storage/storageAccounts/fileServices/shares@202
 }
 
 output storageAccountName string = storageAccount.name
-output blobBaseUrl string = 'https://${storageAccount.name}.blob.${environment().suffixes.storage}'
 output storageAccountKey string = storageAccount.listKeys().keys[0].value

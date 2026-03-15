@@ -44,6 +44,7 @@ try
     var app = builder.Build();
 
     app.UseHttpsRedirection();
+    app.UseStaticFiles();
     if (!app.Environment.IsDevelopment())
     {
         app.UseHsts();
@@ -55,7 +56,7 @@ try
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();
     app.MapChatbotEndpoints();
-    app.MapCvEndpoints();
+    app.MapStaticFilesEndpoints();
 
     if (app.Environment.IsDevelopment())
     {
