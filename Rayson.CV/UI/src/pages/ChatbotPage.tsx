@@ -96,7 +96,7 @@ const ChatbotPage: React.FC = () => {
         <div>
           <p className="font-bold">AI Limitation Warning</p>
           <p className="text-sm">
-            This chatbot uses smollm2:135m, RAG, CPU inference, and hallucinates. 
+            This chatbot uses llama3.2:latest, RAG, and GPU inference. 
             For accurate details, please{' '}
             <button onClick={() => setIsPdfModalOpen(true)} className="underline font-bold">
               view the real CV

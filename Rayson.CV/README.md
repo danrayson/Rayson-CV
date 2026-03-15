@@ -74,12 +74,12 @@ docker compose -f docker-compose.dev.full.yml down
 
 ## Chatbot
 
-The chatbot feature uses Ollama with the smollm2:135m model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
+The chatbot feature uses Ollama with the llama3.2:latest model to answer questions about Daniel Rayson's CV. It provides a conversational interface for visitors to learn about professional background, skills, and experience.
 
 ### Architecture
 
 ```
-User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (smollm2:135m)
+User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (llama3.2:latest)
 ```
 
 ### Components
@@ -138,7 +138,7 @@ The chatbot service is configured via environment variables:
 | `OLLAMA__BASEURL` | Ollama server URL | `http://ollama:11434` |
 
 The following are hardcoded in the service:
-- **Model**: `smollm2:135m` (not configurable)
+- **Model**: `llama3.2:latest` (not configurable)
 - **Max tokens**: 128 (limits response length)
 
 ### System Prompt
@@ -153,8 +153,8 @@ The chatbot uses a system prompt that includes:
 
 Ollama runs in its own container with:
 - Custom Dockerfile (`ollama.Dockerfile`) based on `ollama/ollama:latest`
-- Startup script (`ollama-startup.sh`) that pulls smollm2:135m model on first run
-- Health check confirms smollm2:135m model is available
+- Startup script (`ollama-startup.sh`) that pulls llama3.2:latest model on first run
+- Health check confirms llama3.2:latest model is available
 
 **Ports**: 11434 (container), 11435 (host)
 

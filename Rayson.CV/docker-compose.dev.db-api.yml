@@ -41,7 +41,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       Cors__AllowedOrigins: http://localhost:3000,http://localhost:5173
       LOG_LEVEL: Debug
-      OLLAMA__BASEURL: http://ollama:11434
+      Ollama__Url: http://ollama:11434
     ports:
       - "13245:8080"
     depends_on:
@@ -63,24 +63,29 @@ services:
   # ===========================================
   ollama:
     build:
-      context: .
+      context: ./Api/Infrastructure/Ollama
       dockerfile: ollama.Dockerfile
-    container_name: raysoncv-ollama
-    restart: unless-stopped
     environment:
-      OLLAMA_HOST: 0.0.0.0
+      - CUSTOM_MODELS=["llama3.2:latest","nomic-embed-text"]
     volumes:
-      - ollama-data:/root/.ollama
-    ports:
-      - "11435:11434"
+      - ollama_data:/root/.ollama
+    container_name: ollama
+    healthcheck:
+      test: ["CMD", "/ollama.healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
     networks:
       - internal
-    healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:11434/api/tags | grep -q smollm2 && curl -s http://localhost:11434/api/tags | grep -q nomic-embed-text"]
-      interval: 5s
-      timeout: 10s
-      retries: 180
-      start_period: 0s
+    # NVIDIA GPU Support: Uncomment the following to enable NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 networks:
   internal:
@@ -88,4 +93,4 @@ networks:
 
 volumes:
   postgres-data:
-  ollama-data:
+  ollama_data:
