@@ -20,6 +20,7 @@ const ChatbotPage: React.FC = () => {
   const [streamingContent, setStreamingContent] = useState('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,6 +71,8 @@ const ChatbotPage: React.FC = () => {
     } finally {
       setIsLoading(false);
       setStreamingContent('');
+      // Use setTimeout to defer focus until after React re-renders and removes the disabled attribute
+      setTimeout(() => inputRef.current?.focus(), 0);
     }
   };
 
@@ -140,6 +143,7 @@ const ChatbotPage: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-base-100 px-4 py-3">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex items-center gap-2">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
