@@ -17,8 +17,6 @@ try
 
     builder.AddLoggingConfiguration();
 
-    builder.Services.AddOptions<OutlookOptions>().Bind(builder.Configuration.GetSection("Outlook"));
-
     builder.Services.AddControllers();
     builder.Services.AddCors(options =>
     {
