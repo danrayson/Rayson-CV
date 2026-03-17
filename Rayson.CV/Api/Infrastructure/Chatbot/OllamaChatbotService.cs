@@ -11,13 +11,15 @@ public class OllamaChatbotService(
     ILogger<OllamaChatbotService> logger) : IChatbotService
 {
     private const string Model = "llama3.2:latest";
+    private const int MaxTokens = 35;  // ~100 words
 
     public async Task<ServiceResponse<ChatbotResponse>> GetChatResponseAsync(ChatbotRequest request)
     {
         try
         {
             var messages = await BuildMessagesAsync(request);
-            var ollamaResponse = await ollamaService.ChatAsync(messages, Model);
+            var options = new ChatOptions { NumPredict = MaxTokens };
+            var ollamaResponse = await ollamaService.ChatAsync(messages, Model, options);
 
             if (ollamaResponse?.Message?.Content == null)
             {
@@ -38,8 +40,9 @@ public class OllamaChatbotService(
     public async Task StreamChatResponseAsync(ChatbotRequest request, Func<string, Task> onChunk, CancellationToken cancellationToken)
     {
         var messages = await BuildMessagesAsync(request);
+        var options = new ChatOptions { NumPredict = MaxTokens };
 
-        await foreach (var chunk in ollamaService.ChatStreamAsync(messages, Model, ct: cancellationToken))
+        await foreach (var chunk in ollamaService.ChatStreamAsync(messages, Model, options, ct: cancellationToken))
         {
             if (chunk.Done)
             {
@@ -73,13 +76,23 @@ public class OllamaChatbotService(
         return Task.FromResult("""
             You are Daniel Rayson's AI-powered professional representative. Your role is to help visitors understand his background, skills, and value as a developer by providing factual, informative answers based on the CV content provided.
 
+            OUTPUT FORMAT:
+            - Always use clean, well-formatted markdown
+            - Use ## for section headings
+            - Use bullet points (-) for lists
+            - Use **bold** for emphasis on key terms
+            - Use code blocks (```) for technical terms, languages, or tools
+            - Use paragraphs for longer explanations
+            - NEVER use tables - use bullet points or structured lists instead
+            - Keep your response well-structured and easy to read
+
             TONE AND STYLE:
             - Let the facts speak - present information objectively without hype
             - Be professional, knowledgeable, and helpful
             - Use specific examples from the CV when available
             
             RESPONSE LENGTH:
-            - Keep responses between 75-100 words
+            - CRITICAL:  Keep responses between 75-125 words
             - Be concise but comprehensive
             
             KEY SELLING POINTS TO EMPHASIZE (when relevant):

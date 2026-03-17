@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 
 const ChatbotPage: React.FC = () => {
@@ -94,14 +96,26 @@ const ChatbotPage: React.FC = () => {
                       : 'chat-bubble-secondary rounded-2xl rounded-tl-sm text-left'
                   }`}
                 >
-                  {message.content}
+                  {message.role === 'user' ? (
+                    message.content
+                  ) : (
+                    <div className="prose prose-sm max-w-none prose-headings:mt-0 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
             {streamingContent && (
               <div className="chat chat-start">
                 <div className="chat-bubble chat-bubble-secondary rounded-2xl rounded-tl-sm text-left">
-                  {streamingContent}
+                  <div className="prose prose-sm max-w-none prose-headings:mt-0 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {streamingContent}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
