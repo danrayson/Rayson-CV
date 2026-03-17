@@ -17,10 +17,12 @@ public static class ServiceCollectionExtensions
 {
     public static void AddInfrastructureServices(this IServiceCollection services, ConfigurationManager configuration)
     {
+        services.AddOptions<GraphOptions>().Bind(configuration.GetSection("Graph"));
+
         services.AddHttpContextAccessor();
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
-        services.AddScoped<IContactService, OutlookEmailService>();
+        services.AddScoped<IContactService, GraphEmailService>();
 
         services.AddScoped<ICvProvider, CvProvider>();
 
