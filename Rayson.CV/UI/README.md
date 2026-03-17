@@ -61,8 +61,8 @@ Or build and run standalone:
 
 ```bash
 cd Rayson.CV/UI
-docker build -t raysoncv-web-gui .
-docker run -p 3000:3000 raysoncv-web-gui
+docker build -t raysoncv-ui .
+docker run -p 3000:3000 raysoncv-ui
 ```
 
 ### Electron Desktop App
