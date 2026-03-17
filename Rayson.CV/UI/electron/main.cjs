@@ -1,10 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 
-console.log('starting main');
-
 function createWindow() {
-  console.log('Creating window');
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -14,26 +11,28 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-  console.log(path.join(__dirname, '..', 'dist', 'index.html'));
+
+  if (app.isPackaged) {
+    Menu.setApplicationMenu(null);
+  }
+
   win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
 }
 
-while(!app.isReady){
-  console.log('waiting for app to be ready');
-}
+// while(!app.isReady){
+//   //This is gross
+// }
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    console.log('quit')
     app.quit();
   }
 });
 
 app.on('activate', () => {
-  console.log('activating...')
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
-    console.log('activated')
   }
 });
