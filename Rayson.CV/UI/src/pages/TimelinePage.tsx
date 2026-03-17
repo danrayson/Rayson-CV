@@ -3,13 +3,71 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
 import {
   workExperience,
+  projects,
   education,
   skills,
   personalDetails,
   personalDescription,
+  WorkExperience,
+  Project,
 } from '../data/cv';
 
+function getEndYear(period: string): number {
+  if (period.toLowerCase().includes('current')) return 2026;
+  const match = period.match(/(\d{4})/g);
+  if (!match) return 2026;
+  return parseInt(match[match.length - 1]);
+}
+
+interface RowData {
+  year: number;
+  work: WorkExperience | null;
+  projects: Project[];
+}
+
 const TimelinePage: React.FC = () => {
+  const sortedWork = [...workExperience].sort((a, b) => getEndYear(a.period) - getEndYear(b.period));
+  const sortedProjects = [...projects].sort((a, b) => b.year - a.year);
+
+  const shownYears = new Set<number>();
+  const rows: RowData[] = [];
+
+  for (const work of sortedWork) {
+    const yearStart = work.yearStart;
+    const yearEnd = getEndYear(work.period);
+
+    const overlappingProjects = sortedProjects.filter(p => 
+      p.year >= yearStart && p.year <= yearEnd && !shownYears.has(p.year)
+    );
+
+    if (overlappingProjects.length > 0) {
+      rows.push({
+        year: yearEnd,
+        work,
+        projects: overlappingProjects,
+      });
+      overlappingProjects.forEach(p => shownYears.add(p.year));
+    } else {
+      rows.push({
+        year: yearEnd,
+        work,
+        projects: [],
+      });
+    }
+  }
+
+  const remainingProjects = sortedProjects.filter(p => !shownYears.has(p.year));
+  for (const project of remainingProjects) {
+    rows.push({
+      year: project.year,
+      work: null,
+      projects: [project],
+    });
+    shownYears.add(project.year);
+  }
+
+  rows.sort((a, b) => b.year - a.year);
+
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
       <button
@@ -27,25 +85,51 @@ const TimelinePage: React.FC = () => {
 
       <main className="container mx-auto px-4 pb-16">
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Work Experience</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
-            {workExperience.map((job) => (
-              <TimelineCard key={job.id}>
-                <div className="timeline-node absolute left-4 md:left-1/2 w-4 h-4 rounded-full bg-primary transform -translate-x-1/2 z-10 ring-4 ring-base-200" />
-                <div className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
-                  <div className="mb-2">
-                    <span className="badge badge-primary badge-lg">{job.period}</span>
-                  </div>
-                  <h3 className="text-xl font-bold">{job.title}</h3>
-                  <p className="text-primary font-medium mb-3">{job.company}</p>
-                  <p className="text-sm opacity-70 mb-3">{job.description}</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {job.bulletPoints.map((point, idx) => (
-                      <li key={idx} className="text-sm">{point}</li>
-                    ))}
-                  </ul>
+            <div className="flex mb-4">
+              <div className="w-1/2 pr-4 md:pr-8 text-center font-bold">Work Experience</div>
+              <div className="w-1/2 pl-4 md:pl-8 text-center font-bold">Personal Projects</div>
+            </div>
+            {rows.map((row) => (
+              <div key={row.year} className="flex">
+                <div className="w-1/2 pr-4 md:pr-8">
+                  {row.work && (
+                    <TimelineCard key={row.work.id} size="normal">
+                      <div className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
+                        <div className="mb-2">
+                          <span className="badge badge-primary badge-lg">{row.work.period}</span>
+                        </div>
+                        <h3 className="text-xl font-bold">{row.work.title}</h3>
+                        <p className="text-primary font-medium mb-3">{row.work.company}</p>
+                        <p className="text-sm opacity-70 mb-3">{row.work.description}</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          {row.work.bulletPoints.map((point, idx) => (
+                            <li key={idx} className="text-sm">{point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </TimelineCard>
+                  )}
                 </div>
-              </TimelineCard>
+                <div className="w-1/2 pl-4 md:pl-8">
+                  {row.projects.map((project) => (
+                    <TimelineCard key={project.id} size="small">
+                      <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs whitespace-nowrap">{project.name}</span>
+                          <span className="text-xs opacity-70 truncate">{project.description}</span>
+                          <div className="flex gap-1 ml-auto">
+                            {project.technologies.slice(0, 2).map((tech) => (
+                              <span key={tech} className="badge badge-outline badge-xs whitespace-nowrap">{tech}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </TimelineCard>
+                  ))}
+                </div>
+              </div>
             ))}
           </Timeline>
         </section>
