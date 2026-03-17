@@ -1,12 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
-import PdfViewerModal from '../components/PdfViewerModal';
-
-const getCvDownloadUrl = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  return `${baseUrl}files/cv`;
-};
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -18,7 +12,6 @@ const ChatbotPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -152,12 +145,6 @@ const ChatbotPage: React.FC = () => {
           </button>
         </form>
       </div>
-
-      <PdfViewerModal
-        isOpen={isPdfModalOpen}
-        onClose={() => setIsPdfModalOpen(false)}
-        pdfUrl={getCvDownloadUrl()}
-      />
     </div>
   );
 };
