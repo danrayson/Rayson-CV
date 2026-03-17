@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       chunkSizeWarningLimit: 1000,
-      minify: false,
     },
     base: './',
     define: {
