@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "description": "Rayson CV",
-  "author": "daniel william frederick rayson (danrayson@hotmail.co.uk)",
+  "author": "daniel william frederick rayson (daniel@rayson.dev)",
   "scripts": {
     "dev": "vite",
     "electron:dev": "tsc -b && vite build --mode development && electron .",

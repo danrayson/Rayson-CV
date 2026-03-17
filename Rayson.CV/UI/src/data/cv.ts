@@ -76,7 +76,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'arvs',
     company: 'ARVS ltd (Car Accident Claims Management)',
-    period: 'Summer 2014 - Summer 2016',
+    period: 'Summer 2014 – Summer 2016',
     title: 'Web Developer',
     description: 'Web developer supporting a bespoke motor accident management website',
     bulletPoints: [
@@ -89,7 +89,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'dbl ogic',
     company: 'DBLogic (Software House)',
-    period: 'Spring 2012 - Spring 2014',
+    period: 'Spring 2012 – Spring 2014',
     title: 'Software Development Engineer',
     description: 'Software development engineer in a software house environment',
     bulletPoints: [
@@ -118,31 +118,69 @@ export const education: Education = {
   period: '1999-2005',
   qualifications: [
     { subject: 'Mathematics', grade: 'A*' },
-    { subject: 'Sciences Double Award', grade: 'Band B' },
-    { subject: 'ICT Studies', grade: 'Pass' },
   ],
 };
 
 export const skills: SkillCategory[] = [
   {
-    id: 'primary-languages',
-    name: 'Primary Languages',
-    skills: ['C#', 'T-SQL', 'HTML/CSS', 'Javascript', 'Java'],
-  },
-  {
-    id: 'other-languages',
-    name: 'Other Languages',
-    skills: ['DAX', 'Python', 'Pinescript', 'AI generated code'],
+    id: 'languages',
+    name: 'Languages',
+    skills: ['.NET Core', 'AJAX', 'CSS', 'HTML', 'Java', 'JavaScript', 'JSON', 'Node.js', 'PowerShell', 'Python', 'SASS', 'Scripting', 'Shell Scripting', 'TypeScript', 'VBA', 'XML'],
   },
   {
     id: 'frameworks',
-    name: 'Frameworks & Tools',
-    skills: ['Visual Studio IDE', 'ORMs', 'WPF', 'ASP.Net', 'GCP/AWS/Azure', 'Redis'],
+    name: 'Frameworks & Libraries',
+    skills: ['ASP.NET Core', 'Bootstrap', 'Entity Framework', 'MVC', 'React', 'React Native', 'Redis', 'Telerik', 'WCF'],
+  },
+  {
+    id: 'cloud-devops',
+    name: 'Cloud & DevOps',
+    skills: ['Azure', 'CI/CD', 'Cloud architecture', 'Cloud computing', 'Cloud development', 'Cloud infrastructure', 'Docker', 'IIS', 'SaaS', 'S3'],
+  },
+  {
+    id: 'databases',
+    name: 'Databases',
+    skills: ['Database design', 'Database management', 'Microsoft SQL Server', 'MongoDB', 'MySQL', 'NoSQL', 'PostgreSQL', 'Relational databases', 'SSIS', 'SSRS'],
+  },
+  {
+    id: 'testing-quality',
+    name: 'Testing & Quality',
+    skills: ['Software testing', 'Test-driven development', 'Unit testing', 'xUnit'],
+  },
+  {
+    id: 'architecture',
+    name: 'Architecture & Design',
+    skills: ['Application development', 'Design patterns', 'Distributed systems', 'Full-stack development', 'Solution architecture', 'System architecture', 'Systems analysis', 'UML'],
   },
   {
     id: 'methodologies',
     name: 'Methodologies',
-    skills: ['Agile', 'SCRUM', 'SOLID', 'DRY', 'YAGNI', 'CI/CD (Octopus, Jenkins, TFS)'],
+    skills: ['Agile', 'Kanban', 'SDLC', 'Waterfall'],
+  },
+  {
+    id: 'apis',
+    name: 'APIs & Services',
+    skills: ['APIs', 'REST', 'SOAP', 'Web services'],
+  },
+  {
+    id: 'version-control',
+    name: 'Version Control & Deployment',
+    skills: ['Git', 'GitHub', 'Software deployment', 'VPN'],
+  },
+  {
+    id: 'operating-systems',
+    name: 'Operating Systems',
+    skills: ['Android', 'Linux', 'Microsoft Windows Server', 'Mobile applications', 'Windows'],
+  },
+  {
+    id: 'soft-skills',
+    name: 'Soft Skills',
+    skills: ['Analysis skills', 'Business analysis', 'Business requirements', 'Communication skills', 'Continuous improvement', 'Customer service', 'Mentoring', 'Project management', 'Technical support', 'Time management'],
+  },
+  {
+    id: 'additional',
+    name: 'Additional',
+    skills: ['Back-end development', 'Debugging', 'Deep learning', 'DevOps', 'Elasticsearch', 'Image processing', 'IT', 'Machine learning', 'Microsoft Excel', 'Microsoft Office', 'Power BI', 'Remote access software', 'Scalability', 'System administration', 'Web accessibility'],
   },
 ];
 
