@@ -81,7 +81,7 @@ const ChatbotPage: React.FC = () => {
 
       <div className="absolute top-20 bottom-20 left-4 right-4">
         <div className="max-w-3xl mx-auto h-full border border-base-300 rounded-2xl bg-base-100 overflow-y-auto">
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 text-base-content">
             {messages.map((message, index) => (
               <div
                 key={index}
