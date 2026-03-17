@@ -10,8 +10,8 @@ public class RagService(
     ICvProvider cvProvider,
     ILogger<RagService> logger) : IRagService
 {
-    private const int ChunkSize = 150;
-    private const int Overlap = 50;
+    private const int MaxChunkSize = 350;
+    private const int MinChunkSize = 100;
 
     public async Task InitializeAsync()
     {
@@ -54,7 +54,7 @@ public class RagService(
     public async Task<IEnumerable<string>> SearchAsync(string query, int topK = 3)
     {
         var queryEmbedding = await embeddingService.GenerateEmbeddingAsync(query);
-        var results = await cvChunkRepository.GetMostSimilarAsync(queryEmbedding, topK);
+        var results = await cvChunkRepository.GetMostSimilarAsync(queryEmbedding, topK, query);
 
         return results;
     }
@@ -113,28 +113,148 @@ public class RagService(
 
     private static List<string> SplitIntoChunks(string text, string section)
     {
-        var chunks = new List<string>();
-
         if (string.IsNullOrWhiteSpace(text))
-            return chunks;
+            return [];
 
-        if (text.Length <= ChunkSize)
+        var chunks = new List<string>();
+        var paragraphs = text.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var paragraph in paragraphs)
         {
-            chunks.Add(text.Trim());
-            return chunks;
-        }
+            var trimmedParagraph = paragraph.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedParagraph))
+                continue;
 
-        for (var start = 0; start < text.Length; start += ChunkSize - Overlap)
-        {
-            var end = Math.Min(start + ChunkSize, text.Length);
-            var chunk = text[start..end].Trim();
-
-            if (!string.IsNullOrWhiteSpace(chunk))
+            if (trimmedParagraph.Length <= MaxChunkSize)
             {
-                chunks.Add(chunk);
+                chunks.Add(trimmedParagraph);
+                continue;
+            }
+
+            var lines = trimmedParagraph.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var currentChunk = new List<string>();
+
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmedLine))
+                    continue;
+
+                var potentialChunk = currentChunk.Count > 0
+                    ? string.Join("\n", currentChunk) + "\n" + trimmedLine
+                    : trimmedLine;
+
+                if (potentialChunk.Length <= MaxChunkSize)
+                {
+                    currentChunk.Add(trimmedLine);
+                }
+                else
+                {
+                    if (currentChunk.Count > 0)
+                    {
+                        chunks.Add(string.Join("\n", currentChunk));
+                    }
+
+                    if (trimmedLine.Length > MaxChunkSize)
+                    {
+                        chunks.AddRange(SplitBySentences(trimmedLine));
+                        currentChunk.Clear();
+                    }
+                    else
+                    {
+                        currentChunk = [trimmedLine];
+                    }
+                }
+            }
+
+            if (currentChunk.Count > 0)
+            {
+                chunks.Add(string.Join("\n", currentChunk));
             }
         }
 
         return chunks;
+    }
+
+    private static List<string> SplitBySentences(string text)
+    {
+        var chunks = new List<string>();
+        if (string.IsNullOrWhiteSpace(text))
+            return chunks;
+
+        var sentences = SplitIntoSentences(text);
+        var currentChunk = new List<string>();
+
+        foreach (var sentence in sentences)
+        {
+            var trimmed = sentence.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+                continue;
+
+            var potentialChunk = currentChunk.Count > 0
+                ? string.Join(" ", currentChunk) + " " + trimmed
+                : trimmed;
+
+            if (potentialChunk.Length <= MaxChunkSize)
+            {
+                currentChunk.Add(trimmed);
+            }
+            else
+            {
+                if (currentChunk.Count > 0)
+                {
+                    chunks.Add(string.Join(" ", currentChunk));
+                }
+
+                if (trimmed.Length > MaxChunkSize)
+                {
+                    for (var i = 0; i < trimmed.Length; i += MaxChunkSize - MinChunkSize)
+                    {
+                        var chunk = trimmed.Substring(i, Math.Min(MaxChunkSize - MinChunkSize, trimmed.Length - i));
+                        if (!string.IsNullOrWhiteSpace(chunk))
+                            chunks.Add(chunk);
+                    }
+                    currentChunk.Clear();
+                }
+                else
+                {
+                    currentChunk = [trimmed];
+                }
+            }
+        }
+
+        if (currentChunk.Count > 0)
+        {
+            chunks.Add(string.Join(" ", currentChunk));
+        }
+
+        return chunks;
+    }
+
+    private static string[] SplitIntoSentences(string text)
+    {
+        var sentences = new List<string>();
+        var current = new System.Text.StringBuilder();
+
+        foreach (var c in text)
+        {
+            current.Append(c);
+
+            if (c == '.' || c == '!' || c == '?')
+            {
+                if (current.Length > 0)
+                {
+                    sentences.Add(current.ToString());
+                    current.Clear();
+                }
+            }
+        }
+
+        if (current.Length > 0)
+        {
+            sentences.Add(current.ToString());
+        }
+
+        return sentences.ToArray();
     }
 }
