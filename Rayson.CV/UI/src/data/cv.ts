@@ -29,7 +29,7 @@ export interface PersonalDetails {
 export const personalDetails: PersonalDetails = {
   address: '85 Bagots Oak, ST17 9SB',
   phone: '07703 574867',
-  email: 'danrayson@hotmail.co.uk',
+  email: 'daniel@rayson.dev',
   website: 'www.rayson.dev',
 };
 
