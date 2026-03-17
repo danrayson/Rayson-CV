@@ -1,12 +1,14 @@
 # ===========================================
-# Docker Compose - Development: Database + API
+# Docker Compose - Production: Full Stack
 # ===========================================
-# Usage: docker compose -f docker-compose.dev.db-api.yml up -d
-# Purpose: Run PostgreSQL and API in Docker, debug UI locally
-# UI connects to API at http://localhost:13245
+# Usage: docker compose -f docker-compose.prod.full.yml --env-file .env.production up -d
+# Purpose: Run all services (PostgreSQL, API, UI) in Docker for production
 # ===========================================
 
 services:
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
   postgres:
     image: pgvector/pgvector:pg16
     container_name: raysoncv-postgres
@@ -14,22 +16,25 @@ services:
     environment:
       POSTGRES_DB: raysoncv
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d raysoncv"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
+  # ===========================================
+  # API (.NET 8.0)
+  # ===========================================
   api:
     build:
       context: ./Api
-      dockerfile: Dockerfile
+      dockerfile: prod.Dockerfile
     container_name: raysoncv-api
     restart: unless-stopped
     environment:
@@ -37,10 +42,9 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_DATABASE: raysoncv
       POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: postgres
-      ASPNETCORE_ENVIRONMENT: Development
-      Cors__AllowedOrigins: http://localhost:3000,http://localhost:5173
-      LOG_LEVEL: Debug
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ASPNETCORE_ENVIRONMENT: Production
+      Cors__AllowedOrigins: https://www.rayson.dev,https://rayson.dev
       Ollama__Url: http://ollama:11434
     ports:
       - "13245:8080"
@@ -53,6 +57,34 @@ services:
       - internal
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ===========================================
+  # UI (React/Vite)
+  # ===========================================
+  ui:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: https://api.rayson.dev/
+    container_name: raysoncv-ui
+    restart: unless-stopped
+    environment:
+      API_HEALTH_URL: http://api:8080/health
+      LOG_LEVEL: info
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -72,10 +104,10 @@ services:
     container_name: ollama
     healthcheck:
       test: ["CMD", "/ollama.healthcheck.sh"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
-      retries: 30
-      start_period: 10s
+      retries: 100
+      start_period: 120s
     networks:
       - internal
     # NVIDIA GPU Support: Uncomment the following to enable NVIDIA GPU
@@ -87,10 +119,16 @@ services:
               count: all
               capabilities: [gpu]
 
+# ===========================================
+# Networks
+# ===========================================
 networks:
   internal:
     driver: bridge
 
+# ===========================================
+# Volumes
+# ===========================================
 volumes:
   postgres-data:
   ollama_data:

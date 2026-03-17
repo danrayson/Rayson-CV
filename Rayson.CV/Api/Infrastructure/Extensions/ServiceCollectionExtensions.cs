@@ -5,10 +5,9 @@ using Infrastructure.Chatbot;
 using Infrastructure.Health;
 using Infrastructure.Logging;
 using Infrastructure.RAG;
-using Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Rayson.Ollama.Extensions;
 
 namespace Infrastructure.Extensions;
 
@@ -20,19 +19,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
 
-        services.Configure<BlobSettings>(configuration.GetSection("BlobStorage"));
-        services.AddHttpClient("BlobStorage");
-
         services.AddScoped<ICvProvider, CvProvider>();
 
-        services.Configure<OllamaSettings>(configuration.GetSection("Ollama"));
-        services.AddHttpClient("Ollama")
-            .ConfigureHttpClient((serviceProvider, client) =>
-            {
-                var settings = serviceProvider.GetRequiredService<IOptions<OllamaSettings>>().Value;
-                client.BaseAddress = new Uri(settings.BaseUrl);
-                client.Timeout = TimeSpan.FromMinutes(5);
-            });
+        services.AddOllama();
         services.AddScoped<IChatbotService, OllamaChatbotService>();
 
         services.AddScoped<ICvChunkRepository, CvChunkRepository>();

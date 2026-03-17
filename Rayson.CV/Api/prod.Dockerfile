@@ -57,16 +57,27 @@ COPY --from=build /src/wwwroot ./wwwroot
 # This overrides the default URL configuration
 ENV ASPNETCORE_URLS=http://+:8080
 
-ENV AuthOptions__Issuer=danrayson
-ENV AuthOptions__Audience=RaysonCVUsers
-ENV AuthOptions__IssuerSigningKey=development_signing_key_for_testing_only_not_for_production
-ENV POSTGRES_HOST=host.docker.internal
-ENV POSTGRES_PORT=5433
-ENV POSTGRES_DATABASE=raysoncv
-ENV POSTGRES_USERNAME=postgres
-ENV POSTGRES_PASSWORD=postgres
-ENV Cors__AllowedOrigins=http://localhost:3000
-ENV OLLAMA__BASEURL=http://ollama:11434
+# ===========================================
+# Runtime Environment Variables
+# ===========================================
+# The following environment variables MUST be passed at runtime
+# via docker-compose or environment file:
+#
+# Required:
+#   - POSTGRES_HOST       (e.g., postgres)
+#   - POSTGRES_PORT       (e.g., 5432)
+#   - POSTGRES_DATABASE   (e.g., raysoncv)
+#   - POSTGRES_USERNAME   (e.g., postgres)
+#   - POSTGRES_PASSWORD   (secure password)
+#   - OLLAMA__URL        (e.g., http://ollama:11434)
+#
+# Optional:
+#   - ASPNETCORE_ENVIRONMENT  (Development/Production)
+#   - Cors__AllowedOrigins    (comma-separated list of allowed origins)
+#   - JWT_SIGNING_KEY         (your secure signing key)
+#   - AuthOptions__Issuer     (JWT issuer)
+#   - AuthOptions__Audience   (JWT audience)
+# ===========================================
 
 EXPOSE 8080
 

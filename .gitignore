@@ -363,8 +363,8 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Environment files
-.env
-.env.*
+#.env
+#.env.*
 
 # E2E test reports
 Rayson.Dev/Test/e2e/reports/

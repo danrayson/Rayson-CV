@@ -1,46 +1,24 @@
-using System.Text;
-using System.Text.Json;
 using Application.Chatbot;
 using Application.Core;
 using Infrastructure.RAG;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Rayson.Ollama;
 
 namespace Infrastructure.Chatbot;
 
 public class OllamaChatbotService(
-    IHttpClientFactory httpClientFactory,
-    IOptions<OllamaSettings> options,
+    IOllamaService ollamaService,
     IRagService ragService,
     ILogger<OllamaChatbotService> logger) : IChatbotService
 {
-    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Ollama");
-    private readonly OllamaSettings _settings = options.Value;
+    private const string Model = "llama3.2:latest";
 
     public async Task<ServiceResponse<ChatbotResponse>> GetChatResponseAsync(ChatbotRequest request)
     {
         try
         {
             var messages = await BuildMessagesAsync(request);
-            var ollamaRequest = CreateChatRequest(messages, stream: false);
-
-            var jsonContent = new StringContent(
-                JsonSerializer.Serialize(ollamaRequest),
-                Encoding.UTF8,
-                "application/json");
-
-            var response = await _httpClient.PostAsync("/api/chat", jsonContent);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return ServiceResponse<ChatbotResponse>.Fail($"Ollama returned status code: {response.StatusCode}");
-            }
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var ollamaResponse = JsonSerializer.Deserialize<OllamaChatResponse>(responseContent, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var ollamaResponse = await ollamaService.ChatAsync(messages, Model);
 
             if (ollamaResponse?.Message?.Content == null)
             {
@@ -61,96 +39,69 @@ public class OllamaChatbotService(
     public async Task StreamChatResponseAsync(ChatbotRequest request, Func<string, Task> onChunk, CancellationToken cancellationToken)
     {
         var messages = await BuildMessagesAsync(request);
-        var ollamaRequest = CreateChatRequest(messages, stream: true);
 
-        var jsonContent = new StringContent(
-            JsonSerializer.Serialize(ollamaRequest),
-            Encoding.UTF8,
-            "application/json");
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/chat")
+        await foreach (var chunk in ollamaService.ChatStreamAsync(messages, Model, ct: cancellationToken))
         {
-            Content = jsonContent
-        };
-
-        var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            logger.LogError("Ollama request failed with status {StatusCode}: {ErrorContent}", response.StatusCode, errorContent);
-            throw new Exception($"Ollama returned status code: {response.StatusCode}");
-        }
-
-        var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-
-        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
-        {
-            var line = await reader.ReadLineAsync(cancellationToken);
-            
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
-            try
+            if (chunk.Done)
             {
-                var chunk = JsonSerializer.Deserialize<OllamaChatResponse>(line, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (chunk?.Done == true)
-                {
-                    break;
-                }
-
-                if (chunk?.Message?.Content != null)
-                {
-                    await onChunk(chunk.Message.Content);
-                }
+                break;
             }
-            catch (JsonException ex)
+
+            if (chunk.Message?.Content != null)
             {
-                logger.LogWarning(ex, "Failed to parse JSON chunk: {Json}", line);
+                await onChunk(chunk.Message.Content);
             }
         }
     }
 
-    private async Task<List<OllamaMessage>> BuildMessagesAsync(ChatbotRequest request)
+    private async Task<IList<OllamaMessage>> BuildMessagesAsync(ChatbotRequest request)
     {
         var systemPrompt = await BuildSystemPromptAsync(request.Message);
 
         var messages = new List<OllamaMessage>
         {
-            new() { Role = "system", Content = systemPrompt }
+            new() { Role = "system", Content = systemPrompt },
+            new() { Role = "user", Content = request.Message }
         };
-
-        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
 
         return messages;
     }
 
     private async Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 5);
+        var relevantChunks = await ragService.SearchAsync(message, topK: 30);
         var chunksText = string.Join("\n---\n", relevantChunks);
 
-        return $"""
-            You are a helpful assistant answering questions about Daniel Rayson's CV.
-            ---
-            Relevant sections from Daniel's CV:
-            ---
-            {chunksText}
-            """;
-    }
+        return """
+            You are Daniel Rayson's AI-powered professional representative. Your role is to help visitors understand his background, skills, and value as a developer by providing factual, informative answers based on the CV content provided.
 
-    private static OllamaChatRequest CreateChatRequest(List<OllamaMessage> messages, bool stream)
-    {
-        return new OllamaChatRequest
-        {
-            Model = "smollm2:135m",
-            Messages = messages,
-            Stream = stream,
-            NumPredict = 128
-        };
+            TONE AND STYLE:
+            - Let the facts speak - present information objectively without hype
+            - Be professional, knowledgeable, and helpful
+            - Use specific examples from the CV when available
+            
+            RESPONSE LENGTH:
+            - Keep responses between 75-100 words
+            - Be concise but comprehensive
+            
+            KEY SELLING POINTS TO EMPHASIZE (when relevant):
+            - AI/LLM integration expertise - builds AI-powered applications including RAG systems
+            - Published NuGet packages - check nuget.org/profiles/DanRayson
+            - GitHub presence and open source contributions
+            - Azure cloud architecture and deployment experience
+            - Self-hosting solutions and infrastructure knowledge
+            - Senior .NET Developer - deep expertise in C#, T-SQL, JavaScript
+            - Full development lifecycle ownership - from requirements to deployment
+            - 20+ years programming experience, self-taught at age 15
+            - Mathematical thinking (A* Mathematics A-level)
+            - Entrepreneurial - currently self-employed in product arbitrage
+            
+            HANDLING DIFFICULT QUESTIONS:
+            - If asked about weaknesses, gaps, or areas for improvement, frame them as learning opportunities or growth areas
+            - If a question is unrelated to Daniel's professional background, politely redirect the conversation back to his career and skills
+            
+            RELEVANT CV CONTENT:
+            ---
+            """ + chunksText;
     }
 }
