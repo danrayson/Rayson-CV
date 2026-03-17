@@ -1,15 +1,28 @@
-import { useEffect, useRef } from 'react';
-import { Viewer, Worker } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import type { ToolbarSlot, TransformToolbarSlot } from '@react-pdf-viewer/toolbar';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { useState, useEffect, useRef } from 'react';
 
 interface PdfViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
   pdfUrl: string;
 }
+
+type ToolbarSlot = {
+  ShowSearchPopover?: any;
+  GoToPreviousPage?: any;
+  CurrentPageInput?: any;
+  NumberOfPages?: any;
+  GoToNextPage?: any;
+  Zoom?: any;
+  ZoomIn?: any;
+  ZoomOut?: any;
+  Download?: any;
+  Print?: any;
+  EnterFullScreen?: any;
+  SwitchTheme?: any;
+  [key: string]: any;
+};
+
+type TransformToolbarSlot = (slot: ToolbarSlot) => ToolbarSlot;
 
 const transform: TransformToolbarSlot = (slot: ToolbarSlot) => {
   return {
@@ -19,12 +32,22 @@ const transform: TransformToolbarSlot = (slot: ToolbarSlot) => {
   };
 };
 
-const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl }) => {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+interface PdfViewerInnerProps {
+  pdfUrl: string;
+  modules: {
+    Viewer: any;
+    Worker: any;
+    defaultLayoutPlugin: any;
+  };
+}
+
+const PdfViewerInner: React.FC<PdfViewerInnerProps> = ({ pdfUrl, modules }) => {
+  const { Viewer, Worker, defaultLayoutPlugin } = modules;
+
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
-    renderToolbar: (Toolbar) => (
+    renderToolbar: (Toolbar: any) => (
       <Toolbar>
-        {(slots) => {
+        {(slots: ToolbarSlot) => {
           const transformedSlots = transform(slots);
           const {
             ShowSearchPopover,
@@ -92,6 +115,71 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
     sidebarTabs: () => [],
   });
 
+  return (
+    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+      <div style={{ width: '100%', height: '100%' }}>
+        <Viewer
+          fileUrl={pdfUrl}
+          plugins={[defaultLayoutPluginInstance]}
+        />
+      </div>
+    </Worker>
+  );
+};
+
+const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl }) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [modules, setModules] = useState<{
+    Viewer: any;
+    Worker: any;
+    defaultLayoutPlugin: any;
+  } | null>(null);
+  const isLoadingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen || isLoadingRef.current) return;
+
+    isLoadingRef.current = true;
+
+    const loadCss = () => {
+      const cssUrls = [
+        'https://unpkg.com/@react-pdf-viewer/core@3.12.0/lib/styles/index.css',
+        'https://unpkg.com/@react-pdf-viewer/default-layout@3.12.0/lib/styles/index.css',
+      ];
+
+      cssUrls.forEach((href) => {
+        if (!document.querySelector(`link[href="${href}"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          document.head.appendChild(link);
+        }
+      });
+    };
+
+    const loadModules = async () => {
+      try {
+        const [core, layout] = await Promise.all([
+          import('@react-pdf-viewer/core'),
+          import('@react-pdf-viewer/default-layout'),
+        ]);
+
+        setModules({
+          Viewer: core.Viewer,
+          Worker: core.Worker,
+          defaultLayoutPlugin: layout.defaultLayoutPlugin,
+        });
+      } catch (error) {
+        console.error('Failed to load PDF viewer modules:', error);
+      } finally {
+        isLoadingRef.current = false;
+      }
+    };
+
+    loadCss();
+    loadModules();
+  }, [isOpen]);
+
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -106,7 +194,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
   const handleBackdropClick = (e: React.MouseEvent) => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    
+
     const rect = dialog.getBoundingClientRect();
     const isInDialog = (
       rect.top <= e.clientY &&
@@ -114,7 +202,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
       rect.left <= e.clientX &&
       e.clientX <= rect.left + rect.width
     );
-    
+
     if (!isInDialog) {
       dialog.close();
     }
@@ -138,14 +226,13 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
           </button>
         </div>
         <div className="flex-1 overflow-hidden min-h-0" style={{ width: '100%', height: '100%' }}>
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-            <div style={{ width: '100%', height: '100%' }}>
-              <Viewer
-                fileUrl={pdfUrl}
-                plugins={[defaultLayoutPluginInstance]}
-              />
+          {!modules ? (
+            <div className="flex justify-center items-center h-full">
+              <span className="loading loading-spinner loading-lg"></span>
             </div>
-          </Worker>
+          ) : (
+            <PdfViewerInner modules={modules} pdfUrl={pdfUrl} />
+          )}
         </div>
       </div>
     </dialog>

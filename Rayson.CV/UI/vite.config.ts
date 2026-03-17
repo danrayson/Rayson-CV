@@ -9,6 +9,14 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        onwarn(warning, warn) {
+          if (warning.code === 'EVAL' && warning.message.includes('pdfjs-dist')) {
+            return;
+          }
+          warn(warning);
+        },
+      },
     },
     base: './',
     define: {

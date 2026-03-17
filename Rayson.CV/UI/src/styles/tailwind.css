@@ -1069,6 +1069,11 @@ body {
   margin-inline-end: -1rem;
 }
 
+.link {
+  cursor: pointer;
+  text-decoration-line: underline;
+}
+
 .menu li.disabled {
   cursor: not-allowed;
   -webkit-user-select: none;
@@ -1170,6 +1175,14 @@ body {
   transform: translateY(0) scale(1);
   z-index: 3;
   opacity: 1;
+}
+
+.alert-warning {
+  border-color: var(--fallback-wa,oklch(var(--wa)/0.2));
+  --tw-text-opacity: 1;
+  color: var(--fallback-wac,oklch(var(--wac)/var(--tw-text-opacity)));
+  --alert-bg: var(--fallback-wa,oklch(var(--wa)/1));
+  --alert-bg-mix: var(--fallback-b1,oklch(var(--b1)/1));
 }
 
 .btm-nav > *.disabled,
@@ -1485,6 +1498,16 @@ body {
   margin-inline-start: calc(var(--border-btn) * -1);
 }
 
+.link:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .loading {
   pointer-events: none;
   display: inline-block;
@@ -1508,6 +1531,10 @@ body {
 
 .loading-sm {
   width: 1.25rem;
+}
+
+.loading-lg {
+  width: 2.5rem;
 }
 
 :where(.menu li:not(.menu-title, .disabled) > *:not(ul, details, .menu-title)):not(summary, .active, .btn).focus, :where(.menu li:not(.menu-title, .disabled) > *:not(ul, details, .menu-title)):not(summary, .active, .btn):focus, :where(.menu li:not(.menu-title, .disabled) > *:not(ul, details, .menu-title)):is(summary):not(.active, .btn):focus-visible, :where(.menu li:not(.menu-title, .disabled) > details > summary:not(.menu-title)):not(summary, .active, .btn).focus, :where(.menu li:not(.menu-title, .disabled) > details > summary:not(.menu-title)):not(summary, .active, .btn):focus, :where(.menu li:not(.menu-title, .disabled) > details > summary:not(.menu-title)):is(summary):not(.active, .btn):focus-visible {
@@ -1857,6 +1884,10 @@ body {
   margin-top: 2rem;
 }
 
+.mt-16 {
+  margin-top: 4rem;
+}
+
 .flex {
   display: flex;
 }
@@ -1885,6 +1916,10 @@ body {
   height: 100%;
 }
 
+.h-6 {
+  height: 1.5rem;
+}
+
 .min-h-0 {
   min-height: 0px;
 }
@@ -1907,6 +1942,10 @@ body {
 
 .w-full {
   width: 100%;
+}
+
+.w-6 {
+  width: 1.5rem;
 }
 
 .max-w-3xl {
@@ -2087,6 +2126,10 @@ body {
   padding-top: 4rem;
 }
 
+.pb-24 {
+  padding-bottom: 6rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -2117,6 +2160,10 @@ body {
 
 .font-bold {
   font-weight: 700;
+}
+
+.underline {
+  text-decoration-line: underline;
 }
 
 .placeholder-base-content\/50::-moz-placeholder {
