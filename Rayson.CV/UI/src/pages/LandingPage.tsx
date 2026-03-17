@@ -11,7 +11,7 @@ const getOS = (): OS | null => {
   
   if (userAgent.includes('mac')) return 'mac';
   if (userAgent.includes('win')) return 'win';
-  if (userAgent.includes('linux')) return 'mac';
+  if (userAgent.includes('linux')) return 'linux';
   return null;
 };
 
