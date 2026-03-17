@@ -44,6 +44,7 @@ services:
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: postgres
       ASPNETCORE_ENVIRONMENT: Development
+      Outlook__AppPassword: fake-passwrd
       Cors__AllowedOrigins: http://localhost:3000
       LOG_LEVEL: Debug
       Ollama__Url: http://ollama:11434
