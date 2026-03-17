@@ -8,16 +8,7 @@ export const Timeline: React.FC<TimelineProps> = ({ children }) => {
   return (
     <div className="relative w-full max-w-4xl mx-auto">
       <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-primary to-transparent transform md:-translate-x-1/2" />
-      {React.Children.map(children, (child, index) => {
-        if (React.isValidElement(child)) {
-          const align = index % 2 === 0 ? 'left' : 'right';
-          return React.cloneElement(child as React.ReactElement<{ align?: 'left' | 'right'; delay?: number }>, {
-            align,
-            delay: index * 150,
-          });
-        }
-        return child;
-      })}
+      {children}
     </div>
   );
 };

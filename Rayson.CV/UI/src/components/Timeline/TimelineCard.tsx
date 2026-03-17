@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 
 interface TimelineCardProps {
   children: React.ReactNode;
-  align?: 'left' | 'right';
   delay?: number;
+  size?: 'normal' | 'small';
 }
 
 export const TimelineCard: React.FC<TimelineCardProps> = ({ 
   children, 
-  align = 'left',
-  delay = 0 
+  delay = 0,
+  size = 'normal'
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -46,16 +46,14 @@ export const TimelineCard: React.FC<TimelineCardProps> = ({
       ref={cardRef}
       className={`
         timeline-card
-        relative
         w-full
-        md:w-[calc(50%-2rem)]
-        mb-8
+        mb-1
         transition-all
         duration-700
         ease-out
         transform
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-        ${align === 'left' ? 'md:mr-auto md:pr-12' : 'md:ml-auto md:pl-12'}
+        ${size === 'small' ? 'p-1' : 'p-2'}
       `}
     >
       {children}
