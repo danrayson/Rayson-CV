@@ -56,13 +56,15 @@ const TimelinePage: React.FC = () => {
             <div className="text-center mb-6">
               <span className="badge badge-primary badge-lg">{education.period}</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {education.qualifications.map((qual) => (
-                <div key={qual.subject} className="flex justify-between items-center p-4 bg-base-200 rounded">
-                  <span className="font-medium">{qual.subject}</span>
-                  <span className="badge badge-secondary badge-lg">{qual.grade}</span>
-                </div>
-              ))}
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                {education.qualifications.map((qual) => (
+                  <div key={qual.subject} className="flex flex-col items-center justify-center p-4 bg-base-200 rounded">
+                    <span className="font-medium">{qual.subject}</span>
+                    <span className="badge badge-secondary badge-lg mt-2">{qual.grade}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
