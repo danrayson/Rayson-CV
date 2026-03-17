@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeftIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 import PdfViewerModal from '../components/PdfViewerModal';
 
@@ -77,66 +77,54 @@ const ChatbotPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-base-200 flex flex-col">
+    <div className="relative h-screen bg-base-200">
       <button
         onClick={() => window.history.back()}
-        className="absolute top-4 left-4 btn btn-sm btn-ghost z-10"
+        className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
         Home
       </button>
 
-      <div className="alert alert-warning mt-16">
-        <ExclamationTriangleIcon className="h-6 w-6" />
-        <div>
-          <p className="font-bold">AI Limitation Warning</p>
-          <p className="text-sm">
-            This chatbot uses llama3.2:latest, RAG, and GPU inference. 
-            For accurate details, please{' '}
-            <button onClick={() => setIsPdfModalOpen(true)} className="underline font-bold">
-              view the real CV
-            </button>.  This is due to cost limitations.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
-        <div className="max-w-3xl mx-auto space-y-2">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}
-            >
-              <div 
-                className={`chat-bubble ${
-                  message.role === 'user' 
-                    ? 'chat-bubble-primary rounded-2xl rounded-tr-sm' 
-                    : 'chat-bubble-secondary rounded-2xl rounded-tl-sm text-left'
-                }`}
+      <div className="absolute top-20 bottom-20 left-4 right-4">
+        <div className="max-w-3xl mx-auto h-full border border-base-300 rounded-2xl bg-base-100 overflow-y-auto">
+          <div className="p-4 space-y-2">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}
               >
-                {message.content}
-              </div>
-            </div>
-          ))}
-          {streamingContent && (
-            <div className="chat chat-start">
-              <div className="chat-bubble chat-bubble-secondary rounded-2xl rounded-tl-sm text-left">
-                {streamingContent}
-              </div>
-            </div>
-          )}
-          {isLoading && !streamingContent && (
-            <div className="chat chat-start">
-              <div className="chat-bubble bg-base-300 rounded-2xl rounded-tl-sm">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <div 
+                  className={`chat-bubble ${
+                    message.role === 'user' 
+                      ? 'chat-bubble-primary rounded-2xl rounded-tr-sm' 
+                      : 'chat-bubble-secondary rounded-2xl rounded-tl-sm text-left'
+                  }`}
+                >
+                  {message.content}
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+            ))}
+            {streamingContent && (
+              <div className="chat chat-start">
+                <div className="chat-bubble chat-bubble-secondary rounded-2xl rounded-tl-sm text-left">
+                  {streamingContent}
+                </div>
+              </div>
+            )}
+            {isLoading && !streamingContent && (
+              <div className="chat chat-start">
+                <div className="chat-bubble bg-base-300 rounded-2xl rounded-tl-sm">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
 
