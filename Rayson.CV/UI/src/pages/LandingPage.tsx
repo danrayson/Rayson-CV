@@ -128,6 +128,13 @@ const LandingPage: React.FC = () => {
             View CV
           </button>
 
+          <a
+            href="#/timeline"
+            className="btn btn-primary text-2xl font-bold"
+          >
+            View Timeline
+          </a>
+
           {appDownloadUrl ? (
             <a
               href={appDownloadUrl}

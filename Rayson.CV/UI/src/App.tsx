@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage';
 import BasicPage from './pages/Basic';
 import ChatbotPage from './pages/ChatbotPage';
 import ContactPage from './pages/ContactPage';
+import TimelinePage from './pages/TimelinePage';
 import './index.css'
 import './App.css'
 import './styles/tailwind.css'
@@ -36,6 +37,7 @@ function App() {
         <Routes>
           {`Hi there, you reading the code, buddy?`}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/timeline" element={<TimelinePage />} />
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/dashboard" element={<BasicPage />} />
           <Route path="/contact" element={<ContactPage />} />
