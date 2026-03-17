@@ -2,6 +2,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 import LandingPage from './pages/LandingPage';
 import BasicPage from './pages/Basic';
 import ChatbotPage from './pages/ChatbotPage';
+import ContactPage from './pages/ContactPage';
 import './index.css'
 import './App.css'
 import './styles/tailwind.css'
@@ -33,11 +34,12 @@ function App() {
       </button>
       <HashRouter>
         <Routes>
-          {`Hi there`}
+          {`Hi there, you reading the code, buddy?`}
           <Route path="/" element={<LandingPage />} />
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/dashboard" element={<BasicPage />} />
-          {`Hi there 2`}
+          <Route path="/contact" element={<ContactPage />} />
+          {`Hi again.  You read the whole lot!?`}
         </Routes>
       </HashRouter>
     </div>

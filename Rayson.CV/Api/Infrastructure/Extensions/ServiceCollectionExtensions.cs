@@ -1,7 +1,9 @@
 using Application.Chatbot;
+using Application.Contact;
 using Application.Health;
 using Application.Logging;
 using Infrastructure.Chatbot;
+using Infrastructure.Contact;
 using Infrastructure.Health;
 using Infrastructure.Logging;
 using Infrastructure.RAG;
@@ -18,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IHealthService, HealthService>();
         services.AddScoped<ILoggingService, LoggingService>();
+        services.AddScoped<IContactService, OutlookEmailService>();
 
         services.AddScoped<ICvProvider, CvProvider>();
 

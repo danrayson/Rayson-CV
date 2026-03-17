@@ -5,8 +5,10 @@ using Presentation.Endpoints.Health;
 using Presentation.Endpoints.Logging;
 using Presentation.Endpoints.Chatbot;
 using Presentation.Endpoints.Files;
+using Presentation.Endpoints.Contact;
 using Infrastructure.Extensions;
 using Infrastructure.Logging;
+using Infrastructure.Contact;
 using Serilog;
 
 try
@@ -14,6 +16,8 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.AddLoggingConfiguration();
+
+    builder.Services.AddOptions<OutlookOptions>().Bind(builder.Configuration.GetSection("Outlook"));
 
     builder.Services.AddControllers();
     builder.Services.AddCors(options =>
@@ -57,6 +61,7 @@ try
     app.MapLoggingEndpoints();
     app.MapChatbotEndpoints();
     app.MapStaticFilesEndpoints();
+    app.MapContactEndpoints();
 
     if (app.Environment.IsDevelopment())
     {

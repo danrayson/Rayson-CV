@@ -156,6 +156,13 @@ const LandingPage: React.FC = () => {
           </a>
           
           <a
+            href="#/contact"
+            className="btn btn-primary text-2xl font-bold"
+          >
+            Contact
+          </a>
+          
+          <a
             href="https://github.com/danrayson/Rayson-CV"
             target="_blank"
             rel="noopener noreferrer"
