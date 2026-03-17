@@ -1,6 +1,5 @@
 using Application.Chatbot;
 using Application.Core;
-using Infrastructure.RAG;
 using Microsoft.Extensions.Logging;
 using Rayson.Ollama;
 
@@ -8,7 +7,7 @@ namespace Infrastructure.Chatbot;
 
 public class OllamaChatbotService(
     IOllamaService ollamaService,
-    IRagService ragService,
+    ICvProvider cvProvider,
     ILogger<OllamaChatbotService> logger) : IChatbotService
 {
     private const string Model = "llama3.2:latest";
@@ -67,12 +66,11 @@ public class OllamaChatbotService(
         return messages;
     }
 
-    private async Task<string> BuildSystemPromptAsync(string message)
+    private Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 8);
-        var chunksText = string.Join("\n---\n", relevantChunks);
+        var cvContent = cvProvider.GetCvContent();
 
-        return """
+        return Task.FromResult("""
             You are Daniel Rayson's AI-powered professional representative. Your role is to help visitors understand his background, skills, and value as a developer by providing factual, informative answers based on the CV content provided.
 
             TONE AND STYLE:
@@ -100,8 +98,8 @@ public class OllamaChatbotService(
             - If asked about weaknesses, gaps, or areas for improvement, frame them as learning opportunities or growth areas
             - If a question is unrelated to Daniel's professional background, politely redirect the conversation back to his career and skills
             
-            RELEVANT CV CONTENT:
+            CV CONTENT:
             ---
-            """ + chunksText;
+            """ + cvContent);
     }
 }
