@@ -69,7 +69,7 @@ public class OllamaChatbotService(
 
     private async Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 30);
+        var relevantChunks = await ragService.SearchAsync(message, topK: 8);
         var chunksText = string.Join("\n---\n", relevantChunks);
 
         return """
