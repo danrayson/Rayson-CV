@@ -53,7 +53,7 @@ export const TimelineCard: React.FC<TimelineCardProps> = ({
         ease-out
         transform
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-        ${size === 'small' ? 'p-1' : 'p-6'}
+        ${size === 'small' ? 'p-1' : 'p-2'}
       `}
     >
       {children}

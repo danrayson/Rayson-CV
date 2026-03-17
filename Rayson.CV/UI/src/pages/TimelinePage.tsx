@@ -96,9 +96,9 @@ const TimelinePage: React.FC = () => {
                 <div className="w-1/2 pr-4 md:pr-8">
                   {row.work && (
                     <TimelineCard key={row.work.id} size="normal">
-                      <div className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
+                      <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
                         <div className="mb-2">
-                          <span className="badge badge-primary badge-lg">{row.work.period}</span>
+                          <span className="badge badge-primary badge-lg whitespace-nowrap">{row.work.period}</span>
                         </div>
                         <h3 className="text-xl font-bold">{row.work.title}</h3>
                         <p className="text-primary font-medium mb-3">{row.work.company}</p>
