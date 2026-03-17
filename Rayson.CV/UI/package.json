@@ -62,17 +62,17 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/icon.ico",
+      "icon": "public/iconwin.ico",
       "artifactName": "${productName}.${ext}"
     },
     "mac": {
       "target": "dmg",
-      "icon": "public/icon.png",
+      "icon": "public/iconmac.png",
       "artifactName": "${productName}.${ext}"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "public/rayson.dev.svg",
+      "icon": "public/iconlinux.svg",
       "artifactName": "${productName}.${ext}"
     }
   }
