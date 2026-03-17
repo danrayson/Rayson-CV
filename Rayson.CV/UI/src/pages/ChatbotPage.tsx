@@ -44,6 +44,7 @@ const ChatbotPage: React.FC = () => {
     try {
       await chatbotService.sendMessageStreaming(
         userMessage.content,
+        messages,
         (chunk) => {
           setStreamingContent(prev => prev + chunk);
           finalContent += chunk;

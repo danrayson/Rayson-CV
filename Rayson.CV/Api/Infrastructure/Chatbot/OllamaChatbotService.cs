@@ -62,9 +62,22 @@ public class OllamaChatbotService(
 
         var messages = new List<OllamaMessage>
         {
-            new() { Role = "system", Content = systemPrompt },
-            new() { Role = "user", Content = request.Message }
+            new() { Role = "system", Content = systemPrompt }
         };
+
+        if (request.History != null)
+        {
+            foreach (var historyMessage in request.History)
+            {
+                messages.Add(new OllamaMessage
+                {
+                    Role = historyMessage.Role,
+                    Content = historyMessage.Content
+                });
+            }
+        }
+
+        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
 
         return messages;
     }
