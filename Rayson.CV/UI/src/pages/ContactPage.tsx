@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PhoneIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { contactService } from '../services/contactService';
 import { useFormErrors } from '../hooks/useFormErrors';
 import ValidationMessages from '../components/ui/ValidationMessages';
@@ -40,6 +40,14 @@ const ContactPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-base-200 text-base-content p-4 flex flex-col items-center justify-center">
+      <button
+        onClick={() => window.history.back()}
+        className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        Home
+      </button>
+
       <div className="max-w-2xl w-full">
         <h1 className="text-4xl font-bold mb-8 text-center">Contact Me</h1>
 
