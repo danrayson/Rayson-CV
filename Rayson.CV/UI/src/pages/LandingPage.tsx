@@ -116,9 +116,9 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-base-200 p-4">
+    <div className="flex flex-col min-h-screen bg-base-200 text-base-content p-4">
       <div className="flex-grow flex flex-col items-center justify-center">
-        <h1 className="text-7xl font-bold mb-12 text-center">{"Design Develop Deploy"}</h1>
+        <h1 className="text-7xl font-bold mb-12 text-center text-base-content">{"Design Develop Deploy"}</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
           <button
