@@ -1,6 +1,5 @@
 using Application.Chatbot;
 using Application.Core;
-using Infrastructure.RAG;
 using Microsoft.Extensions.Logging;
 using Rayson.Ollama;
 
@@ -8,17 +7,19 @@ namespace Infrastructure.Chatbot;
 
 public class OllamaChatbotService(
     IOllamaService ollamaService,
-    IRagService ragService,
+    ICvProvider cvProvider,
     ILogger<OllamaChatbotService> logger) : IChatbotService
 {
     private const string Model = "llama3.2:latest";
+    private const int MaxTokens = 35;  // ~100 words
 
     public async Task<ServiceResponse<ChatbotResponse>> GetChatResponseAsync(ChatbotRequest request)
     {
         try
         {
             var messages = await BuildMessagesAsync(request);
-            var ollamaResponse = await ollamaService.ChatAsync(messages, Model);
+            var options = new ChatOptions { NumPredict = MaxTokens };
+            var ollamaResponse = await ollamaService.ChatAsync(messages, Model, options);
 
             if (ollamaResponse?.Message?.Content == null)
             {
@@ -39,8 +40,9 @@ public class OllamaChatbotService(
     public async Task StreamChatResponseAsync(ChatbotRequest request, Func<string, Task> onChunk, CancellationToken cancellationToken)
     {
         var messages = await BuildMessagesAsync(request);
+        var options = new ChatOptions { NumPredict = MaxTokens };
 
-        await foreach (var chunk in ollamaService.ChatStreamAsync(messages, Model, ct: cancellationToken))
+        await foreach (var chunk in ollamaService.ChatStreamAsync(messages, Model, options, ct: cancellationToken))
         {
             if (chunk.Done)
             {
@@ -60,20 +62,42 @@ public class OllamaChatbotService(
 
         var messages = new List<OllamaMessage>
         {
-            new() { Role = "system", Content = systemPrompt },
-            new() { Role = "user", Content = request.Message }
+            new() { Role = "system", Content = systemPrompt }
         };
+
+        if (request.History != null)
+        {
+            foreach (var historyMessage in request.History)
+            {
+                messages.Add(new OllamaMessage
+                {
+                    Role = historyMessage.Role,
+                    Content = historyMessage.Content
+                });
+            }
+        }
+
+        messages.Add(new OllamaMessage { Role = "user", Content = request.Message });
 
         return messages;
     }
 
-    private async Task<string> BuildSystemPromptAsync(string message)
+    private Task<string> BuildSystemPromptAsync(string message)
     {
-        var relevantChunks = await ragService.SearchAsync(message, topK: 30);
-        var chunksText = string.Join("\n---\n", relevantChunks);
+        var cvContent = cvProvider.GetCvContent();
 
-        return """
+        return Task.FromResult("""
             You are Daniel Rayson's AI-powered professional representative. Your role is to help visitors understand his background, skills, and value as a developer by providing factual, informative answers based on the CV content provided.
+
+            OUTPUT FORMAT:
+            - Always use clean, well-formatted markdown
+            - Use ## for section headings
+            - Use bullet points (-) for lists
+            - Use **bold** for emphasis on key terms
+            - Use code blocks (```) for technical terms, languages, or tools
+            - Use paragraphs for longer explanations
+            - NEVER use tables - use bullet points or structured lists instead
+            - Keep your response well-structured and easy to read
 
             TONE AND STYLE:
             - Let the facts speak - present information objectively without hype
@@ -81,7 +105,7 @@ public class OllamaChatbotService(
             - Use specific examples from the CV when available
             
             RESPONSE LENGTH:
-            - Keep responses between 75-100 words
+            - CRITICAL:  Keep responses between 75-125 words
             - Be concise but comprehensive
             
             KEY SELLING POINTS TO EMPHASIZE (when relevant):
@@ -100,8 +124,8 @@ public class OllamaChatbotService(
             - If asked about weaknesses, gaps, or areas for improvement, frame them as learning opportunities or growth areas
             - If a question is unrelated to Daniel's professional background, politely redirect the conversation back to his career and skills
             
-            RELEVANT CV CONTENT:
+            CV CONTENT:
             ---
-            """ + chunksText;
+            """ + cvContent);
     }
 }

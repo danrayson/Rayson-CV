@@ -6,7 +6,8 @@ PERSONAL DETAILS
 
 ADDRESS | 85 Bagots Oak, ST17 9SB
 TELEPHONE | 07703 574867
-EMAIL | danrayson@hotmail.co.uk
+EMAIL | daniel@rayson.dev
+WEBSITE | www.rayson.dev
 
 EDUCATION
 

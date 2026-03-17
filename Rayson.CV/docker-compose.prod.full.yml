@@ -46,6 +46,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Cors__AllowedOrigins: https://www.rayson.dev,https://rayson.dev
       Ollama__Url: http://ollama:11434
+      Graph__ClientSecret: ${GRAPH_CLIENT_SECRET}
     ports:
       - "13245:8080"
     depends_on:

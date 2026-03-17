@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 
 const ChatbotPage: React.FC = () => {
@@ -42,6 +44,7 @@ const ChatbotPage: React.FC = () => {
     try {
       await chatbotService.sendMessageStreaming(
         userMessage.content,
+        messages,
         (chunk) => {
           setStreamingContent(prev => prev + chunk);
           finalContent += chunk;
@@ -81,7 +84,7 @@ const ChatbotPage: React.FC = () => {
 
       <div className="absolute top-20 bottom-20 left-4 right-4">
         <div className="max-w-3xl mx-auto h-full border border-base-300 rounded-2xl bg-base-100 overflow-y-auto">
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 text-base-content">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -94,14 +97,26 @@ const ChatbotPage: React.FC = () => {
                       : 'chat-bubble-secondary rounded-2xl rounded-tl-sm text-left'
                   }`}
                 >
-                  {message.content}
+                  {message.role === 'user' ? (
+                    message.content
+                  ) : (
+                    <div className="prose prose-sm max-w-none prose-headings:mt-0 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
             {streamingContent && (
               <div className="chat chat-start">
                 <div className="chat-bubble chat-bubble-secondary rounded-2xl rounded-tl-sm text-left">
-                  {streamingContent}
+                  <div className="prose prose-sm max-w-none prose-headings:mt-0 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {streamingContent}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
