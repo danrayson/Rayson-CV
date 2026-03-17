@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
 import {
   workExperience,
@@ -11,6 +12,14 @@ import {
 const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
+      <button
+        onClick={() => window.history.back()}
+        className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        Home
+      </button>
+
       <header className="py-16 text-center px-4">
         <h1 className="text-5xl md:text-7xl font-bold mb-4">Daniel W F Rayson</h1>
         <p className="text-2xl md:text-3xl text-primary font-semibold">Senior DotNet Developer</p>
