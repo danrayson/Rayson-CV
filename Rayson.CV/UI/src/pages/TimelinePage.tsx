@@ -84,6 +84,13 @@ const TimelinePage: React.FC = () => {
       </header>
 
       <main className="container mx-auto px-4 pb-16">
+        <section className="mb-16 max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
+          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
+            <p className="text-lg leading-relaxed">{personalDescription}</p>
+          </div>
+        </section>
+
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
@@ -166,13 +173,6 @@ const TimelinePage: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
-          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-            <p className="text-lg leading-relaxed">{personalDescription}</p>
           </div>
         </section>
 
