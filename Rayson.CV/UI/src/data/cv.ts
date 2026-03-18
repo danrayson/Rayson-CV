@@ -38,7 +38,7 @@ export interface PersonalDetails {
 }
 
 export const personalDetails: PersonalDetails = {
-  address: '85 Bagots Oak, ST17 9SB',
+  address: 'Stafford, ST17 9SB',
   phone: '07703 574867',
   email: 'daniel@rayson.dev',
   website: 'www.rayson.dev',
@@ -46,16 +46,19 @@ export const personalDetails: PersonalDetails = {
 
 export const workExperience: WorkExperience[] = [
   {
-    id: 'self-employed',
-    company: 'Self Employed (Material Product Arbitrage)',
-    period: '2023 - Onwards',
-    yearStart: 2023,
-    title: 'N/A',
-    description: 'Self-directed research and systems design in material product arbitrage',
+    id: 'freelance',
+    company: 'Freelance',
+    period: '2024 - Current',
+    yearStart: 2024,
+    title: 'Senior Full-Stack Developer',
+    description: 'Full-stack development with focus on quality delivery and project ownership',
     bulletPoints: [
-      'Self-directed research and systems design',
-      'Responsibility for following regulatory requirements',
-      'Automation, data validation, service interfacing',
+      'Followed ISO 29110 processes to ensure quality delivery',
+      'Cloud and On-site hosting solutions with full CI/CD pipelines',
+      'Full project lifecycle ownership from requirements through deployment',
+      'Completed full-stack applications: arbitrage platform and custom e-commerce shop',
+      'Contract and legal compliance considerations in project delivery',
+      'Self-hosted portfolio website (www.rayson.dev) and additional personal projects',
     ],
   },
   {
