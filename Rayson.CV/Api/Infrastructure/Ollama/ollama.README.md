@@ -57,12 +57,7 @@ await foreach (var chunk in ollama.ChatStreamAsync(
     Console.Write(chunk.Message?.Content);
 }
 
-// Generate embeddings
-var embedding = await ollama.EmbedAsync("Hello", "nomic-embed-text");
-Console.WriteLine(embedding.Embedding.Count);
-```
-
-## Prerequisites
+// ## Prerequisites
 
 ### NVIDIA GPU Support
 
@@ -107,11 +102,11 @@ docker compose ps
 
 ### Using Multiple Models
 
-By default, the container starts with `smollm:135m` and `nomic-embed-text`. To configure models, edit the `CUSTOM_MODELS` environment variable in `ollama.docker-compose.yml`:
+By default, the container starts with `smollm:135m`. To configure models, edit the `CUSTOM_MODELS` environment variable in `ollama.docker-compose.yml`:
 
 ```yaml
 environment:
-  - CUSTOM_MODELS=["smollm:135m","nomic-embed-text"]
+  - CUSTOM_MODELS=["smollm:135m"]
 ```
 
 The `CUSTOM_MODELS` environment variable accepts a JSON array of model names. The entrypoint script will check if each model exists and pull it only if missing.
@@ -124,7 +119,7 @@ The `CUSTOM_MODELS` environment variable accepts a JSON array of model names. Th
 
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
-| `CUSTOM_MODELS` | `["smollm:135m","nomic-embed-text"]` | Models to check/pull on startup |
+| `CUSTOM_MODELS` | `["smollm:135m"]` | Models to check/pull on startup |
 
 > **Note:**  The `OLLAMA_HOST` in the Ollama container is hardcoded to `0.0.0.0` so connections from other containers are accepted.  This could raise security issues for your environment.
 

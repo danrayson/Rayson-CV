@@ -13,7 +13,7 @@ import {
 } from '../data/cv';
 
 function getEndYear(period: string): number {
-  if (period.toLowerCase().includes('current')) return 2026;
+  if (period.toLowerCase().includes('current') || period.toLowerCase().includes('onwards')) return 2026;
   const match = period.match(/(\d{4})/g);
   if (!match) return 2026;
   return parseInt(match[match.length - 1]);

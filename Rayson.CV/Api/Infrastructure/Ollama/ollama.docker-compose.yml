@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: ollama.Dockerfile
     environment:
-      - CUSTOM_MODELS=["llama3.2:latest","nomic-embed-text"]
+      - CUSTOM_MODELS=["llama3.2:latest"]
     volumes:
       - ollama_data:/root/.ollama
-    container_name: ollama
+    container_name: raysoncv-ollama
     healthcheck:
       test: ["CMD", "/ollama.healthcheck.sh"]
       interval: 10s

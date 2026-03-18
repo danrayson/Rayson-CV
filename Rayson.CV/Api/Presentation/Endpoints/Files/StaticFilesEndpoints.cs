@@ -20,7 +20,7 @@ public static class StaticFilesEndpoints
 
     private static IResult GetCv()
     {
-        const string filename = "Daniel-Rayson-DotNet-CV.pdf";
+        const string filename = "CV 2026.pdf";
         var webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var filePath = Path.Combine(webRoot, filename);
 
