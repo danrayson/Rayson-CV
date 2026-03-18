@@ -8,12 +8,6 @@ export interface WorkExperience {
   bulletPoints: string[];
 }
 
-export interface Education {
-  id: string;
-  period: string;
-  qualifications: { subject: string; grade: string }[];
-}
-
 export interface Project {
   id: string;
   name: string;
@@ -132,14 +126,6 @@ export const workExperience: WorkExperience[] = [
     ],
   },
 ];
-
-export const education: Education = {
-  id: 'gcse',
-  period: '1999-2005',
-  qualifications: [
-    { subject: 'Mathematics', grade: 'A*' },
-  ],
-};
 
 export const projects: Project[] = [
   {
