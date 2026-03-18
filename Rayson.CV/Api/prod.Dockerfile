@@ -13,7 +13,6 @@ COPY ["Presentation/Presentation.csproj", "Presentation/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
-COPY ["Database/Database.csproj", "Database/"]
 
 # Restore NuGet packages based on project references
 RUN dotnet restore "Presentation/Presentation.csproj"
@@ -64,11 +63,6 @@ ENV ASPNETCORE_URLS=http://+:8080
 # via docker-compose or environment file:
 #
 # Required:
-#   - POSTGRES_HOST       (e.g., postgres)
-#   - POSTGRES_PORT       (e.g., 5432)
-#   - POSTGRES_DATABASE   (e.g., raysoncv)
-#   - POSTGRES_USERNAME   (e.g., postgres)
-#   - POSTGRES_PASSWORD   (secure password)
 #   - OLLAMA__URL        (e.g., http://ollama:11434)
 #
 # Optional:

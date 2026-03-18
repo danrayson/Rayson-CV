@@ -7,8 +7,7 @@ namespace Infrastructure.Chatbot;
 
 public class OllamaChatbotService(
     IOllamaService ollamaService,
-    ICvProvider cvProvider,
-    ILogger<OllamaChatbotService> logger) : IChatbotService
+    ICvProvider cvProvider) : IChatbotService
 {
     private const string Model = "llama3.2:latest";
     private const int MaxTokens = 35;  // ~100 words

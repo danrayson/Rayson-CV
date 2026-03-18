@@ -2,32 +2,10 @@
 # Docker Compose - Development: Full Stack
 # ===========================================
 # Usage: docker compose -f docker-compose.dev.full.yml up -d
-# Purpose: Run all services (PostgreSQL, API, UI) in Docker
+# Purpose: Run all services (API, UI, Ollama) in Docker
 # ===========================================
 
 services:
-  # ===========================================
-  # PostgreSQL Database
-  # ===========================================
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: raysoncv-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: raysoncv
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d raysoncv"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   # ===========================================
   # API (.NET 8.0)
   # ===========================================
@@ -38,11 +16,6 @@ services:
     container_name: raysoncv-api
     restart: unless-stopped
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: raysoncv
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: postgres
       ASPNETCORE_ENVIRONMENT: Development
       Graph__ClientSecret: fake-passwrd
       Cors__AllowedOrigins: http://localhost:3000
@@ -51,8 +24,6 @@ services:
     ports:
       - "13245:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
       ollama:
         condition: service_healthy
     networks:
@@ -100,7 +71,7 @@ services:
       context: ./Api/Infrastructure/Ollama
       dockerfile: ollama.Dockerfile
     environment:
-      - CUSTOM_MODELS=["llama3.2:latest","nomic-embed-text"]
+      - CUSTOM_MODELS=["llama3.2:latest"]
     volumes:
       - ollama_data:/root/.ollama
     container_name: raysoncv-ollama
@@ -132,5 +103,4 @@ networks:
 # Volumes
 # ===========================================
 volumes:
-  postgres-data:
   ollama_data:
