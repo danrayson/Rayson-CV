@@ -88,7 +88,7 @@ const TimelinePage: React.FC = () => {
           <section className="mb-16 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
             <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-              <p className="text-lg leading-relaxed">{personalDescription}</p>
+              <p className="text-base leading-relaxed">{personalDescription}</p>
             </div>
           </section>
         </FadeInSection>
