@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
+import { FadeInSection } from '../components/FadeInSection/FadeInSection';
 import {
   workExperience,
   projects,
@@ -84,15 +85,18 @@ const TimelinePage: React.FC = () => {
       </header>
 
       <main className="container mx-auto px-4 pb-16">
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
-          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-            <p className="text-lg leading-relaxed">{personalDescription}</p>
-          </div>
-        </section>
+        <FadeInSection delay={0}>
+          <section className="mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
+            <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
+              <p className="text-lg leading-relaxed">{personalDescription}</p>
+            </div>
+          </section>
+        </FadeInSection>
 
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
+        <FadeInSection delay={100}>
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
             <div className="flex flex-col md:flex-row mb-4">
               <div className="w-full md:w-1/2 md:pr-8 text-center font-bold">Work Experience</div>
@@ -139,10 +143,12 @@ const TimelinePage: React.FC = () => {
               </div>
             ))}
           </Timeline>
-        </section>
+          </section>
+        </FadeInSection>
 
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Education</h2>
+        <FadeInSection delay={200}>
+          <section className="mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">Education</h2>
           <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
             <div className="text-center mb-6">
               <span className="badge badge-primary badge-lg">{education.period}</span>
@@ -158,25 +164,31 @@ const TimelinePage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+          </section>
+        </FadeInSection>
 
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {skills.map((category) => (
-              <div key={category.id} className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
-                <h3 className="text-xl font-bold text-primary mb-4">{category.name}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {category.skills.map((skill) => (
-                    <span key={skill} className="badge badge-outline badge-lg">{skill}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <FadeInSection delay={300}>
+          <section className="mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {skills.map((category, index) => (
+                <FadeInSection key={category.id} delay={index * 100}>
+                  <div className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
+                    <h3 className="text-xl font-bold text-primary mb-4">{category.name}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {category.skills.map((skill) => (
+                        <span key={skill} className="badge badge-outline badge-lg">{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                </FadeInSection>
+              ))}
+            </div>
+          </section>
+        </FadeInSection>
 
-        <section className="max-w-4xl mx-auto">
+        <FadeInSection delay={400}>
+          <section className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Contact</h2>
           <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,6 +230,7 @@ const TimelinePage: React.FC = () => {
             </div>
           </div>
         </section>
+        </FadeInSection>
       </main>
     </div>
   );
