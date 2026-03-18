@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: ollama.Dockerfile
     environment:
-      - CUSTOM_MODELS=["smollm2:135m","nomic-embed-text"]
+      - CUSTOM_MODELS=["smollm2:135m"]
     volumes:
       - ollama_data:/root/.ollama
     container_name: ollama
