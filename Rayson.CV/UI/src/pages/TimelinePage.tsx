@@ -87,13 +87,13 @@ const TimelinePage: React.FC = () => {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
-            <div className="flex mb-4">
-              <div className="w-1/2 pr-4 md:pr-8 text-center font-bold">Work Experience</div>
-              <div className="w-1/2 pl-4 md:pl-8 text-center font-bold">Personal Projects</div>
+            <div className="flex flex-col md:flex-row mb-4">
+              <div className="w-full md:w-1/2 md:pr-8 text-center font-bold">Work Experience</div>
+              <div className="hidden md:block md:w-1/2 md:pl-8 text-center font-bold">Personal Projects</div>
             </div>
             {rows.map((row) => (
-              <div key={row.year} className="flex">
-                <div className="w-1/2 pr-4 md:pr-8">
+              <div key={row.year} className="flex flex-col md:flex-row">
+                <div className="w-full md:w-1/2 md:pr-8">
                   {row.work && (
                     <TimelineCard key={row.work.id} size="normal">
                       <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
@@ -112,7 +112,7 @@ const TimelinePage: React.FC = () => {
                     </TimelineCard>
                   )}
                 </div>
-                <div className="w-1/2 pl-4 md:pl-8">
+                <div className="w-full md:w-1/2 md:pl-8">
                   {row.projects.map((project) => (
                     <TimelineCard key={project.id} size="small">
                       <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
