@@ -84,7 +84,7 @@ const TimelinePage: React.FC = () => {
       </header>
 
       <main className="container mx-auto px-4 pb-16">
-        <FadeInSection delay={0}>
+        <FadeInSection delay={100}>
           <section className="mb-16 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
             <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
@@ -145,7 +145,7 @@ const TimelinePage: React.FC = () => {
           </section>
         </FadeInSection>
 
-        <FadeInSection delay={300}>
+        <FadeInSection delay={100}>
           <section className="mb-16 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -165,7 +165,7 @@ const TimelinePage: React.FC = () => {
           </section>
         </FadeInSection>
 
-        <FadeInSection delay={400}>
+        <FadeInSection delay={100}>
           <section className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Contact</h2>
           <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
