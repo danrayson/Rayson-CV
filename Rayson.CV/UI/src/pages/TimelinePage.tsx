@@ -5,7 +5,6 @@ import { FadeInSection } from '../components/FadeInSection/FadeInSection';
 import {
   workExperience,
   projects,
-  education,
   skills,
   personalDetails,
   personalDescription,
@@ -143,27 +142,6 @@ const TimelinePage: React.FC = () => {
               </div>
             ))}
           </Timeline>
-          </section>
-        </FadeInSection>
-
-        <FadeInSection delay={200}>
-          <section className="mb-16 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Education</h2>
-          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-            <div className="text-center mb-6">
-              <span className="badge badge-primary badge-lg">{education.period}</span>
-            </div>
-            <div className="flex justify-center">
-              <div className="w-full max-w-md">
-                {education.qualifications.map((qual) => (
-                  <div key={qual.subject} className="flex flex-col items-center justify-center p-4 bg-base-200 rounded">
-                    <span className="font-medium">{qual.subject}</span>
-                    <span className="badge badge-secondary badge-lg mt-2">{qual.grade}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
           </section>
         </FadeInSection>
 
