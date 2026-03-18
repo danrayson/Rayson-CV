@@ -4,7 +4,7 @@ Senior DotNet Developer
 
 PERSONAL DETAILS
 
-ADDRESS | 85 Bagots Oak, ST17 9SB
+ADDRESS | Stafford, ST17 9SB
 TELEPHONE | 07703 574867
 EMAIL | daniel@rayson.dev
 WEBSITE | www.rayson.dev
@@ -70,11 +70,14 @@ Title: Software Developer
     • Developed B2B APIs deployed to the Cloud using CI
     • Responsible for communicating with clients and work team
 
-Self Employed (Material Product Arbitrage) 2023 - Onwards
-Title: N/A
-    • Self-directed research and systems design
-    • Responsibility for following regulatory requirements
-    • Automation, data validation, service interfacing
+Freelance 2024 - Current
+Title: Senior Full-Stack Developer
+    • Followed ISO 29110 processes to ensure quality delivery
+    • Cloud and On-site hosting solutions with full CI/CD pipelines
+    • Full project lifecycle ownership from requirements through deployment
+    • Completed full-stack applications: arbitrage platform and custom e-commerce shop
+    • Contract and legal compliance considerations in project delivery
+    • Self-hosted portfolio website (www.rayson.dev) and additional personal projects
 
 HOME EXPERIENCE
 
