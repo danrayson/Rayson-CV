@@ -35,27 +35,27 @@ Has worked with continuous integration frameworks such as Octopus, Jenkins and T
 
 WORK EXPERIENCE
 
-Freelance (Personal and Brochure Websites) 2007 – 2012
+Freelance (Personal and Brochure Websites) 2007 - 2012
 Title: Website Development and Support
     • Design and implementation of custom websites
     • General site maintenance and updates
     • Site specification and general IT consultation
 
-DBLogic (Software House) Spring 2012 - Spring 2014
+DBLogic (Software House) 2012 - 2014
 Title: Software Development Engineer
     • Full development life-cycle ownership
     • Customer support and software bug fixing
     • Experience with the SCRUM method
     • Multiple completed business applications
 
-ARVS ltd (Car Accident Claims Management) Summer 2014 - Summer 2016
+ARVS ltd (Car Accident Claims Management) 2014 - 2016
 Title: Web Developer
     • Supporting and maintaining a bespoke motor accident management website
     • Creating add-ons and new services in an agile environment
     • Advisor to junior members of staff and introducer of new technologies to the team
     • Consulted with end users to achieve the best results
 
-Inspired Gaming UK Ltd (Video Streaming and Back-end Services) Winter 2017 – Winter 2021
+Inspired Gaming UK Ltd (Video Streaming and Back-end Services) 2017 – 2021
 Title: Senior Software Developer
     • Development ownership of solo-projects
     • Supporting and advising the development team
@@ -63,14 +63,14 @@ Title: Senior Software Developer
     • Unit, Behaviour, and Integration testing using various suites
     • Completed multiple projects through to production
 
-The Site Doctor (Small and Highly Skilled Software House) Winter 2021 – Winter 2023
+The Site Doctor (Small and Highly Skilled Software House) 2021 – 2024
 Title: Software Developer
     • Full project ownership, requirement gathering, work specification, deployment and support
     • Supporting and advising the development team
     • Developed B2B APIs deployed to the Cloud using CI
     • Responsible for communicating with clients and work team
 
-Self Employed (Material Product Arbitrage) Winter 2023 – Current
+Self Employed (Material Product Arbitrage) 2023 - Onwards
 Title: N/A
     • Self-directed research and systems design
     • Responsibility for following regulatory requirements
