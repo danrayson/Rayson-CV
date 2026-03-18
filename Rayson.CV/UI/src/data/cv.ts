@@ -48,7 +48,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'self-employed',
     company: 'Self Employed (Material Product Arbitrage)',
-    period: 'Winter 2023 – Current',
+    period: '2023 - Onwards',
     yearStart: 2023,
     title: 'N/A',
     description: 'Self-directed research and systems design in material product arbitrage',
@@ -61,7 +61,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'the-site-doctor',
     company: 'The Site Doctor (Small and Highly Skilled Software House)',
-    period: 'Winter 2021 – Winter 2023',
+    period: '2021 - 2024',
     yearStart: 2021,
     title: 'Software Developer',
     description: 'Full project ownership in a small, highly skilled software house',
@@ -75,7 +75,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'inspired-gaming',
     company: 'Inspired Gaming UK Ltd (Video Streaming and Back-end Services)',
-    period: 'Winter 2017 – Winter 2021',
+    period: '2017 - 2021',
     yearStart: 2017,
     title: 'Senior Software Developer',
     description: 'Senior developer role in video streaming and back-end services',
@@ -90,7 +90,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'arvs',
     company: 'ARVS ltd (Car Accident Claims Management)',
-    period: 'Summer 2014 – Summer 2016',
+    period: '2014 - 2016',
     yearStart: 2014,
     title: 'Web Developer',
     description: 'Web developer supporting a bespoke motor accident management website',
@@ -102,9 +102,9 @@ export const workExperience: WorkExperience[] = [
     ],
   },
   {
-    id: 'dbl ogic',
+    id: 'dblogic',
     company: 'DBLogic (Software House)',
-    period: 'Spring 2012 – Spring 2014',
+    period: '2012 - 2014',
     yearStart: 2012,
     title: 'Software Development Engineer',
     description: 'Software development engineer in a software house environment',
@@ -118,7 +118,7 @@ export const workExperience: WorkExperience[] = [
   {
     id: 'freelance',
     company: 'Freelance (Personal and Brochure Websites)',
-    period: '2007 – 2012',
+    period: '2007 - 2012',
     yearStart: 2007,
     title: 'Website Development and Support',
     description: 'Freelance website development and support',
