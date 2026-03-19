@@ -5,13 +5,16 @@ namespace Infrastructure.Logging;
 
 public class LoggingService : ILoggingService
 {
-    public Task LogClientEventAsync(ClientLogEvent logEvent, string? userId = null)
+    public Task LogClientEventAsync(ClientLogEvent logEvent, string? userId = null, string? userCorrelationId = null)
     {
         var logger = Log.ForContext("SourceContext", "Client")
             .ForContext("EventType", logEvent.EventType);
 
         if (userId != null)
             logger = logger.ForContext("UserId", userId);
+
+        if (userCorrelationId != null)
+            logger = logger.ForContext("UserCorrelationId", userCorrelationId);
 
         Action<ILogger> logCall = logEvent.EventType switch
         {
@@ -41,15 +44,18 @@ public class LoggingService : ILoggingService
                 .ForContext("SectionId", logEvent.SectionId)
                 .ForContext("Duration", logEvent.Duration)
                 .ForContext("CorrelationId", logEvent.CorrelationId),
-            "ApiCall" => logger
-                .ForContext("Path", logEvent.Path),
             "Click" => logger
                 .ForContext("ElementId", logEvent.ElementId)
-                .ForContext("ElementText", logEvent.ElementText),
+                .ForContext("ElementText", logEvent.ElementText)
+                .ForContext("CorrelationId", logEvent.CorrelationId),
+            "ApiCall" => logger
+                .ForContext("Path", logEvent.Path)
+                .ForContext("CorrelationId", logEvent.CorrelationId),
             "Error" => logger
                 .ForContext("BrowserInfo", logEvent.BrowserInfo)
                 .ForContext("StackTrace", logEvent.StackTrace)
-                .ForContext("AdditionalData", logEvent.AdditionalData),
+                .ForContext("AdditionalData", logEvent.AdditionalData)
+                .ForContext("CorrelationId", logEvent.CorrelationId),
             _ => logger
                 .ForContext("BrowserInfo", logEvent.BrowserInfo)
                 .ForContext("StackTrace", logEvent.StackTrace)

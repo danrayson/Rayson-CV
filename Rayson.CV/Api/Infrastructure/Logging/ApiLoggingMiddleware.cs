@@ -35,13 +35,13 @@ public class ApiLoggingMiddleware
         }
 
         var userCorrelationId = context.Request.Headers["X-User-Correlation-Id"].FirstOrDefault() ?? Guid.NewGuid().ToString();
-        var apiCorrelationId = Guid.NewGuid().ToString();
+        var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault() ?? Guid.NewGuid().ToString();
         var userIp = GetClientIp(context);
         var userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "";
         var country = geoIpService.GetCountryCode(userIp);
         var culture = context.Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',').FirstOrDefault();
 
-        context.Items["ApiCorrelationId"] = apiCorrelationId;
+        context.Items["CorrelationId"] = correlationId;
         context.Items["UserCorrelationId"] = userCorrelationId;
         context.Items["Country"] = country ?? "Unknown";
 
@@ -72,19 +72,19 @@ public class ApiLoggingMiddleware
             if (!context.Response.HasStarted)
             {
                 context.Response.Headers["X-User-Correlation-Id"] = userCorrelationId;
-                context.Response.Headers["X-Api-Correlation-Id"] = apiCorrelationId;
+                context.Response.Headers["X-Correlation-Id"] = correlationId;
             }
 
             _logger.LogInformation(
                 "HTTP {Method} {Path} responded {StatusCode} in {DurationMs}ms | " +
-                "UserCorrelationId: {UserCorrelationId} | ApiCorrelationId: {ApiCorrelationId} | " +
+                "UserCorrelationId: {UserCorrelationId} | CorrelationId: {CorrelationId} | " +
                 "Country: {Country} | IP: {UserIp} | UserAgent: {UserAgent} | Culture: {Culture}",
                 context.Request.Method,
                 context.Request.Path.Value,
                 context.Response.StatusCode,
                 elapsedMs,
                 userCorrelationId,
-                apiCorrelationId,
+                correlationId,
                 country ?? "Unknown",
                 userIp,
                 userAgent,

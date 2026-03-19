@@ -18,7 +18,8 @@ public static class LoggingEndpoints
         [FromBody] ClientLogEvent logEvent)
     {
         var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        await loggingService.LogClientEventAsync(logEvent, userId);
+        var userCorrelationId = httpContext.Request.Headers["X-User-Correlation-Id"].FirstOrDefault();
+        await loggingService.LogClientEventAsync(logEvent, userId, userCorrelationId);
         return Results.Ok();
     }
 }

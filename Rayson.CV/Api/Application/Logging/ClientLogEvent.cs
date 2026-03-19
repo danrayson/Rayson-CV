@@ -14,6 +14,7 @@ public class ClientLogEvent
     public string? Path { get; set; }
     public string? Referrer { get; set; }
     public string? CorrelationId { get; set; }
+    public string? UserCorrelationId { get; set; }
     public string? UserAgent { get; set; }
     public string? Language { get; set; }
     public int? ScreenWidth { get; set; }

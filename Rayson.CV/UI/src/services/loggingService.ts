@@ -8,6 +8,7 @@ export interface ApiCallEvent {
   status: number;
   duration: number;
   correlationId: string;
+  userCorrelationId: string;
 }
 
 export interface PageViewEvent {
@@ -15,6 +16,7 @@ export interface PageViewEvent {
   path: string;
   referrer: string;
   correlationId: string;
+  userCorrelationId: string;
   userAgent: string;
   language: string;
   screenWidth: number;
@@ -27,6 +29,7 @@ export interface SectionEvent {
   sectionId: string;
   duration?: number;
   correlationId: string;
+  userCorrelationId: string;
 }
 
 export interface ClickEvent {
@@ -34,6 +37,7 @@ export interface ClickEvent {
   elementId: string;
   elementText: string;
   correlationId: string;
+  userCorrelationId: string;
 }
 
 type ClientLogEvent = ApiCallEvent | PageViewEvent | SectionEvent | ClickEvent;
@@ -61,13 +65,13 @@ class LoggingService {
     console.info(`[ApiCall] ${event.method} ${event.path} - ${event.status} (${event.duration.toFixed(0)}ms)`);
   }
 
-  public logPageView(event: Omit<PageViewEvent, 'eventType'>): void {
-    this.log({ ...event, eventType: 'PageView' });
+  public logPageView(event: Omit<PageViewEvent, 'eventType' | 'userCorrelationId'>): void {
+    this.log({ ...event, eventType: 'PageView', userCorrelationId: getUserCorrelationId() });
     console.info(`[PageView] ${event.path}`);
   }
 
-  public logSectionEvent(event: Omit<SectionEvent, 'eventType'> & { eventType: 'SectionVisible' | 'SectionHidden' }): void {
-    this.log({ ...event, eventType: event.eventType });
+  public logSectionEvent(event: Omit<SectionEvent, 'eventType' | 'userCorrelationId'> & { eventType: 'SectionVisible' | 'SectionHidden' }): void {
+    this.log({ ...event, eventType: event.eventType, userCorrelationId: getUserCorrelationId() });
     console.info(`[${event.eventType}] ${event.sectionId}${event.duration ? ` (${event.duration}ms)` : ''}`);
   }
 
@@ -76,7 +80,8 @@ class LoggingService {
       eventType: 'Click',
       elementId,
       elementText,
-      correlationId: getUserCorrelationId(),
+      correlationId: '',
+      userCorrelationId: getUserCorrelationId(),
     });
   }
 
@@ -88,7 +93,8 @@ class LoggingService {
       path: source ?? 'Unknown',
       status: 0,
       duration: 0,
-      correlationId: getUserCorrelationId(),
+      correlationId: '',
+      userCorrelationId: getUserCorrelationId(),
     });
   }
 }

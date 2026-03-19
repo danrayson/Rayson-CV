@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from '../config';
 import { loggingService } from './loggingService';
-import { getUserCorrelationId } from '../utils/correlation';
+import { getUserCorrelationId, getCorrelationId } from '../utils/correlation';
 
 interface RequestMetadata {
   startTime: number;
+  correlationId: string;
 }
 
 declare module 'axios' {
@@ -23,7 +24,8 @@ class HttpClient {
 
     this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       config.headers['X-User-Correlation-Id'] = getUserCorrelationId();
-      config.metadata = { startTime: performance.now() };
+      config.headers['X-Correlation-Id'] = getCorrelationId();
+      config.metadata = { startTime: performance.now(), correlationId: getCorrelationId() };
       return config;
     });
 
@@ -36,7 +38,8 @@ class HttpClient {
             path: response.config.url ?? '',
             status: response.status,
             duration,
-            correlationId: getUserCorrelationId(),
+            correlationId: response.config.metadata?.correlationId ?? '',
+            userCorrelationId: getUserCorrelationId(),
           });
         }
         return response;
@@ -98,6 +101,7 @@ class HttpClient {
       headers: {
         'Content-Type': 'application/json',
         'X-User-Correlation-Id': getUserCorrelationId(),
+        'X-Correlation-Id': getCorrelationId(),
       },
       body: JSON.stringify(data),
     });
