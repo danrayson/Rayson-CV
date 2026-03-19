@@ -31,11 +31,12 @@ class HttpClient {
 
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
-        if (!response.config.url?.includes('/logs')) {
+        const path = response.request.responseURL ?? response.config.url ?? '';
+        if (!path.includes('/logs')) {
           const duration = performance.now() - (response.config.metadata?.startTime ?? 0);
           loggingService.logApiCall({
             method: response.config.method?.toUpperCase() ?? 'UNKNOWN',
-            path: response.config.url ?? '',
+            path,
             status: response.status,
             duration,
             correlationId: response.config.metadata?.correlationId ?? '',
@@ -47,7 +48,7 @@ class HttpClient {
       (error) => {
         if (!error.config?.url?.includes('/logs')) {
           loggingService.error(
-            `API Error: ${error.config?.url} - ${error.message}`,
+            `API Error: ${error.message}`,
             'UI.HttpClient',
             {
               status: error.response?.status,

@@ -25,10 +25,8 @@ export interface PageViewEvent {
 }
 
 export interface SectionEvent {
-  eventType: 'SectionVisible' | 'SectionHidden';
+  eventType: 'SectionVisible';
   sectionId: string;
-  duration?: number;
-  correlationId: string;
   userCorrelationId: string;
 }
 
@@ -70,9 +68,9 @@ class LoggingService {
     console.info(`[PageView] ${event.path}`);
   }
 
-  public logSectionEvent(event: Omit<SectionEvent, 'eventType' | 'userCorrelationId'> & { eventType: 'SectionVisible' | 'SectionHidden' }): void {
-    this.log({ ...event, eventType: event.eventType, userCorrelationId: getUserCorrelationId() });
-    console.info(`[${event.eventType}] ${event.sectionId}${event.duration ? ` (${event.duration}ms)` : ''}`);
+  public logSectionEvent(event: { sectionId: string }): void {
+    this.log({ eventType: 'SectionVisible', sectionId: event.sectionId, userCorrelationId: getUserCorrelationId() });
+    console.info(`[SectionVisible] ${event.sectionId}`);
   }
 
   public logClick(elementId: string, elementText: string): void {

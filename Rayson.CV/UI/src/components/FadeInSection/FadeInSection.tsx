@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+const loggedSections = new Set<string>();
+
 interface FadeInSectionProps {
   children: React.ReactNode;
   delay?: number;
@@ -15,26 +17,34 @@ export const FadeInSection: React.FC<FadeInSectionProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const hasEmittedRef = useRef(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const element = ref.current;
+    if (!element) return;
+
+    const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !hasEmittedRef.current) {
+          hasEmittedRef.current = true;
           setTimeout(() => setIsVisible(true), delay);
-          observer.unobserve(entry.target);
+        }
+
+        const sectionId = entry.target.getAttribute('data-section-id');
+        if (sectionId && !loggedSections.has(sectionId)) {
+          loggedSections.add(sectionId);
+          window.dispatchEvent(new CustomEvent('section-visible', {
+            detail: { sectionId }
+          }));
         }
       },
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    visibilityObserver.observe(element);
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
+      visibilityObserver.disconnect();
     };
   }, [delay]);
 
