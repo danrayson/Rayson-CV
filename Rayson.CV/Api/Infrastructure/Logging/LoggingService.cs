@@ -1,6 +1,5 @@
 using Application.Logging;
 using Serilog;
-using Serilog.Events;
 
 namespace Infrastructure.Logging;
 
@@ -13,6 +12,16 @@ public class LoggingService : ILoggingService
 
         if (userId != null)
             logger = logger.ForContext("UserId", userId);
+
+        Action<ILogger> logCall = logEvent.EventType switch
+        {
+            "PageView" => l => l.Information("PageView - {PageName}", logEvent.Path),
+            "SectionVisible" or "SectionHidden" => l => l.Information("{EventType} - {SectionId}", logEvent.EventType, logEvent.SectionId),
+            "Click" => l => l.Information("Click - {ElementText}", logEvent.ElementText ?? logEvent.ElementId),
+            "ApiCall" => l => l.Information("ApiCall - {Path}", logEvent.Path),
+            "Error" => l => l.Error("Error - {ErrorMessage}", logEvent.Message ?? "Unknown error"),
+            _ => l => l.Information("Client event: {EventType} - {Message}", logEvent.EventType, logEvent.Message)
+        };
 
         logger = logEvent.EventType switch
         {
@@ -32,22 +41,27 @@ public class LoggingService : ILoggingService
                 .ForContext("SectionId", logEvent.SectionId)
                 .ForContext("Duration", logEvent.Duration)
                 .ForContext("CorrelationId", logEvent.CorrelationId),
+            "ApiCall" => logger
+                .ForContext("Path", logEvent.Path),
+            "Click" => logger
+                .ForContext("ElementId", logEvent.ElementId)
+                .ForContext("ElementText", logEvent.ElementText),
+            "Error" => logger
+                .ForContext("BrowserInfo", logEvent.BrowserInfo)
+                .ForContext("StackTrace", logEvent.StackTrace)
+                .ForContext("AdditionalData", logEvent.AdditionalData),
             _ => logger
                 .ForContext("BrowserInfo", logEvent.BrowserInfo)
                 .ForContext("StackTrace", logEvent.StackTrace)
                 .ForContext("AdditionalData", logEvent.AdditionalData)
         };
 
-        var level = Enum.Parse<LogEventLevel>(logEvent.Level ?? "Information", ignoreCase: true);
-
-        // Skip ApiCall events to /logs - would cause infinite loop
-        // All other ApiCall events are logged to track UI→API response times
         if (logEvent is { EventType: "ApiCall", Path: "/logs" })
         {
             return Task.CompletedTask;
         }
 
-        logger.Write(level, "Client event: {EventType} - {Message}", logEvent.EventType, logEvent.Message);
+        logCall(logger);
 
         return Task.CompletedTask;
     }

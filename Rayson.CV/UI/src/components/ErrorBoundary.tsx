@@ -1,6 +1,11 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { loggingService } from '../services/loggingService';
 
+const handleReload = () => {
+  loggingService.logClick('reload', 'Refresh Page');
+  window.location.reload();
+};
+
 interface ErrorBoundaryProps {
   children: ReactNode;
 }
@@ -32,8 +37,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <h1 className='text-2xl font-bold mb-4'>Something went wrong</h1>
             <p className='mb-4'>An unexpected error occurred. Please refresh the page.</p>
             <button
+              data-track data-element-id="reload"
               className='btn btn-primary'
-              onClick={() => window.location.reload()}
+              onClick={handleReload}
             >
               Refresh Page
             </button>

@@ -29,7 +29,14 @@ export interface SectionEvent {
   correlationId: string;
 }
 
-type ClientLogEvent = ApiCallEvent | PageViewEvent | SectionEvent;
+export interface ClickEvent {
+  eventType: 'Click';
+  elementId: string;
+  elementText: string;
+  correlationId: string;
+}
+
+type ClientLogEvent = ApiCallEvent | PageViewEvent | SectionEvent | ClickEvent;
 
 class LoggingService {
   private httpClient: HttpClient | null = null;
@@ -62,6 +69,15 @@ class LoggingService {
   public logSectionEvent(event: Omit<SectionEvent, 'eventType'> & { eventType: 'SectionVisible' | 'SectionHidden' }): void {
     this.log({ ...event, eventType: event.eventType });
     console.info(`[${event.eventType}] ${event.sectionId}${event.duration ? ` (${event.duration}ms)` : ''}`);
+  }
+
+  public logClick(elementId: string, elementText: string): void {
+    this.log({
+      eventType: 'Click',
+      elementId,
+      elementText,
+      correlationId: getUserCorrelationId(),
+    });
   }
 
   public error(message: string, source?: string, additionalData?: Record<string, unknown>): void {

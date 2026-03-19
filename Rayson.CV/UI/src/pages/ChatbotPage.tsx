@@ -3,6 +3,7 @@ import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
+import { useTrackedClick } from '../hooks/useTrackedClick';
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -75,7 +76,8 @@ const ChatbotPage: React.FC = () => {
   return (
     <div className="relative h-screen bg-base-200">
       <button
-        onClick={() => window.history.back()}
+        data-track data-element-id="chatbot-back"
+        onClick={useTrackedClick('chatbot-back', () => window.history.back())}
         className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
@@ -149,6 +151,8 @@ const ChatbotPage: React.FC = () => {
           />
           <button
             type="submit"
+            data-track data-element-id="chatbot-submit"
+            onClick={useTrackedClick('chatbot-submit', handleSubmit as unknown as () => void)}
             className="btn btn-circle btn-primary"
             disabled={isLoading || !input.trim()}
           >

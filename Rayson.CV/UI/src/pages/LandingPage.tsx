@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PdfViewerModal from '../components/PdfViewerModal';
+import { useTrackedClick } from '../hooks/useTrackedClick';
 
 type OS = 'win' | 'mac' | 'linux';
 
@@ -122,7 +123,8 @@ const LandingPage: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl">
           <button
-            onClick={() => setIsPdfModalOpen(true)}
+            data-track data-element-id="view-cv"
+            onClick={useTrackedClick('view-cv', () => setIsPdfModalOpen(true))}
             className="btn btn-primary text-2xl font-bold"
           >
             View CV
@@ -130,6 +132,8 @@ const LandingPage: React.FC = () => {
 
           <a
             href="#/timeline"
+            data-track data-element-id="view-timeline"
+            onClick={useTrackedClick('view-timeline')}
             className="btn btn-primary text-2xl font-bold"
           >
             View Timeline
@@ -139,6 +143,8 @@ const LandingPage: React.FC = () => {
             <a
               href={appDownloadUrl}
               download
+              data-track data-element-id="download-app"
+              onMouseDown={useTrackedClick('download-app', undefined)}
               className="btn btn-primary text-2xl font-bold"
             >
               <span className="flex items-center gap-2">
@@ -148,7 +154,8 @@ const LandingPage: React.FC = () => {
             </a>
           ) : (
             <button
-              onClick={handleAppClick}
+              data-track data-element-id="unsupported-os"
+              onClick={useTrackedClick('unsupported-os', handleAppClick)}
               className="btn btn-disabled text-2xl font-bold"
             >
               Unsupported OS
@@ -157,6 +164,8 @@ const LandingPage: React.FC = () => {
           
           <a
             href="#/chatbot"
+            data-track data-element-id="chat-with-ai"
+            onClick={useTrackedClick('chat-with-ai')}
             className="btn btn-primary text-2xl font-bold"
           >
             Chat with AI
@@ -164,6 +173,8 @@ const LandingPage: React.FC = () => {
           
           <a
             href="#/contact"
+            data-track data-element-id="contact"
+            onClick={useTrackedClick('contact')}
             className="btn btn-primary text-2xl font-bold"
           >
             Contact
@@ -173,6 +184,8 @@ const LandingPage: React.FC = () => {
             href="https://github.com/danrayson/Rayson-CV"
             target="_blank"
             rel="noopener noreferrer"
+            data-track data-element-id="view-github"
+            onClick={useTrackedClick('view-github')}
             className="btn btn-primary text-2xl font-bold"
           >
             View GitHub

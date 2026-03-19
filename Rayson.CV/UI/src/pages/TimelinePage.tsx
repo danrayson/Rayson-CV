@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
 import { FadeInSection } from '../components/FadeInSection/FadeInSection';
+import { useTrackedClick } from '../hooks/useTrackedClick';
 import {
   workExperience,
   projects,
@@ -71,7 +72,8 @@ const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
       <button
-        onClick={() => window.history.back()}
+        data-track data-element-id="timeline-back"
+        onClick={useTrackedClick('timeline-back', () => window.history.back())}
         className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />

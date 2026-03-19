@@ -8,6 +8,7 @@ import './index.css'
 import './App.css'
 import './styles/tailwind.css'
 import { useTheme } from './hooks/useTheme';
+import { useTrackedClick } from './hooks/useTrackedClick';
 import { pageTrackingService } from './services/pageTracking';
 import { engagementTracker } from './services/engagementTracker';
 import { useEffect } from 'react';
@@ -35,7 +36,8 @@ function App() {
   return (
     <div className='secondlevelofhell'>
       <button
-        onClick={toggleTheme}
+        data-track data-element-id="theme-toggle"
+        onClick={useTrackedClick('theme-toggle', toggleTheme)}
         className="fixed top-4 right-4 z-50 btn btn-sm btn-circle btn-ghost"
         title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
       >

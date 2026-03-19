@@ -22,4 +22,7 @@ public class ClientLogEvent
 
     public string? SectionId { get; set; }
     public double? Duration { get; set; }
+
+    public string? ElementId { get; set; }
+    public string? ElementText { get; set; }
 }

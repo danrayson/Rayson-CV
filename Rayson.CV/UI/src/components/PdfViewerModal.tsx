@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { loggingService } from '../services/loggingService';
 
 interface PdfViewerModalProps {
   isOpen: boolean;
@@ -219,7 +220,11 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
         <div className="flex justify-between items-center p-4 border-b flex-shrink-0">
           <h3 className="font-bold text-lg">CV Preview</h3>
           <button
-            onClick={() => dialogRef.current?.close()}
+            data-track data-element-id="close-pdf"
+            onClick={() => {
+              loggingService.logClick('close-pdf', dialogRef.current?.textContent ?? '');
+              dialogRef.current?.close();
+            }}
             className="btn btn-sm btn-circle btn-ghost"
           >
             ✕
