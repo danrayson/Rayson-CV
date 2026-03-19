@@ -10,29 +10,37 @@ public static class LoggingExtensions
     {
         var logLevelStr = builder.Configuration["LOG_LEVEL"] ?? "Information";
         var logLevel = Enum.Parse<LogEventLevel>(logLevelStr, ignoreCase: true);
+        var seqUrl = builder.Configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
+        var seqApiKey = builder.Configuration["Serilog:ApiKey"];
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Is(logLevel)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Extensions.Diagnostics.HealthChecks", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.HttpMessageHandler", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithEnvironmentName()
             .Enrich.WithMachineName()
             .Enrich.WithThreadId()
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+            .Enrich.WithProperty("Application", "RaysonCV")
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Seq(seqUrl, apiKey: seqApiKey)
             .CreateBootstrapLogger();
 
-        builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+        builder.Host.UseSerilog((context, _, loggerConfiguration) =>
         {
             loggerConfiguration
-                .ReadFrom.Services(services)
+                .MinimumLevel.Is(logLevel)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.Extensions.Diagnostics.HealthChecks", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.HttpMessageHandler", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithEnvironmentName()
                 .Enrich.WithMachineName()
                 .Enrich.WithThreadId()
-                .Enrich.WithCorrelationIdHeader("X-Correlation-ID")
-                .MinimumLevel.Is(logLevel)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
+                .Enrich.WithProperty("Application", "RaysonCV")
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Seq(seqUrl, apiKey: seqApiKey);
         });
     }
 }

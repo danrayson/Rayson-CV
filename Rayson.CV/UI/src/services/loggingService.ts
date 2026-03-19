@@ -1,13 +1,35 @@
 import HttpClient from './httpClient';
+import { getUserCorrelationId } from '../utils/correlation';
 
-interface ClientLogEvent {
-  level: 'Error' | 'Warning' | 'Information';
-  message: string;
-  source?: string;
-  browserInfo?: string;
-  stackTrace?: string;
-  additionalData?: Record<string, unknown>;
+export interface ApiCallEvent {
+  eventType: 'ApiCall';
+  method: string;
+  path: string;
+  status: number;
+  duration: number;
+  correlationId: string;
 }
+
+export interface PageViewEvent {
+  eventType: 'PageView';
+  path: string;
+  referrer: string;
+  correlationId: string;
+  userAgent: string;
+  language: string;
+  screenWidth: number;
+  screenHeight: number;
+  timezone: string;
+}
+
+export interface SectionEvent {
+  eventType: 'SectionVisible' | 'SectionHidden';
+  sectionId: string;
+  duration?: number;
+  correlationId: string;
+}
+
+type ClientLogEvent = ApiCallEvent | PageViewEvent | SectionEvent;
 
 class LoggingService {
   private httpClient: HttpClient | null = null;
@@ -19,39 +41,39 @@ class LoggingService {
     return this.httpClient;
   }
 
-  private getBrowserInfo(): string {
-    return `${navigator.userAgent} | ${window.location.href}`;
-  }
-
-  private async log(level: ClientLogEvent['level'], message: string, source?: string, additionalData?: Record<string, unknown>): Promise<void> {
+  private async log(event: ClientLogEvent): Promise<void> {
     try {
-      const event: ClientLogEvent = {
-        level,
-        message,
-        source: source ?? 'UI',
-        browserInfo: this.getBrowserInfo(),
-        additionalData,
-      };
-
       await this.getHttpClient().post('logs', event);
     } catch {
-      console.error('Failed to send log to API');
+      // Silently fail - do not log or console as that causes infinite loops
     }
   }
 
+  public logApiCall(event: Omit<ApiCallEvent, 'eventType'>): void {
+    this.log({ ...event, eventType: 'ApiCall' });
+    console.info(`[ApiCall] ${event.method} ${event.path} - ${event.status} (${event.duration.toFixed(0)}ms)`);
+  }
+
+  public logPageView(event: Omit<PageViewEvent, 'eventType'>): void {
+    this.log({ ...event, eventType: 'PageView' });
+    console.info(`[PageView] ${event.path}`);
+  }
+
+  public logSectionEvent(event: Omit<SectionEvent, 'eventType'> & { eventType: 'SectionVisible' | 'SectionHidden' }): void {
+    this.log({ ...event, eventType: event.eventType });
+    console.info(`[${event.eventType}] ${event.sectionId}${event.duration ? ` (${event.duration}ms)` : ''}`);
+  }
+
   public error(message: string, source?: string, additionalData?: Record<string, unknown>): void {
-    this.log('Error', message, source, additionalData);
     console.error(`[${source ?? 'UI'}] ${message}`, additionalData ?? '');
-  }
-
-  public warn(message: string, source?: string, additionalData?: Record<string, unknown>): void {
-    this.log('Warning', message, source, additionalData);
-    console.warn(`[${source ?? 'UI'}] ${message}`, additionalData ?? '');
-  }
-
-  public info(message: string, source?: string, additionalData?: Record<string, unknown>): void {
-    this.log('Information', message, source, additionalData);
-    console.info(`[${source ?? 'UI'}] ${message}`, additionalData ?? '');
+    this.log({
+      eventType: 'ApiCall',
+      method: 'ERROR',
+      path: source ?? 'Unknown',
+      status: 0,
+      duration: 0,
+      correlationId: getUserCorrelationId(),
+    });
   }
 }
 

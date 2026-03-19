@@ -4,12 +4,14 @@ interface FadeInSectionProps {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  'data-section-id'?: string;
 }
 
 export const FadeInSection: React.FC<FadeInSectionProps> = ({
   children,
   delay = 0,
   className = '',
+  'data-section-id': sectionId,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -39,6 +41,7 @@ export const FadeInSection: React.FC<FadeInSectionProps> = ({
   return (
     <div
       ref={ref}
+      data-section-id={sectionId}
       className={`transition-all duration-700 ease-out transform ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       } ${className}`}

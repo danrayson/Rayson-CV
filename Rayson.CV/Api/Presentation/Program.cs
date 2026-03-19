@@ -37,10 +37,16 @@ try
         c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Rayson CV API", Version = "v1" });
     });
 
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddSingleton<IGeoIpService, GeoIpService>();
+
     builder.Services.AddPresentationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
     var app = builder.Build();
+
+    var geoIpService = app.Services.GetRequiredService<IGeoIpService>();
+    await geoIpService.EnsureDatabaseAsync();
 
     app.UseHttpsRedirection();
     app.UseStaticFiles();
@@ -50,7 +56,7 @@ try
     }
     app.UseCors("frontend");
 
-    app.UseMiddleware<RequestLoggingMiddleware>();
+    app.UseMiddleware<ApiLoggingMiddleware>();
 
     app.MapHealthEndpoints();
     app.MapLoggingEndpoints();

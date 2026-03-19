@@ -1,0 +1,27 @@
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: ollama.Dockerfile
+    environment:
+      - CUSTOM_MODELS=["smollm2:135m","nomic-embed-text"]
+    volumes:
+      - ollama_data:/root/.ollama
+    container_name: ollama
+    healthcheck:
+      test: ["CMD", "/ollama.healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+    # NVIDIA GPU Support: Uncomment the following to enable NVIDIA GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_data:

@@ -4,6 +4,16 @@
 # ===========================================
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
+# Install gzip for GeoIP extraction
+RUN apk add --no-cache gzip
+
+# Download GeoLite2-Country database during build (updated monthly)
+# The jsDelivr CDN serves the database without authentication
+# Attribution: GeoLite2 data © MaxMind - Creative Commons BY-SA 4.0
+RUN mkdir -p /app/geoip && \
+    curl -sL "https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz" | \
+    gunzip > /app/geoip/GeoLite2-Country.mmdb
+
 # Set working directory to /src for build operations
 WORKDIR /src
 
@@ -51,6 +61,9 @@ COPY --from=build /app/publish .
 
 # Copy wwwroot for static files (PDF CV, desktop apps)
 COPY --from=build /src/wwwroot ./wwwroot
+
+# Copy GeoIP database from build stage
+COPY --from=build /app/geoip /app/geoip
 
 # Set environment variable for ASP.NET Core to listen on port 8080
 # This overrides the default URL configuration

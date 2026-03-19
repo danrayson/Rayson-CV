@@ -8,6 +8,9 @@ import './index.css'
 import './App.css'
 import './styles/tailwind.css'
 import { useTheme } from './hooks/useTheme';
+import { pageTrackingService } from './services/pageTracking';
+import { engagementTracker } from './services/engagementTracker';
+import { useEffect } from 'react';
 
 const SunIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -23,6 +26,11 @@ const MoonIcon = () => (
 
 function App() {
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    pageTrackingService.init();
+    engagementTracker.init();
+  }, []);
 
   return (
     <div className='secondlevelofhell'>

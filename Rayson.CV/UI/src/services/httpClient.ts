@@ -1,6 +1,17 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from '../config';
 import { loggingService } from './loggingService';
+import { getUserCorrelationId } from '../utils/correlation';
+
+interface RequestMetadata {
+  startTime: number;
+}
+
+declare module 'axios' {
+  export interface InternalAxiosRequestConfig {
+    metadata?: RequestMetadata;
+  }
+}
 
 class HttpClient {
   private instance: AxiosInstance;
@@ -10,18 +21,38 @@ class HttpClient {
       baseURL: API_BASE_URL
     });
 
+    this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      config.headers['X-User-Correlation-Id'] = getUserCorrelationId();
+      config.metadata = { startTime: performance.now() };
+      return config;
+    });
+
     this.instance.interceptors.response.use(
-      (response) => response,
+      (response: AxiosResponse) => {
+        if (!response.config.url?.includes('/logs')) {
+          const duration = performance.now() - (response.config.metadata?.startTime ?? 0);
+          loggingService.logApiCall({
+            method: response.config.method?.toUpperCase() ?? 'UNKNOWN',
+            path: response.config.url ?? '',
+            status: response.status,
+            duration,
+            correlationId: getUserCorrelationId(),
+          });
+        }
+        return response;
+      },
       (error) => {
-        loggingService.error(
-          `API Error: ${error.config?.url} - ${error.message}`,
-          'UI.HttpClient',
-          {
-            status: error.response?.status,
-            data: error.response?.data,
-            stack: error.stack
-          }
-        );
+        if (!error.config?.url?.includes('/logs')) {
+          loggingService.error(
+            `API Error: ${error.config?.url} - ${error.message}`,
+            'UI.HttpClient',
+            {
+              status: error.response?.status,
+              data: error.response?.data,
+              stack: error.stack
+            }
+          );
+        }
         return Promise.reject(error);
       }
     );
@@ -66,6 +97,7 @@ class HttpClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-User-Correlation-Id': getUserCorrelationId(),
       },
       body: JSON.stringify(data),
     });
@@ -96,7 +128,6 @@ class HttpClient {
       for (const line of lines) {
         if (!line.trim()) continue;
         
-        // Handle SSE format: "data: {...}" or "data: [DONE]"
         let jsonStr = line;
         if (line.startsWith('data: ')) {
           jsonStr = line.slice(6);

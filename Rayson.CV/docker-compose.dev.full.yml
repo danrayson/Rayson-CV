@@ -21,11 +21,16 @@ services:
       Cors__AllowedOrigins: http://localhost:3000
       LOG_LEVEL: Debug
       Ollama__Url: http://ollama:11434
+      Serilog__SeqUrl: http://seq:5341
+      Serilog__ApiKey: ""
+      GeoIP__DatabasePath: /app/geoip/GeoLite2-Country.mmdb
     ports:
       - "13245:8080"
     depends_on:
       ollama:
         condition: service_healthy
+      seq:
+        condition: service_started
     networks:
       - internal
     healthcheck:
@@ -92,6 +97,24 @@ services:
               count: all
               capabilities: [gpu]
 
+  # ===========================================
+  # Seq (Structured Log Server)
+  # ===========================================
+  seq:
+    image: datalust/seq:latest
+    container_name: raysoncv-seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=devseqpassword
+    ports:
+      - "5341:5341"
+      - "80:80"
+    volumes:
+      - seq_data:/data
+    networks:
+      - internal
+
 # ===========================================
 # Networks
 # ===========================================
@@ -104,3 +127,4 @@ networks:
 # ===========================================
 volumes:
   ollama_data:
+  seq_data:

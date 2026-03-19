@@ -78,13 +78,13 @@ const TimelinePage: React.FC = () => {
         Home
       </button>
 
-      <header className="py-16 text-center px-4">
+      <header data-section-id="timeline-hero" className="py-16 text-center px-4">
         <h1 className="text-5xl md:text-7xl font-bold mb-4">Daniel W F Rayson</h1>
         <p className="text-2xl md:text-3xl text-primary font-semibold">Senior DotNet Developer</p>
       </header>
 
       <main className="container mx-auto px-4 pb-16">
-        <FadeInSection delay={100}>
+        <FadeInSection delay={100} data-section-id="about-section">
           <section className="mb-16 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
             <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
@@ -93,7 +93,7 @@ const TimelinePage: React.FC = () => {
           </section>
         </FadeInSection>
 
-        <FadeInSection delay={100}>
+        <FadeInSection delay={100} data-section-id="timeline-section">
           <section className="mb-16">
             <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
@@ -145,7 +145,7 @@ const TimelinePage: React.FC = () => {
           </section>
         </FadeInSection>
 
-        <FadeInSection delay={100}>
+        <FadeInSection delay={100} data-section-id="skills-section">
           <section className="mb-16 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -165,7 +165,7 @@ const TimelinePage: React.FC = () => {
           </section>
         </FadeInSection>
 
-        <FadeInSection delay={100}>
+        <FadeInSection delay={100} data-section-id="contact-section">
           <section className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Contact</h2>
           <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
