@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { chatbotService, ChatMessage } from '../services/chatbotService';
 
 const ChatbotPage: React.FC = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
@@ -75,7 +77,7 @@ const ChatbotPage: React.FC = () => {
   return (
     <div className="relative h-screen bg-base-200">
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate('/')}
         className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
