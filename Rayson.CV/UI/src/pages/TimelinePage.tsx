@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
 import { FadeInSection } from '../components/FadeInSection/FadeInSection';
@@ -26,6 +27,7 @@ interface RowData {
 }
 
 const TimelinePage: React.FC = () => {
+  const navigate = useNavigate();
   const sortedWork = [...workExperience].sort((a, b) => getEndYear(a.period) - getEndYear(b.period));
   const sortedProjects = [...projects].sort((a, b) => b.year - a.year);
 
@@ -71,7 +73,7 @@ const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate('/')}
         className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
