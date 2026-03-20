@@ -6,7 +6,6 @@ A bootstrapping project to create new applications with .NET API backend and Rea
 
 | Component | Technology | Port |
 |-----------|------------|------|
-| Database | PostgreSQL 16 | 5433 (host) |
 | API | .NET 8.0 | 13245 (host), 8080 (container) |
 | UI | React + Vite | 3000 |
 | Ollama | AI Chatbot | 11435 (host), 11434 (container) |
@@ -31,36 +30,6 @@ Configure `.env` with your values:
 ### 2. Start Services
 
 Choose your development scenario:
-
-#### Database Only
-Run PostgreSQL for local debugging of both API and UI:
-```bash
-# Start
-docker compose -f docker-compose.dev.db.yml up -d
-
-# Stop
-docker compose -f docker-compose.dev.db.yml down
-```
-
-#### Database + UI
-Run PostgreSQL and UI in Docker, debug API locally in VSCode:
-```bash
-# Start
-docker compose -f docker-compose.dev.db-ui.yml up -d
-
-# Stop
-docker compose -f docker-compose.dev.db-ui.yml down
-```
-
-#### Database + API
-Run PostgreSQL and API in Docker, debug UI locally:
-```bash
-# Start
-docker compose -f docker-compose.dev.db-api.yml up -d
-
-# Stop
-docker compose -f docker-compose.dev.db-api.yml down
-```
 
 #### Full Stack
 Run all services in Docker:
@@ -95,9 +64,9 @@ User -> UI (ChatbotPage) -> API (/chatbot endpoint) -> Ollama (llama3.2:latest)
 
 ### Usage
 
-1. Start the API (with database and Ollama):
+1. Start the API (with Ollama):
    ```bash
-   docker compose -f docker-compose.dev.db-api.yml up -d
+   docker compose -f docker-compose.dev.full.yml up -d
    ```
 
 2. Run the UI locally:
@@ -162,11 +131,9 @@ Ollama runs in its own container with:
 
 ### Debug API Locally
 
-1. Start the database:
+1. Start the services:
    ```bash
-   docker compose -f docker-compose.dev.db.yml up -d
-   # OR
-   docker compose -f docker-compose.dev.db-ui.yml up -d
+   docker compose -f docker-compose.dev.full.yml up -d
    ```
 
 2. In VSCode, select ".NET Core Launch (web)" from the debug dropdown
@@ -177,11 +144,9 @@ The API will be available at `http://localhost:5000` (configured in `launch.json
 
 ### Debug API in Docker Container
 
-1. Start the database:
+1. Start the services:
    ```bash
-   docker compose -f docker-compose.dev.db.yml up -d
-   # OR
-   docker compose -f docker-compose.dev.db-ui.yml up -d
+   docker compose -f docker-compose.dev.full.yml up -d
    ```
 
 2. In VSCode, select "Docker: .NET Core Debug" from the debug dropdown
@@ -192,9 +157,9 @@ The API will be available at `http://localhost:13245`
 
 ### Debug UI Locally
 
-1. Start database and API:
+1. Start API:
    ```bash
-   docker compose -f docker-compose.dev.db-api.yml up -d
+   docker compose -f docker-compose.dev.full.yml up -d
    ```
 
 2. Navigate to UI folder and run:
@@ -215,7 +180,6 @@ docker ps
 ```bash
 docker logs raysoncv-api
 docker logs raysoncv-ui
-docker logs raysoncv-postgres
 docker logs raysoncv-ollama
 ```
 
@@ -224,7 +188,7 @@ docker logs raysoncv-ollama
 docker compose -f docker-compose.dev.full.yml down
 ```
 
-### Remove All Data (Including Database Volume)
+### Remove All Data
 ```bash
 docker compose -f docker-compose.dev.full.yml down -v
 ```
@@ -246,42 +210,30 @@ The following environment variables are required:
 
 | Variable | Description |
 |----------|-------------|
-| `POSTGRES_DB` | Database name |
-| `POSTGRES_USER` | Database username |
-| `POSTGRES_PASSWORD` | Database password |
 | `JWT_ISSUER` | JWT token issuer |
 | `JWT_AUDIENCE` | JWT token audience |
 | `JWT_SIGNING_KEY` | JWT signing key (min 16 chars) |
 | `VITE_API_BASE_URL` | API URL for UI (build time) |
 | `API_HEALTH_URL` | API health URL for UI health checks |
-| `LOCAL_CONNECTION_STRING` | Connection string for local debugging |
 | `LOG_LEVEL` | Log level for UI health server |
-| `OLLAMA__BASEURL` | Ollama server URL (e.g., `http://ollama:11434` for Docker, `http://ca-ollama-staging.internal.<domain>:11434` for Azure) |
+| `OLLAMA__BASEURL` | Ollama server URL (e.g., `http://ollama:11434` for Docker) |
 
 ## Health Check Endpoints
 
-Both API and UI expose health check endpoints for Azure Container Apps probes and monitoring.
+Both API and UI expose health check endpoints for container orchestrator probes and monitoring.
 
 ### API Endpoints
 
 | Endpoint | Purpose | Checks |
 |----------|---------|--------|
-| `GET /health` | Full health status | Self + PostgreSQL connectivity |
+| `GET /health` | Full health status | Self |
 | `GET /health/live` | Liveness probe | Self only (no dependency checks) |
-| `GET /health/ready` | Readiness probe | PostgreSQL connectivity |
+| `GET /health/ready` | Readiness probe | Self |
 
 **Example Response (GET /health):**
 ```json
 {
-  "status": "Healthy",
-  "checks": {
-    "postgresql": {
-      "status": "Healthy",
-      "description": null,
-      "duration": 42.5
-    }
-  },
-  "totalDuration": 45.2
+  "status": "Healthy"
 }
 ```
 
@@ -311,48 +263,16 @@ Both API and UI expose health check endpoints for Azure Container Apps probes an
 }
 ```
 
-### Azure Container Apps Configuration
-
-When deploying to Azure Container Apps, configure probes as follows:
-
-```yaml
-probes:
-  - type: Startup
-    httpGet:
-      path: /health/live
-      port: 8080
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    failureThreshold: 30
-  - type: Liveness
-    httpGet:
-      path: /health/live
-      port: 8080
-    periodSeconds: 30
-  - type: Readiness
-    httpGet:
-      path: /health/ready
-      port: 8080
-    periodSeconds: 10
-```
-
 ## CORS Configuration
 
 CORS origins are configuration-driven and whitelist only specified domains.
 
-### Local Development
-
-CORS is pre-configured in Docker Compose files and the Dockerfile:
-- `http://localhost:3000` (UI running locally or in Docker)
-
-### Azure Deployment
-
-Set the environment variable in Azure Container Apps:
-For multiple origins use comma-seperated values
-
+Set the environment variable:
 ```
-Cors:AllowedOrigins=https://your-ui.azurecontainerapps.io,https://yourcustomdomain.com
+Cors:AllowedOrigins=https://yourdomain.com,https://www.yourdomain.com
 ```
+
+For multiple origins use comma-separated values.
 
 ## Logging
 
@@ -397,35 +317,6 @@ Content-Type: application/json
 docker logs raysoncv-ui
 ```
 
-## Database
-
-### Technology Stack
-- PostgreSQL 16 (Alpine image for smaller footprint)
-- Entity Framework Core 8.0
-- Npgsql as database provider
-
-### Schema
-- Uses ASP.NET Core Identity schema (Users, Roles, RoleClaims, UserRoles, UserClaims, UserLogins, UserTokens)
-- Custom `ApplicationUser` and `ApplicationRole` extending Identity base classes
-- All entities inherit from `Domain.Entity` base class with `Id` and `DeletedAt` fields
-
-### Migrations
-- Located in `Api/Database/Migrations/`
-- Initial migration: `20260222125915_Init.cs`
-- Applied automatically on startup via `app.RunMigrations()` extension
-
-### Creating Migrations
-
-```bash
-cd Api
-dotnet ef migrations add MigrationName -p Database -s Presentation
-```
-
-### Conventions
-- Use **soft deletes** (set `DeletedAt` field) instead of hard deletes
-- Use **EF Core migrations** for schema changes
-- Use **repository pattern** for data access (via `Repository<T>`)
-
 ## Project Structure
 
 ```
@@ -436,16 +327,11 @@ Rayson.CV/                      # Root solution folder
 │   │   ├── Application/        # Business logic, interfaces, DTOs
 │   │   ├── Domain/             # Entities, interfaces
 │   │   ├── Infrastructure/     # External services (Auth, Chatbot, Logging)
-│   │   └── Database/           # EF Core, migrations, seed data
 │   ├── UI/                     # React + Vite frontend
 │   ├── Test/
 │   │   └── e2e/                # End-to-end BDD tests (Playwright + Cucumber)
 │   ├── .env                    # Local environment variables (gitignored)
 │   └── docker-compose.*.yml   # Docker Compose configurations
-├── infra/                      # Azure Bicep infrastructure templates
-│   ├── main-core.bicep         # Core resources (RG, ACR, Storage, Container Apps Env)
-│   ├── main-apps.bicep        # Workload resources (PostgreSQL, API, UI)
-│   └── modules/                # Reusable Bicep modules
 ├── .github/workflows/          # CI/CD workflows
 └── .vscode/                    # VSCode launch configs and tasks
 ```
@@ -534,91 +420,76 @@ To seed this user, add it to the database seed data or manually create it.
 
 HTML reports are generated in `Test/e2e/reports/cucumber.html` after each test run. Screenshots are captured on failure and saved to `Test/e2e/reports/screenshots/`.
 
-## Azure Infrastructure
-
-Infrastructure is defined in Bicep and located at project root `/infra/`:
-
-### Main Templates
-- `infra/main-core.bicep` - Creates subscription-level resources: Resource Group, Container Registry, Storage Account, Container Apps Environment
-- `infra/main-apps.bicep` - Creates workload resources: PostgreSQL, API Container App, UI Container App
-
-### Modules
-- `infra/modules/api-container.bicep` - Azure Container App for .NET API (port 8080, 0.5 CPU, 1Gi memory, 1-3 replicas)
-- `infra/modules/ui-container.bicep` - Azure Container App for React UI (port 3000)
-- `infra/modules/postgres-service.bicep` - Azure Database for PostgreSQL Flexible Server
-- `infra/modules/container-apps-environment.bicep` - Container Apps Environment
-- `infra/modules/storage.bicep` - Azure Storage Account
-- `infra/modules/container-registry.bicep` - Azure Container Registry
-
-### Azure Services
-- **Azure Container Apps** - Hosts API and UI containers
-- **Azure Container Registry** - Stores Docker images
-- **Azure Database for PostgreSQL Flexible Server** - PostgreSQL database
-- **Azure Storage Account** - General purpose storage
-
 ## CI/CD
 
-GitHub Actions workflow at `.github/workflows/deploy-staging.yml`:
+GitHub Actions workflow at `.github/workflows/deploy-production.yml`:
 
 ### Trigger
-- Push to `develop` branch
-- Manual workflow dispatch (with optional imageTag input)
+- Manual workflow dispatch (with optional api_base_url input)
 
 ### Jobs
-1. **build** - Compiles .NET API and builds React UI
-2. **deploy-core** - Deploys core Azure infrastructure (Resource Group, Container Registry, Storage, Container Apps Environment)
-3. **push** - Builds and pushes Docker images to Azure Container Registry
-4. **deploy-apps** - Deploys container apps (PostgreSQL, API, UI) via Bicep
+1. **build-electron-linux** - Builds Electron app for Linux (.AppImage)
+2. **build-electron-mac** - Builds Electron app for macOS (.dmg)
+3. **build-electron-windows** - Builds Electron app for Windows (.exe)
 
-### Environment
-- Staging (Azure `uksouth` region, resource group `rg-raysoncv-staging`)
-
-### Secrets Required
-- `AZURE_CREDENTIALS` - Azure service principal credentials
-- `JWT_SIGNING_KEY` - JWT token signing key
-
-### Deploying
-
-Deployments are triggered via:
-- **Pull Request**: Merge to `develop` branch via GitHub PR
-- **Manual Trigger**: Run workflow from GitHub Actions UI with optional imageTag
+### Usage
+1. Go to GitHub Actions → Deploy Production workflow
+2. Click "Run workflow" with your desired `api_base_url`
+3. Wait for builds to complete
+4. Download the artifacts (electron-linux, electron-mac, electron-windows)
 
 ## Deployment
 
 ### Production Setup
 - Docker containers for API and UI
-- Azure Container Apps for orchestration
-- Azure PostgreSQL Flexible Server for database
 
 ### Environment Configuration
 - `ASPNETCORE_ENVIRONMENT=Production` in production
 - CORS origins must be explicitly configured
 - JWT signing key must be secure (minimum 16 characters)
 - Use HTTPS only in production (HSTS enabled)
-- Database connection should use SSL
 
 ### Docker Production
 
 To deploy using Docker Compose:
 
-1. Edit `.env.production` with your secure values:
+1. **Backup** - Backup environment and docker-compose files:
    ```bash
-   # Update POSTGRES_PASSWORD and JWT_SIGNING_KEY with secure values
+   cp Api/.env.production ~/.raysoncv-backup/.env.production
+   cp docker-compose.prod.full.yml ~/.raysoncv-backup/docker-compose.prod.full.yml
    ```
 
-2. Build and start:
+2. **Pull code** - Pull latest code from main:
    ```bash
-   docker compose -f docker-compose.prod.full.yml --env-file .env.production up --build
+   git checkout main && git pull origin main
    ```
 
-3. View logs:
+3. **Restore** - Restore environment file:
    ```bash
-   docker compose -f docker-compose.prod.full.yml logs -f
+   cp ~/.raysoncv-backup/.env.production Api/.env.production
    ```
 
-4. Stop:
+4. **Electron** - Build Electron desktop apps and download artifacts:
+   - Go to GitHub Actions → Deploy Production workflow
+   - Click "Run workflow" with your desired `api_base_url`
+   - Wait for build to complete
+   - Download the artifacts (electron-linux, electron-mac, electron-windows)
+   - Extract the downloaded files into `Api/wwwroot/` in the project
+
+5. **Build images** - Build Docker images:
    ```bash
-   docker compose -f docker-compose.prod.full.yml --env-file .env.production down
+   docker compose -f docker-compose.prod.full.yml --env-file .env.production build
+   ```
+
+6. **Deploy** - Stop old containers, then start new containers (logs will be shown; press `d` to detach):
+   ```bash
+   docker compose -f ~/.raysoncv-backup/docker-compose.prod.full.yml --env-file ~/.raysoncv-backup/.env.production down && \
+   docker compose -f docker-compose.prod.full.yml --env-file .env.production up
+   ```
+
+7. **Cleanup** - Clean up unused Docker resources:
+   ```bash
+   docker system prune
    ```
 
 **Note:** Once `.env.production` contains real sensitive values it should not be committed to version control.  The file in version control contains placeholder values only for guidance.
