@@ -7,7 +7,7 @@ interface TimelineProps {
 export const Timeline: React.FC<TimelineProps> = ({ children }) => {
   return (
     <div className="relative w-full max-w-4xl mx-auto">
-      <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-primary to-transparent transform md:-translate-x-1/2" />
+      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-primary to-transparent md:left-1/2 md:-translate-x-1/2" />
       {children}
     </div>
   );

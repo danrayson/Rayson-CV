@@ -1,10 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Timeline, TimelineCard } from '../components/Timeline';
+import { FadeInSection } from '../components/FadeInSection/FadeInSection';
 import {
   workExperience,
   projects,
-  education,
   skills,
   personalDetails,
   personalDescription,
@@ -26,6 +27,7 @@ interface RowData {
 }
 
 const TimelinePage: React.FC = () => {
+  const navigate = useNavigate();
   const sortedWork = [...workExperience].sort((a, b) => getEndYear(a.period) - getEndYear(b.period));
   const sortedProjects = [...projects].sort((a, b) => b.year - a.year);
 
@@ -71,7 +73,7 @@ const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate('/')}
         className="fixed top-4 left-4 btn btn-sm btn-ghost z-10"
       >
         <ArrowLeftIcon className="w-5 h-5" />
@@ -84,16 +86,26 @@ const TimelinePage: React.FC = () => {
       </header>
 
       <main className="container mx-auto px-4 pb-16">
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
+        <FadeInSection delay={100}>
+          <section className="mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
+            <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
+              <p className="text-base leading-relaxed">{personalDescription}</p>
+            </div>
+          </section>
+        </FadeInSection>
+
+        <FadeInSection delay={100}>
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12">Timeline</h2>
           <Timeline>
-            <div className="flex mb-4">
-              <div className="w-1/2 pr-4 md:pr-8 text-center font-bold">Work Experience</div>
-              <div className="w-1/2 pl-4 md:pl-8 text-center font-bold">Personal Projects</div>
+            <div className="flex flex-col md:flex-row mb-4">
+              <div className="w-full md:w-1/2 md:pr-8 text-center font-bold">Work Experience</div>
+              <div className="hidden md:block md:w-1/2 md:pl-8 text-center font-bold">Personal Projects</div>
             </div>
             {rows.map((row) => (
-              <div key={row.year} className="flex">
-                <div className="w-1/2 pr-4 md:pr-8">
+              <div key={row.year} className="flex flex-col md:flex-row">
+                <div className="w-full md:w-1/2 md:pr-8">
                   {row.work && (
                     <TimelineCard key={row.work.id} size="normal">
                       <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
@@ -112,7 +124,7 @@ const TimelinePage: React.FC = () => {
                     </TimelineCard>
                   )}
                 </div>
-                <div className="w-1/2 pl-4 md:pl-8">
+                <div className="w-full md:w-1/2 md:pl-8">
                   {row.projects.map((project) => (
                     <TimelineCard key={project.id} size="small">
                       <div className="bg-base-100 p-1 rounded-lg shadow-lg border border-base-300">
@@ -132,51 +144,31 @@ const TimelinePage: React.FC = () => {
               </div>
             ))}
           </Timeline>
-        </section>
+          </section>
+        </FadeInSection>
 
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Education</h2>
-          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-            <div className="text-center mb-6">
-              <span className="badge badge-primary badge-lg">{education.period}</span>
-            </div>
-            <div className="flex justify-center">
-              <div className="w-full max-w-md">
-                {education.qualifications.map((qual) => (
-                  <div key={qual.subject} className="flex flex-col items-center justify-center p-4 bg-base-200 rounded">
-                    <span className="font-medium">{qual.subject}</span>
-                    <span className="badge badge-secondary badge-lg mt-2">{qual.grade}</span>
+        <FadeInSection delay={100}>
+          <section className="mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {skills.map((category) => (
+                <FadeInSection key={category.id} delay={100}>
+                  <div className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
+                    <h3 className="text-xl font-bold text-primary mb-4">{category.name}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {category.skills.map((skill) => (
+                        <span key={skill} className="badge badge-outline badge-lg">{skill}</span>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                </FadeInSection>
+              ))}
             </div>
-          </div>
-        </section>
+          </section>
+        </FadeInSection>
 
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Skills</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {skills.map((category) => (
-              <div key={category.id} className="bg-base-100 p-6 rounded-lg shadow-lg border border-base-300">
-                <h3 className="text-xl font-bold text-primary mb-4">{category.name}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {category.skills.map((skill) => (
-                    <span key={skill} className="badge badge-outline badge-lg">{skill}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">About Me</h2>
-          <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
-            <p className="text-lg leading-relaxed">{personalDescription}</p>
-          </div>
-        </section>
-
-        <section className="max-w-4xl mx-auto">
+        <FadeInSection delay={100}>
+          <section className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Contact</h2>
           <div className="bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,6 +210,7 @@ const TimelinePage: React.FC = () => {
             </div>
           </div>
         </section>
+        </FadeInSection>
       </main>
     </div>
   );
