@@ -30,6 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChatbotService, OllamaChatbotService>();
 
         services.AddHealthChecks()
-            .AddCheck<OllamaHealthCheck>("ollama", tags: new[] { "ready" });
+            .AddCheck<OllamaHealthCheck>("ollama", tags: ["ready"]);
     }
 }

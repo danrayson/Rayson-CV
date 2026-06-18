@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Logging;
 
-public class RequestLoggingMiddleware
+public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<RequestLoggingMiddleware> _logger;
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<RequestLoggingMiddleware> _logger = logger;
     private const int MaxBodyLength = 4096;
 
     private static readonly string[] ExcludedPaths =
@@ -17,12 +17,6 @@ public class RequestLoggingMiddleware
         "/health/ready",
         "/logs"
     };
-
-    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -39,7 +33,7 @@ public class RequestLoggingMiddleware
             requestBody = SensitiveDataRedactor.Redact(requestBody);
         }
 
-        _logger.LogDebug(
+        _logger.LogInformation(
             "HTTP {Method} {Path}{RequestBody}",
             context.Request.Method,
             context.Request.Path.Value,

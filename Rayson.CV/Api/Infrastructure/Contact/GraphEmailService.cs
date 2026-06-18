@@ -52,17 +52,16 @@ Message:
                     ContentType = BodyType.Text,
                     Content = body
                 },
-                ToRecipients = new List<Recipient>
-                {
-                    new Recipient
-                    {
+                ToRecipients =
+                [
+                    new() {
                         EmailAddress = new EmailAddress
                         {
                             Address = RecipientEmail,
                             Name = RecipientName
                         }
                     }
-                }
+                ]
             };
 
             var requestBody = new SendMailPostRequestBody
