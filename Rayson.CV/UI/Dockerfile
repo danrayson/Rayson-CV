@@ -4,9 +4,10 @@
 # ===========================================
 FROM node:20-alpine AS build
 
-# Declare build argument for API URL (passed from docker-compose)
+# Declare build arguments (passed from docker-compose)
 # This is required for Docker to accept the --build-arg
 ARG VITE_API_BASE_URL
+ARG VITE_BASE_PATH
 
 # Set working directory for build operations
 WORKDIR /app

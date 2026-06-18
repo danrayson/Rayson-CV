@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    base: './',
+    base: env.VITE_BASE_PATH || '/',
     define: {
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL),
     },
